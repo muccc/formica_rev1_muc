@@ -1,4 +1,4 @@
-CFLAGS := -mmcu=msp430x2001 -g -Wall
+CFLAGS := -mmcu=msp430x2001 -g -Wall -O3
 LDFLAGS :=
 
 CC := msp430-gcc

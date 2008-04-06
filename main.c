@@ -23,6 +23,8 @@ void init(void)
 	/* GPIO: All inputs */
 	P1DIR = P2DIR = 0;
 
+	P1DIR |= 0x10;
+
 	/* Use a 16 MHz clock (DCO) */
 	DCOCTL = CALDCO_16MHZ;
 	BCSCTL1 &= ~0x0f;

@@ -37,26 +37,63 @@ interrupt (TIMERA1_VECTOR) timer_a_isr(void)
 	{
 		/* CCR1: */
 	case 0x02: {
-		static uint16_t last = 0;
+		/* Previous periods */
+		static int16_t prev[] = {0xffff,0,0xffff};
+		/* Position in the prev buffer */
+		static uint8_t pos = 0;
+		static uint16_t last_period = 0;
 		uint16_t reading = TACCR1;
 
-		if( reading > last )
-			reading -= last;
-		else
-			reading = ((uint32_t)(reading) + 0xffff) - last;
+		{
+			/* The last TACCR1 reading: */
+			static uint16_t last = 0;
 
-		if( reading < 300 )
-			P1OUT = 1;
-		else
-			P1OUT = 0;
+			/* The timer may have wrapped around since the last event */
+			/* Work out the ticks since the last event happened */
+			if( reading > last )
+				reading -= last;
+			else
+				reading = ((uint32_t)(reading) + 0xffff) - last;
+			last = TACCR1;
 
-		last = TACCR1;
+			prev[pos] = reading - last_period;
+			if( pos == 2 )
+				pos = 0;
+			else
+				pos ++;
+
+			last_period = reading;
+		}
+
+		{
+			uint32_t sum = 0;
+			uint8_t i;
+
+			for(i=0; i<3; i++)
+				if( prev[i] < 0 )
+					sum += (-prev[i]);
+				else
+					sum += prev[i];
+
+			if( sum < 400 )
+			{
+				/* Got a stable frequency */
+				P1OUT &= ~0x10;
+#define SPACE 500
+				if( (2000-SPACE) < reading && reading < (2000+SPACE) )
+					P1OUT |= 1;
+				else if( (4000-SPACE) < reading && reading < (4000+SPACE) )
+					P1OUT &= ~1;
+			} else {
+				/* Unstable frequency */
+				P1OUT |= 0x10;
+			}	
+		}
 		break;
 	}
 
 		/* Timer overflow */
 	case 0x0A: {
-		P1OUT ^= 1;
 
 		break;
 	}
