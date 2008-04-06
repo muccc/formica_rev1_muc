@@ -35,6 +35,7 @@ void init(void)
 		/* DCOR = 0 : DCO internal resistor */;
 
 	comp_init();
+	timera_init();
 
 	eint();
 }
