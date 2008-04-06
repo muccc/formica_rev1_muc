@@ -1,6 +1,7 @@
 #include "device.h"
 #include <signal.h>
 #include "timer-a.h"
+#include "comp.h"
 
 /* Initialises everything. */
 void init(void);
@@ -33,7 +34,7 @@ void init(void)
 		/* DIVSx = 0 : No SMCLK divider */
 		/* DCOR = 0 : DCO internal resistor */;
 
-	timera_init();
+	comp_init();
 
 	eint();
 }
