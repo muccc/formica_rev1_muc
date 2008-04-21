@@ -26,7 +26,7 @@ void timera_init( void )
 	TAR = 0;
 
 	tx_sym = NFREQ-1;
-	TACCR0 = period_lut[tx_sym]/2;
+	TACCR0 = period_lut[tx_sym];
 
 	/* Set to output */
 	P1DIR |= 3;
@@ -43,7 +43,7 @@ interrupt (TIMERA1_VECTOR) timer_a_isr(void)
 	if( cycle == 20 ) {
 		tx_sym = next_symbol();
 
-		TACCR0 = period_lut[tx_sym]/2;
+		TACCR0 = period_lut[tx_sym];
 
 		cycle = 0;
 	} else
