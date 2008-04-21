@@ -40,7 +40,7 @@ interrupt (TIMERA1_VECTOR) timer_a_isr(void)
 	static uint16_t cycle = 0;
 	P1OUT &= ~2;
 
-	if( cycle == 20 ) {
+	if( cycle == 4 ) {
 		tx_sym = next_symbol();
 
 		TACCR0 = period_lut[tx_sym];
