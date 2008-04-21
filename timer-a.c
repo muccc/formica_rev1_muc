@@ -156,8 +156,6 @@ static inline void decoder_newdata( uint16_t period )
 	uint8_t sym;
 	uint16_t _p = period;
 
-	period = period << 1;
-
 	/* Check that the frequency reaches the minimum */
 	if( period < (period_lut[0] - RANGE) ) {
 		decoder_reset();
