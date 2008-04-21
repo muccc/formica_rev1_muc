@@ -1,18 +1,21 @@
 #include "timer-a.h"
 #include "device.h"
 #include "../freq.h"
+#include <string.h>
 #include <signal.h>
+
+#define SYM_MASK ((1 << NBITS)-1)
 
 #define timera_en() do { TACTL |= MC_UPTO_CCR0; } while(0)
 
 /* The current symbol that's being transmitted */
 static uint8_t tx_sym = 0;
 
-static uint8_t data = 0x5A;
-static uint8_t data_pos = 0;
-
 /* Returns the next symbol to transmit */
 static uint8_t next_symbol( void );
+
+/* Returns the next byte of data to transmit */
+static uint8_t next_byte( void );
 
 void timera_init( void )
 {
@@ -40,7 +43,7 @@ interrupt (TIMERA1_VECTOR) timer_a_isr(void)
 	static uint16_t cycle = 0;
 	P1OUT &= ~2;
 
-	if( cycle == 4 ) {
+	if( cycle == 14 ) {
 		tx_sym = next_symbol();
 
 		TACCR0 = period_lut[tx_sym];
@@ -63,12 +66,54 @@ interrupt (TIMERA0_VECTOR) timer_a1_isr(void)
 static uint8_t next_symbol( void )
 {
 	uint8_t sym;
+	static uint8_t curbyte;
+	/* How many symbols have been transmitted from the current byte */
+	static uint8_t cb_pos = 4;
+	static uint8_t last_sym;
 
-	if( tx_sym == 0 )
-		P1OUT |= 2;
+#if NBITS != 3
+#error Cannot cope with NBITS not being 3
+#endif
 
-	sym = tx_sym + 1;
-	if( sym == NFREQ )
+	if( cb_pos == 4 ) {
+		/* Send the start byte symbol */
 		sym = 0;
+		cb_pos = 0;
+		curbyte = next_byte();
+
+	} else {
+		/* Grab the data from the byte */
+		sym = curbyte & SYM_MASK;
+		curbyte >>= NBITS;
+			
+		/* Now munge up the symbol so that we don't 
+		   transmit the same one again! */
+		
+		/* First, add 1 because symbol 0 is the 'start bit' symbol */
+		sym++;
+
+		/* Avoid the symbol that was transmitted last */
+		if( sym >= last_sym )
+			sym++;
+	}
+	cb_pos++;
+
+	last_sym = sym;
 	return sym;
+}
+
+static uint8_t next_byte( void )
+{
+	const uint8_t *d = "my eyes are on fire you are insane";
+	static uint8_t p = 0;
+
+	if( p == strlen(d)-1 )
+	{
+		P1OUT |= 2;
+		p = 0;
+	}
+	else
+		p++;
+
+	return d[p];
 }

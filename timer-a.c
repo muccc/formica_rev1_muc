@@ -12,13 +12,15 @@
 #define timera_en() do { TACTL |= MC_CONT; } while(0)
 
 static uint8_t cb_pos = 0;
+static uint8_t curbyte = 0;
 
 #define INV_SYM 255
 /* The last symbol received */
 static uint8_t last_sym = INV_SYM;
 
-static uint8_t sym_log[32];
-static uint8_t sl_pos = 0;
+#define DATA_LEN 32
+static uint8_t data[DATA_LEN];
+static uint8_t d_pos = 0;
 
 /* Debug flag pins */
 #define debug_symbol_lock() do { P1OUT |= 1; } while (0)
@@ -154,7 +156,6 @@ static void decoder_reset( void )
 static inline void decoder_newdata( uint16_t period )
 {
 	uint8_t sym;
-	uint16_t _p = period;
 
 	/* Check that the frequency reaches the minimum */
 	if( period < (period_lut[0] - RANGE) ) {
@@ -175,15 +176,38 @@ static inline void decoder_newdata( uint16_t period )
 	}
 
 	/* Ignore repeated symbols */
-	if( sym == last_sym ) {
+	if( sym == last_sym )
+		return;
+
+	/*** Decode the symbol ***/
+
+	if( sym == 0 ) {
+		cb_pos = 0;
+		curbyte = 0;
+
+		last_sym = 0;
 		return;
 	}
 
-	sym_log[sl_pos] = sym;
-	if( sl_pos == 31 )
-		sl_pos = 0;
-	else
-		sl_pos++;
+	/* Remove the step over the last symbol */
+	if( sym > last_sym ) {
+		last_sym = sym;
+		sym--;
+	} else
+		last_sym = sym;
+	
+	/* Start of the byte? */
+	sym--;
 
-	last_sym = sym;
+	curbyte |= sym << (cb_pos * NBITS);
+	cb_pos++;
+
+#if NBITS != 3
+#error NBITS != 3 not yet supported
+#endif
+	if( cb_pos == 3 ) {
+		data[d_pos] = curbyte;
+		d_pos = (d_pos==(DATA_LEN-1))?0:(d_pos+1);
+		cb_pos = 0;
+	}
 }
