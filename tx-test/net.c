@@ -2,7 +2,7 @@
 #include <string.h>
 
 const uint8_t *p0 = "hello";
-const uint8_t *p1 = "there";
+const uint8_t *p1 = "i like pies";
 
 const uint8_t* net_get_next_packet( uint8_t *len )
 {

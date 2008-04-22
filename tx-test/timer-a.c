@@ -115,17 +115,38 @@ static uint8_t next_byte( void )
 
 	if( cur_packet != NULL ) {
 		static uint8_t p = 0;
+		static uint8_t checksum = 0;
 
-		if( p == cp_len-1 )
-		{
+		uint8_t b;
+
+		if( p == 0 ) {
+			/* Send the 'start of frame' byte */
+			b = 0x7E;
+			checksum = 0;
+
 			P1OUT |= 2;
+		}
+		else if( p == 1 ) {
+			b = cp_len;
+			checksum += b;
+		}
+		else if( p < (cp_len + 2) ) {
+			b = cur_packet[ p - 2 ];
+			checksum += b;
+		}
+
+		if( p == cp_len + 2 )
+		{
+			/* The checksum */
+			b = 0xff - checksum;
+
 			p = 0;
 			cur_packet = net_get_next_packet( &cp_len );
 		}
 		else
 			p++;
 
-		return cur_packet[p];
+		return b;
 	}
 	else
 		return 0;

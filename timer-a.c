@@ -1,6 +1,7 @@
 #include "timer-a.h"
 #include "device.h"
 #include "freq.h"
+#include "net-rx.h"
 #include <signal.h>
 
 /* Number of samples to average out */
@@ -206,8 +207,31 @@ static inline void decoder_newdata( uint16_t period )
 #error NBITS != 3 not yet supported
 #endif
 	if( cb_pos == 3 ) {
-		data[d_pos] = curbyte;
-		d_pos = (d_pos==(DATA_LEN-1))?0:(d_pos+1);
+		static uint8_t checksum;
+
+		/* We now have a full byte */
 		cb_pos = 0;
+
+		if( curbyte == 0x7e ) {
+			/* Start of frame */
+			d_pos = 0;
+			checksum = 0;
+			data[0] = 0x7e;
+		} else if( data[0] == 0x7e ) {
+			data[d_pos] = curbyte;
+
+			checksum += curbyte;
+
+			/* data[1] is the length if we've got that far */
+			if( d_pos > 1 && d_pos == (data[1] + 2) ) {
+				/* Frame reception complete -- check the checksum */
+				if( checksum == 0xff )
+					net_rx_proc_incoming( data+2, data[1] );
+			}
+		}
+
+		if( curbyte == 0x7e || data[0] == 0x7e )
+			d_pos = (d_pos==(DATA_LEN-1))?0:(d_pos+1);
+
 	}
 }
