@@ -1,6 +1,7 @@
 #include "timer-a.h"
 #include "device.h"
 #include "../freq.h"
+#include "net.h"
 #include <string.h>
 #include <signal.h>
 
@@ -104,16 +105,28 @@ static uint8_t next_symbol( void )
 
 static uint8_t next_byte( void )
 {
-	const uint8_t *d = "my eyes are on fire you are insane";
-	static uint8_t p = 0;
+	/* The current packet that's being transmitted */
+	static const uint8_t *cur_packet = NULL;
+	/* The length of the current packet */
+	static uint8_t cp_len = 0;
 
-	if( p == strlen(d)-1 )
-	{
-		P1OUT |= 2;
-		p = 0;
+	if( cur_packet == NULL )
+		cur_packet = net_get_next_packet( &cp_len );
+
+	if( cur_packet != NULL ) {
+		static uint8_t p = 0;
+
+		if( p == cp_len-1 )
+		{
+			P1OUT |= 2;
+			p = 0;
+			cur_packet = net_get_next_packet( &cp_len );
+		}
+		else
+			p++;
+
+		return cur_packet[p];
 	}
 	else
-		p++;
-
-	return d[p];
+		return 0;
 }
