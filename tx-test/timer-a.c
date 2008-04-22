@@ -2,6 +2,7 @@
 #include "device.h"
 #include "../freq.h"
 #include "net.h"
+#include "types.h"
 #include <string.h>
 #include <signal.h>
 
@@ -116,6 +117,7 @@ static uint8_t next_byte( void )
 	if( cur_packet != NULL ) {
 		static uint8_t p = 0;
 		static uint8_t checksum = 0;
+		static bool escaped = FALSE;
 
 		uint8_t b;
 
@@ -126,25 +128,40 @@ static uint8_t next_byte( void )
 
 			P1OUT |= 2;
 		}
-		else if( p == 1 ) {
-			b = cp_len;
-			checksum += b;
-		}
-		else if( p < (cp_len + 2) ) {
-			b = cur_packet[ p - 2 ];
-			checksum += b;
+		else {
+			if( p == 1 ) {
+				b = cp_len;
+				if( !escaped )
+					checksum += b;
+			}
+			else if( p < (cp_len + 2) ) {
+				b = cur_packet[ p - 2 ];
+				if( !escaped )
+					checksum += b;
+			}
+			else
+				/* The checksum */
+				b = 0xff - checksum;
+
+			if( !escaped && (b == 0x7e || b == 0x7d) ) {
+				escaped = TRUE;
+				b = 0x7d;
+			} 
+			else if( escaped ) {
+				escaped = FALSE;
+				b ^= 0x20;
+			}
 		}
 
-		if( p == cp_len + 2 )
-		{
-			/* The checksum */
-			b = 0xff - checksum;
-
-			p = 0;
-			cur_packet = net_get_next_packet( &cp_len );
+		if( !escaped ) {
+			if( p == cp_len + 2 )
+			{
+				p = 0;
+				cur_packet = net_get_next_packet( &cp_len );
+			}
+			else
+				p++;
 		}
-		else
-			p++;
 
 		return b;
 	}

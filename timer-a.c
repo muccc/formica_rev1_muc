@@ -2,6 +2,7 @@
 #include "device.h"
 #include "freq.h"
 #include "net-rx.h"
+#include "types.h"
 #include <signal.h>
 
 /* Number of samples to average out */
@@ -19,9 +20,12 @@ static uint8_t curbyte = 0;
 /* The last symbol received */
 static uint8_t last_sym = INV_SYM;
 
-#define DATA_LEN 32
+#define DATA_LEN 10
 static uint8_t data[DATA_LEN];
 static uint8_t d_pos = 0;
+
+static uint8_t r_log[16];
+static uint8_t rl_pos = 0;
 
 /* Debug flag pins */
 #define debug_symbol_lock() do { P1OUT |= 1; } while (0)
@@ -208,19 +212,36 @@ static inline void decoder_newdata( uint16_t period )
 #endif
 	if( cb_pos == 3 ) {
 		static uint8_t checksum;
+		static bool escaped = FALSE;
 
 		/* We now have a full byte */
 		cb_pos = 0;
+
+		r_log[rl_pos] = curbyte;
+		rl_pos = (rl_pos==15)?0:(rl_pos+1);
 
 		if( curbyte == 0x7e ) {
 			/* Start of frame */
 			d_pos = 0;
 			checksum = 0;
 			data[0] = 0x7e;
+			escaped = FALSE;
 		} else if( data[0] == 0x7e ) {
+			if( curbyte == 0x7d ) {
+				escaped = TRUE;
+				return;
+			}
+			else if( escaped ) {
+				curbyte ^= 0x20;
+				escaped = FALSE;
+			}				
+
 			data[d_pos] = curbyte;
 
 			checksum += curbyte;
+
+			if( d_pos == 8 )
+				nop();
 
 			/* data[1] is the length if we've got that far */
 			if( d_pos > 1 && d_pos == (data[1] + 2) ) {
@@ -230,7 +251,7 @@ static inline void decoder_newdata( uint16_t period )
 			}
 		}
 
-		if( curbyte == 0x7e || data[0] == 0x7e )
+		if( data[0] == 0x7e )
 			d_pos = (d_pos==(DATA_LEN-1))?0:(d_pos+1);
 
 	}
