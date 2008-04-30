@@ -2,6 +2,7 @@
 #include <signal.h>
 #include "timer-a.h"
 #include "comp.h"
+#include "opamp-1.h"
 
 /* Initialises everything. */
 void init(void);
@@ -36,7 +37,7 @@ void init(void)
 		/* DIVSx = 0 : No SMCLK divider */
 		/* DCOR = 0 : DCO internal resistor */;
 
-	comp_init();
+	opamp1_init();
 	timera_init();
 
 	eint();

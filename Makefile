@@ -1,11 +1,11 @@
-CFLAGS := -mmcu=msp430x2001 -g -Wall -Os
+CFLAGS := -mmcu=msp430x2234 -g -Wall -Os
 CFLAGS += -mendup-at=main
 LDFLAGS :=
 
 CC := msp430-gcc
 
-C_FILES := main.c timer-a.c comp.c freq.c net-rx.c
-H_FILES := device.h timer-a.h comp.h freq.h net-rx.h
+C_FILES := main.c timer-a.c freq.c net-rx.c opamp-1.c
+H_FILES := device.h timer-a.h freq.h net-rx.h opamp-1.h
 
 include .config
 
