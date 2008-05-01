@@ -1,7 +1,7 @@
-#ifndef __TIMER_A_H
-#define __TIMER_A_H
+#ifndef __IR_RECEIVE_H
+#define __IR_RECEIVE_H
 #include <stdint.h>
 
-void timera_init( void );
+void ir_receive_init( void );
 
-#endif	/* __TIMER_A_H */
+#endif	/* __IR_RECEIVE_H */

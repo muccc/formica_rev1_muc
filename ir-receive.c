@@ -1,4 +1,4 @@
-#include "timer-a.h"
+#include "ir-receive.h"
 #include "device.h"
 #include "freq.h"
 #include "net-rx.h"
@@ -44,7 +44,7 @@ static void decoder_reset( void );
    'period' is period that's just been received. */
 static inline void decoder_newdata( uint16_t period );
 
-void timera_init( void )
+void ir_receive_init( void )
 {
 	TACTL = TASSEL_SMCLK	/* SMCLK clock source */
 		/* No clock divider */
