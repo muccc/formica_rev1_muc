@@ -1,4 +1,5 @@
 #include "ir-receive.h"
+#include "ir-bias.h"
 #include "device.h"
 #include "freq.h"
 #include "net-rx.h"
@@ -46,6 +47,7 @@ static inline void decoder_newdata( uint16_t period );
 
 void ir_receive_init( void )
 {
+	/*** Configure Timer A ***/
 	TACTL = TASSEL_SMCLK	/* SMCLK clock source */
 		/* No clock divider */
 		| MC_STOP	/* Timer stopped for now */
@@ -61,6 +63,9 @@ void ir_receive_init( void )
 		| SCS		/* Synchronize with timer clock */
 		| CAP		/* Capture mode */
 		| CCIE;		/* Interrupt enabled */
+
+	/*** Bias resistor config ***/
+	bias_use2();
 
 	decoder_reset();
 
