@@ -1,7 +1,6 @@
 #include "device.h"
 #include <signal.h>
 #include "timer-a.h"
-#include "comp.h"
 #include "opamp-1.h"
 
 /* Initialises everything. */
@@ -22,9 +21,7 @@ void init(void)
 	WDTCTL = WDTHOLD | WDTPW;
 
 	/* GPIO: All inputs */
-	P1DIR = P2DIR = 0;
-
-	P1DIR |= 0x10;
+	P1DIR = P2DIR = P3DIR = P4DIR = 0;
 
 	/* Use a 16 MHz clock (DCO) */
 	DCOCTL = CALDCO_16MHZ;

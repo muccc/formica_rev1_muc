@@ -28,10 +28,13 @@ static uint8_t r_log[16];
 static uint8_t rl_pos = 0;
 
 /* Debug flag pins */
-#define debug_symbol_lock() do { P1OUT |= 1; } while (0)
-#define debug_symbol_nolock() do { P1OUT &= ~1; } while (0)
+/* #define debug_symbol_lock() do { P1OUT |= 1; } while (0) */
+/* #define debug_symbol_nolock() do { P1OUT &= ~1; } while (0) */
+/* #define debug_flag_flip() do { P1OUT ^= 2; } while (0) */
+#define debug_symbol_lock() do { ; } while (0)
+#define debug_symbol_nolock() do { ; } while (0)
+#define debug_flag_flip() do { ; } while (0)
 
-#define debug_flag_flip() do { P1OUT ^= 2; } while (0)
 
 /* Resets/initialises the bit decoder.
    For calling on initialisation or when the signal is lost. */
@@ -51,9 +54,6 @@ void timera_init( void )
 
 	/* Clear the timer */
 	TAR = 0;
-
-	/* Set to output */
-	P1DIR |= 3 | 0x20;
 
 	/* Set up CCR1 to trigger off the comparator */
 	TACCTL1 = CM_BOTH	/* Trigger on rising edge */
