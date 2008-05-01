@@ -9,6 +9,9 @@ H_FILES := device.h ir-receive.h freq.h net-rx.h opamp-1.h ir-bias.h
 
 include .config
 
+# Number of symbols we have to transmit per byte
+SYM_PER_BYTE := `./.sym_per_bit.py $(NBITS)`
+
 main: $(C_FILES) $(H_FILES)
 	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES)
 
@@ -21,6 +24,7 @@ freq.h: .freq.h .config
 	sed -i -e "s/_NBITS/$(NBITS)/" freq.h
 	sed -i -e "s/_MIN_PERIOD/$(MIN_PERIOD)/" freq.h
 	sed -i -e "s/_MAX_PERIOD/$(MAX_PERIOD)/" freq.h
+	sed -i -e "s/_SYMBOLS_PER_BYTE/$(SYM_PER_BYTE)/" freq.h
 
 .PHONY: clean tx-test
 

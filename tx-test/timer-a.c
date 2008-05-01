@@ -45,7 +45,7 @@ interrupt (TIMERA1_VECTOR) timer_a_isr(void)
 	static uint16_t cycle = 0;
 	P1OUT &= ~2;
 
-	if( cycle == 14 ) {
+	if( cycle == 8 ) {
 		tx_sym = next_symbol();
 
 		TACCR0 = period_lut[tx_sym];
@@ -65,19 +65,32 @@ interrupt (TIMERA0_VECTOR) timer_a1_isr(void)
 	nop();
 }
 
+#if CONF_TX_SEQ==1
+static uint8_t next_symbol( void )
+{
+	static uint8_t last_sym = 0;
+	uint8_t sym;
+
+	if( last_sym == NFREQ-1 ) {
+		sym = 0;
+		P1OUT |= 2;
+	}
+	else
+		sym = last_sym+1;
+
+	last_sym = sym;
+	return sym;
+}
+#else
 static uint8_t next_symbol( void )
 {
 	uint8_t sym;
 	static uint8_t curbyte;
 	/* How many symbols have been transmitted from the current byte */
 	static uint8_t cb_pos = 4;
-	static uint8_t last_sym;
+	static uint8_t last_sym = 255;
 
-#if NBITS != 3
-#error Cannot cope with NBITS not being 3
-#endif
-
-	if( cb_pos == 4 ) {
+	if( cb_pos == SYMBOLS_PER_BYTE+1 ) {
 		/* Send the start byte symbol */
 		sym = 0;
 		cb_pos = 0;
@@ -103,7 +116,7 @@ static uint8_t next_symbol( void )
 	last_sym = sym;
 	return sym;
 }
-
+#endif
 static uint8_t next_byte( void )
 {
 	/* The current packet that's being transmitted */

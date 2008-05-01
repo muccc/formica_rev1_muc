@@ -9,7 +9,7 @@ const uint8_t* net_get_next_packet( uint8_t *len )
 	static uint8_t p = 0;
 
 	if( p == 0 ) {
-		p = 1;
+		p = 0;
 		*len = strlen(p0);
 		return p0;
 	} else {

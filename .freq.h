@@ -9,6 +9,8 @@
 #define PERIOD_SPACING ((MAX_PERIOD - MIN_PERIOD)/(NFREQ-1))
 #define RANGE (PERIOD_SPACING/2)
 
+#define SYMBOLS_PER_BYTE _SYMBOLS_PER_BYTE
+
 const uint16_t period_lut[_NFREQ];
 
 #endif	/* __FREQ_H */

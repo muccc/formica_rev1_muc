@@ -6,6 +6,12 @@ CC := msp430-gcc
 C_FILES := main.c timer-a.c net.c ../freq.c
 H_FILES := device.h timer-a.h net.h ../freq.h
 
+include .config
+
+ifeq ($(strip $(CONF_TX_SEQ)),y)
+CFLAGS += -DCONF_TX_SEQ=1
+endif
+
 main: $(C_FILES) $(H_FILES)
 	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES)
 

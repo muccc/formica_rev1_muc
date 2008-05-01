@@ -7,10 +7,10 @@
 #include <signal.h>
 
 /* Number of samples to average out */
-#define AVERAGE 3
+#define AVERAGE 2
 
 /* The stability threshold for when to accept a new frequency */
-#define STABLE_THRESH (80 * AVERAGE)
+#define STABLE_THRESH (110 * AVERAGE)
 
 #define timera_en() do { TACTL |= MC_CONT; } while(0)
 
@@ -58,7 +58,7 @@ void ir_receive_init( void )
 	TAR = 0;
 
 	/* Set up CCR1 to trigger off the comparator */
-	TACCTL1 = CM_BOTH	/* Trigger on rising edge */
+	TACCTL1 = CM_POS	/* Trigger on positive edges */
 		| CCIS_0	/* CCI0A trigger source (COMP) */
 		| SCS		/* Synchronize with timer clock */
 		| CAP		/* Capture mode */
@@ -109,6 +109,8 @@ interrupt (TIMERA1_VECTOR) timer_a_isr(void)
 			reading = ((uint32_t)(reading) + 0xffff) - last_taccr1;
 		last_taccr1 = TACCR1;
 
+		/* Currently triggering on positive edges: */
+		reading >>= 1;
 		/* Reset the receiver if the recorded period was too long */
 		if( nwraps > 1 || reading > (MAX_PERIOD + RANGE) ) {
 			/* Lost the signal */
@@ -217,10 +219,7 @@ static inline void decoder_newdata( uint16_t period )
 	curbyte |= sym << (cb_pos * NBITS);
 	cb_pos++;
 
-#if NBITS != 3
-#error NBITS != 3 not yet supported
-#endif
-	if( cb_pos == 3 ) {
+	if( cb_pos == SYMBOLS_PER_BYTE ) {
 		static uint8_t checksum;
 		static bool escaped = FALSE;
 
