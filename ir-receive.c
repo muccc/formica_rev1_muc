@@ -59,13 +59,18 @@ void ir_receive_init( void )
 
 	/* Set up CCR1 to trigger off the comparator */
 	TACCTL1 = CM_BOTH	/* Trigger on rising edge */
-		| CCIS_1	/* CCI1B trigger source (comes from the comparator) */
+		| CCIS_0	/* CCI0A trigger source (COMP) */
 		| SCS		/* Synchronize with timer clock */
 		| CAP		/* Capture mode */
 		| CCIE;		/* Interrupt enabled */
 
+	/* Set P1.2 to be the CCR1 input CCI0A */
+	/* Page 57 of the MSP430F2234 datasheet */
+	P1DIR &= ~0x04;
+	P1SEL |= 0x04;
+
 	/*** Bias resistor config ***/
-	bias_use2();
+	bias_use1();
 
 	decoder_reset();
 
