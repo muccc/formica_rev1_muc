@@ -1,6 +1,8 @@
 #include "ir-transmit.h"
 #include "device.h"
 #include <signal.h>
+#include "freq.h"
+#include "ir-tx-data.h"
 
 /* Puts the timer into stop mode */
 #define timer_b_dis() do { TBCTL &= ~MC_3; } while (0)
@@ -42,8 +44,22 @@ void ir_transmit_init( void )
 
 interrupt (TIMERB0_VECTOR) timer_b_isr(void)
 {
-	/* TBCCR0 interrupt */
-	
+	/* Which period we're in */
+	static uint8_t period = 0;
+	uint8_t sym;
+
+	/* Only change output period during the low section */
+	if( P4IN & 1 )
+		return;
+
+	period++;
+	/* Transmit 3 periods of each frequency */
+	if( period != 4 )
+		return;
+	period = 0;
+
+	sym = ir_tx_next_symbol();
+	TBCCR0 = period_lut[ sym ];
 
 	/* Flag is automatically cleared */
 }

@@ -4,10 +4,16 @@ LDFLAGS :=
 
 CC := msp430-gcc
 
-C_FILES := main.c ir-receive.c freq.c net-rx.c opamp-1.c ir-transmit.c
-H_FILES := device.h ir-receive.h freq.h net-rx.h opamp-1.h ir-bias.h ir-transmit.h
+C_FILES := main.c ir-receive.c freq.c net-rx.c opamp-1.c ir-transmit.c \
+	ir-tx-data.c net-tx.c
+H_FILES := device.h ir-receive.h freq.h net-rx.h opamp-1.h ir-bias.h \
+	ir-transmit.h ir-tx-data.h net-tx.h
 
 include .config
+
+ifeq ($(strip $(CONF_TX_SEQ)),y)
+CFLAGS += -DCONF_TX_SEQ=1
+endif
 
 # Number of symbols we have to transmit per byte
 SYM_PER_BYTE := `./.sym_per_bit.py $(NBITS)`

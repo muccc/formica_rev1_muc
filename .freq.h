@@ -11,6 +11,8 @@
 
 #define SYMBOLS_PER_BYTE _SYMBOLS_PER_BYTE
 
+#define SYM_MASK ((1 << NBITS)-1)
+
 const uint16_t period_lut[_NFREQ];
 
 #endif	/* __FREQ_H */
