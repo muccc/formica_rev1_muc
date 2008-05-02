@@ -1,6 +1,7 @@
 #include "device.h"
 #include <signal.h>
 #include "ir-receive.h"
+#include "ir-transmit.h"
 #include "ir-bias.h"
 #include "opamp-1.h"
 
@@ -38,6 +39,7 @@ void init(void)
 	opamp1_init();
 	bias_init();
 	ir_receive_init();
+	ir_transmit_init();
 
 	eint();
 }

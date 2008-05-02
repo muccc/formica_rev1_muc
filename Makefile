@@ -4,8 +4,8 @@ LDFLAGS :=
 
 CC := msp430-gcc
 
-C_FILES := main.c ir-receive.c freq.c net-rx.c opamp-1.c
-H_FILES := device.h ir-receive.h freq.h net-rx.h opamp-1.h ir-bias.h
+C_FILES := main.c ir-receive.c freq.c net-rx.c opamp-1.c ir-transmit.c
+H_FILES := device.h ir-receive.h freq.h net-rx.h opamp-1.h ir-bias.h ir-transmit.h
 
 include .config
 
