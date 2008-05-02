@@ -4,6 +4,7 @@
 #include "ir-transmit.h"
 #include "ir-bias.h"
 #include "opamp-1.h"
+#include "adc10.h"
 
 /* Initialises everything. */
 void init(void);
@@ -40,6 +41,7 @@ void init(void)
 	bias_init();
 	ir_receive_init();
 	ir_transmit_init();
+	adc10_init();
 
 	eint();
 }
