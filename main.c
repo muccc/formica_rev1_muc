@@ -6,6 +6,7 @@
 #include "opamp-1.h"
 #include "adc10.h"
 #include "random.h"
+#include "motor.h"
 
 /* Initialises everything. */
 void init(void);
@@ -15,6 +16,10 @@ int i = 0;
 int main( void )
 {
 	init();
+
+	P4DIR |= 6;
+	P4OUT &= ~6;
+	P4OUT |= 4;
 
 	while(1);
 }
@@ -44,6 +49,7 @@ void init(void)
 	ir_transmit_init();
 	adc10_init();
     random_init();
+	motor_init();
 
 	eint();
 }
