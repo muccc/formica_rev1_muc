@@ -28,10 +28,10 @@
 #define motor_fwd() do { P1DIR &= ~M_ALL; P1DIR |= M_FWD; } while (0)
 #define motor_bk() do { P1DIR &= ~M_ALL; P1DIR |= M_BK; } while (0)
 
-mdir_t motor_dir = { FWD, BK };
+motor_mode_t motor_mode = MOTOR_TURN_LEFT;
 
-uint8_t motor_r = 0;
-uint8_t motor_l = 0;
+uint8_t motor_r = 5;
+uint8_t motor_l = 5;
 
 void motor_init( void )
 {
@@ -57,54 +57,46 @@ void motor_init( void )
 interrupt (WDT_VECTOR) motor_wdt_isr(void)
 {
 	static uint8_t count = 0;
-	static uint8_t threshold = 0;
-	
 	static uint16_t cc = 0;
 
-	if( cc == 4000 )
+	/* The resulting motor configuration (to be ORed with P1DIR) */
+	uint8_t conf = 0;
+
+	if( cc == 400 )
 	{
 		cc = 0;
-		P4DIR |= 4;
-		P4OUT ^= 4;
 
-
-		motor_r++;
-		if( motor_r == MAX_SPEED )
-			motor_r = 0;
-		motor_l++;
-		if( motor_l == MAX_SPEED )
-			motor_l = 0;
+		
 	}
 	cc++;
 
-	if( count == 0 && motor_r != 0 )
+	if( motor_mode == MOTOR_FWD )
 	{
-		motor_off();
-		/* Right motor */
-		if( motor_dir.right == FWD )
-			P1DIR |= M_R_FWD;
-		else
-			P1DIR |= M_R_BK;
+		conf = M_FWD;
 
-		threshold = motor_r;
-		
+		if( count >= motor_r )
+			conf |= M2;
+
+		if( count >= motor_l )
+			conf |= M1;
 	}
-	else if( count == MAX_SPEED && motor_l != 0 )
+	/* TODO: Backwards */
+
+	if( motor_mode == MOTOR_TURN_LEFT )
 	{
-		motor_off();
-		/* Left motor */
-		if( motor_dir.left == FWD )
-			P1DIR |= M_L_FWD;
-		else
-			P1DIR |= M_L_BK;
+		conf = M_R_FWD;
 
-		threshold = 16 + motor_l; 
+		if( count >= motor_l )
+			conf = M_L_BK;
+
+		if( count >= (motor_l << 1) )
+			conf = 0;
 	}
 
-	if( count == threshold )
-		motor_off();
+	motor_off();
+	P1DIR |= conf;
 
 	count++;
-	if( count == (MAX_SPEED * 2) )
+	if( count == MAX_SPEED )
 		count = 0;
 }

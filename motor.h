@@ -4,20 +4,14 @@
 
 void motor_init( void );
 
-/* Motor directions */
 typedef enum {
-	FWD,
-	BK
-} motor_dir_t;
+	MOTOR_FWD,
+	MOTOR_BK,
+	MOTOR_TURN_LEFT,
+	MOTOR_TURN_RIGHT
+} motor_mode_t;
 
-/* Direction of each motor */
-typedef struct 
-{
-	motor_dir_t right : 1;
-	motor_dir_t left : 1;
-} mdir_t;
-
-extern mdir_t motor_dir;
+extern motor_mode_t motor_mode;
 
 /* The motor speeds */
 #define MAX_SPEED 8
