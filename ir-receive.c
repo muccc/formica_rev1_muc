@@ -137,9 +137,11 @@ interrupt (TIMERA1_VECTOR) timer_a_isr(void)
 			   decoded as a symbol */
 			decoder_newdata( reading );
 			debug_symbol_lock();
+
 		}
-		else
+		else {
 			debug_symbol_nolock();
+		}
 
 		last_period = reading;
 		nwraps = 0;
