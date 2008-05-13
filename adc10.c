@@ -2,6 +2,7 @@
 #include "ir-bias.h"
 #include "device.h"
 #include <signal.h>
+#include <stdint.h>
 
 void adc10_init( void )
 {
@@ -29,13 +30,30 @@ void adc10_init( void )
 	ADC10AE |= (1<<1) | (1<<2) | (1<<3);
 
 /* 	bias_use2(); */
+}
 
-/* 	/\* For now, set up a conversion *\/ */
-/* 	ADC10CTL1 &= ~INCH_15; */
-/* 	ADC10CTL1 |= INCH_A1; */
+uint16_t readtemp( void )
+{
+    uint16_t boottemp;
 
-/* 	/\* Start the conversion: *\/ */
-/* 	ADC10CTL0 |= (ENC | ADC10SC); */
+    /* If the ADC is already enabled return 0 */
+    if(ADC10CTL0 & ENC)
+        return 0;
+
+    /* Read the temperature to initialise a random number generator */
+    ADC10CTL1 &= ~INCH_15;
+    ADC10CTL1 |= INCH_TEMP; /*Temperature sensor*/
+
+ 	/* Start the conversion: */
+ 	ADC10CTL0 |= (ENC | ADC10SC);
+
+    /* Wait for the conversion to finish */
+    while(!(ADC10CTL0 & ADC10IFG));
+    boottemp = ADC10MEM;
+
+    /*Disable the ADC*/
+    ADC10CTL0 &= ~ENC;
+    return boottemp;
 }
 
 interrupt (ADC10_VECTOR) adc10_isr( void )
