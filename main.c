@@ -45,7 +45,7 @@ void init(void)
 	ir_receive_init();
 	ir_transmit_init();
 	adc10_init();
-    random_init();
+	random_init();
 	motor_init();
 	leds_init();
 
