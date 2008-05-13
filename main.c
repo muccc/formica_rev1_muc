@@ -7,6 +7,7 @@
 #include "adc10.h"
 #include "random.h"
 #include "motor.h"
+#include "leds.h"
 
 /* Initialises everything. */
 void init(void);
@@ -16,10 +17,6 @@ int i = 0;
 int main( void )
 {
 	init();
-
-	P4DIR |= 6;
-	P4OUT &= ~6;
-	P4OUT |= 4;
 
 	while(1);
 }
@@ -50,6 +47,7 @@ void init(void)
 	adc10_init();
     random_init();
 	motor_init();
+	leds_init();
 
 	eint();
 }
