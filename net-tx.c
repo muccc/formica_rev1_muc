@@ -1,20 +1,22 @@
 #include "net-tx.h"
 #include <string.h>
+#include "net.h"
+#include "leds.h"
 
-const uint8_t *p0 = "hello";
-const uint8_t p1[] = {0x1,0x2,0x7e,0x7d,0x20,0x00};
+static uint8_t pkt[] = {
+	/* Command */
+	NET_CMD_COLOUR,
+	/* Colour Version */
+	0,
+	/* Colour */
+	0
+};
 
 const uint8_t* net_tx_get_next_packet( uint8_t *len )
 {
-	static uint8_t p = 0;
+	pkt[1] = cur_led_version;
+	pkt[2] = cur_leds;
 
-	if( p == 0 ) {
-		p = 0;
-		*len = strlen(p0);
-		return p0;
-	} else {
-		p = 0;
-		*len = 6;
-		return p1;
-	}
+	*len = 3;
+	return pkt;
 }
