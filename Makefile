@@ -5,10 +5,11 @@ LDFLAGS :=
 CC := msp430-gcc
 
 C_FILES := main.c ir-receive.c freq.c net-rx.c opamp-1.c ir-transmit.c \
-	ir-tx-data.c net-tx.c adc10.c random.c motor.c virus.c
+	ir-tx-data.c net-tx.c adc10.c random.c motor.c virus.c \
+	smbus_pec.c
 H_FILES := device.h ir-receive.h freq.h net-rx.h opamp-1.h ir-bias.h \
 	ir-transmit.h ir-tx-data.h net-tx.h adc10.h random.h motor.h net.h \
-	leds.h virus.h
+	leds.h virus.h smbus_pec.h
 
 include .config
 

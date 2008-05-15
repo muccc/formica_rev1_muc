@@ -5,6 +5,7 @@
 #include "net-rx.h"
 #include "types.h"
 #include <signal.h>
+#include "smbus_pec.h"
 
 /* Number of samples to average out */
 #define AVERAGE 2
@@ -249,17 +250,16 @@ static inline void decoder_newdata( uint16_t period )
 
 			data[d_pos] = curbyte;
 
-			checksum += curbyte;
-
-			if( d_pos == 8 )
-				nop();
 
 			/* data[1] is the length if we've got that far */
 			if( d_pos > 1 && d_pos == (data[1] + 2) ) {
 				/* Frame reception complete -- check the checksum */
-				if( checksum == 0xff )
+				if( checksum == curbyte )
 					net_rx_proc_incoming( data+2, data[1] );
 			}
+			else
+				checksum_add( checksum, curbyte );
+
 		}
 
 		if( data[0] == 0x7e )

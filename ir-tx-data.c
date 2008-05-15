@@ -4,6 +4,7 @@
 #include "types.h"
 #include "net-tx.h"
 #include <stddef.h>
+#include "smbus_pec.h"
 
 /* Generates the next byte to transmit */
 static uint8_t next_byte( void );
@@ -87,16 +88,16 @@ static uint8_t next_byte( void )
 			if( p == 1 ) {
 				b = cp_len;
 				if( !escaped )
-					checksum += b;
+					checksum_add(checksum, b);
 			}
 			else if( p < (cp_len + 2) ) {
 				b = cur_packet[ p - 2 ];
 				if( !escaped )
-					checksum += b;
+					checksum_add(checksum, b);
 			}
 			else
 				/* The checksum */
-				b = 0xff - checksum;
+				b = checksum;
 
 			if( !escaped && (b == 0x7e || b == 0x7d) ) {
 				escaped = TRUE;
