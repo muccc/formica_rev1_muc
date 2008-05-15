@@ -15,8 +15,8 @@ static uint8_t pkt[] = {
 
 const uint8_t* net_tx_get_next_packet( uint8_t *len )
 {
-	pkt[1] = cur_led_version;
-	pkt[2] = cur_leds;
+	pkt[1] = virus_version;
+	pkt[2] = virus_colours;
 
 	*len = 3;
 	return pkt;

@@ -6,7 +6,7 @@ void virus_init( void );
 
 void virus_set( uint8_t version, uint8_t colours );
 
-extern uint8_t cur_led_version;
-extern uint8_t cur_leds;
+extern uint8_t virus_colours;
+extern uint8_t virus_version;
 
 #endif	/* __VIRUS_H */

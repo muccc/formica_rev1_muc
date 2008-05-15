@@ -1,29 +1,36 @@
 #include "virus.h"
 #include "leds.h"
 
-uint8_t cur_leds = RED;
-uint8_t cur_led_version = 2;
+uint8_t virus_colours = RED;
+uint8_t virus_version = 2;
+
+static void virus_conf( void );
 
 void virus_init( void )
 {
-	
+	virus_conf();
 }
 
 void virus_set( uint8_t version, uint8_t colours )
 {
-	if( cur_led_version < version )
+	if( virus_version < version )
 	{
-		if( colours & RED )
-			leds_red_on();
-		else
-			leds_red_off();
-
-		if( colours & GREEN )
-			leds_green_on();
-		else
-			leds_green_off();
-
-		cur_led_version = version;
-		cur_leds = colours;
+		virus_version = version;
+		virus_colours = colours;
+		virus_conf();
 	}
+}
+
+static void virus_conf( void )
+{
+	if( virus_colours & RED )
+		leds_red_on();
+	else
+		leds_red_off();
+
+	if( virus_colours & GREEN )
+		leds_green_on();
+	else
+		leds_green_off();
+
 }
