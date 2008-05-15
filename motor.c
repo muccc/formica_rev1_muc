@@ -1,6 +1,7 @@
 #include "motor.h"
 #include "device.h"
 #include <signal.h>
+#include "random.h"
 
 #define M1 (1<<0)
 #define MP (1<<1)
@@ -28,7 +29,7 @@
 #define motor_fwd() do { P1DIR &= ~M_ALL; P1DIR |= M_FWD; } while (0)
 #define motor_bk() do { P1DIR &= ~M_ALL; P1DIR |= M_BK; } while (0)
 
-motor_mode_t motor_mode = MOTOR_TURN_LEFT;
+motor_mode_t motor_mode = MOTOR_FWD;
 
 uint8_t motor_r = 5;
 uint8_t motor_l = 5;
@@ -62,11 +63,42 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	/* The resulting motor configuration (to be ORed with P1DIR) */
 	uint8_t conf = 0;
 
-	if( cc == 400 )
+	if( cc == 100 )
 	{
+		static uint8_t j = 0;
+		static uint8_t mode = 0;
+		static uint8_t thresh = 0;
 		cc = 0;
 
-		
+		if( j == thresh)
+		{
+			switch(mode)
+			{
+			case 0:
+				motor_mode = MOTOR_FWD;
+				motor_r = motor_l = 3;
+				break;
+
+			case 1:
+				motor_mode = MOTOR_TURN_LEFT;
+				motor_r = motor_l = 5;
+				break;
+
+			case 2:
+				motor_mode = MOTOR_BK;
+				motor_r = motor_l = 5;
+				break;
+			}
+
+			mode = (random() >> 7) % 10;
+			if( mode > 2 )
+				mode = 0;
+
+			thresh = (random() >> 6) + 1;
+			j = 0;
+		}
+
+		j++;
 	}
 	cc++;
 
@@ -80,7 +112,17 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 		if( count >= motor_l )
 			conf |= M1;
 	}
-	/* TODO: Backwards */
+
+	if( motor_mode == MOTOR_BK )
+	{
+		conf = M_BK;
+
+		if( count >= motor_r )
+			conf &= ~M2;
+
+		if( count >= motor_l )
+			conf &= ~M1;
+	}
 
 	if( motor_mode == MOTOR_TURN_LEFT )
 	{

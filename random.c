@@ -8,7 +8,7 @@ uint16_t lfsr;
 void random_init( void )
 {
 	/* Seed with a temperature reading */
-	lfsr = readtemp();
+	lfsr = readtemp() & (~0x03ff);
 
 	/*Spin a few times to spice it up a bit*/
 	random();
@@ -19,8 +19,9 @@ void random_init( void )
 uint16_t random( void )
 {
 	/* Rotate the 10 bit LFSR */
-	lfsr = (lfsr >> 1) | ((uint16_t)((lfsr & 0x09) ^
-					 (lfsr & 0x06) ^
+	/* Bit 9 xor Bit 6 xor 1 */
+	lfsr = (lfsr >> 1) | ((uint16_t)( ((lfsr & 0x0200) >> 9) ^
+					  ((lfsr & 0x0040) >> 6) ^
 					 1) << 0x09);
 	return lfsr;
 }
