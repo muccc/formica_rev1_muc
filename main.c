@@ -8,6 +8,7 @@
 #include "random.h"
 #include "motor.h"
 #include "leds.h"
+#include "virus.h"
 
 /* Initialises everything. */
 void init(void);
@@ -50,4 +51,6 @@ void init(void)
 	leds_init();
 
 	eint();
+
+	virus_init();
 }
