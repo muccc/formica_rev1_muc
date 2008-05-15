@@ -18,4 +18,7 @@ extern motor_mode_t motor_mode;
 extern uint8_t motor_r;
 extern uint8_t motor_l;
 
+/* Change to another direction for the random walk */
+void motor_rand_walk_change( void );
+
 #endif	/* __MOTOR_H */

@@ -2,6 +2,7 @@
 #include "device.h"
 #include <signal.h>
 #include "random.h"
+#include "battery.h"
 
 #define M1 (1<<0)
 #define MP (1<<1)
@@ -31,8 +32,10 @@
 
 motor_mode_t motor_mode = MOTOR_FWD;
 
-uint8_t motor_r = 5;
-uint8_t motor_l = 5;
+uint8_t motor_r = 8;
+uint8_t motor_l = 8;
+
+static uint8_t rand_walk_thresh = 0;
 
 void motor_init( void )
 {
@@ -66,41 +69,25 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	if( cc == 100 )
 	{
 		static uint8_t j = 0;
-		static uint8_t mode = 0;
-		static uint8_t thresh = 0;
 		cc = 0;
 
-		if( j == thresh)
+		if( j == rand_walk_thresh )
 		{
-			switch(mode)
-			{
-			case 0:
-				motor_mode = MOTOR_FWD;
-				motor_r = motor_l = 3;
-				break;
-
-			case 1:
-				motor_mode = MOTOR_TURN_LEFT;
-				motor_r = motor_l = 5;
-				break;
-
-			case 2:
-				motor_mode = MOTOR_BK;
-				motor_r = motor_l = 5;
-				break;
-			}
-
-			mode = (random() >> 7) % 10;
-			if( mode > 2 )
-				mode = 0;
-
-			thresh = (random() >> 6) + 1;
 			j = 0;
+			motor_rand_walk_change();
 		}
 
 		j++;
 	}
 	cc++;
+
+/* 	if( !battery_power_good() ) */
+/* 	{ */
+/* 		motor_mode == MOTOR_FWD; */
+/* 		motor_r = motor_l = 5; */
+/* 	} */
+/* 	else */
+/* 		motor_r = motor_l = 0; */
 
 	if( motor_mode == MOTOR_FWD )
 	{
@@ -141,4 +128,33 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	count++;
 	if( count == MAX_SPEED )
 		count = 0;
+}
+
+void motor_rand_walk_change( void )
+{
+	static uint8_t mode = 0;
+
+	switch(mode)
+	{
+	case 0:
+		motor_mode = MOTOR_FWD;
+		motor_r = motor_l = 8;
+		break;
+
+	case 1:
+		motor_mode = MOTOR_TURN_LEFT;
+		motor_r = motor_l = 8;
+		break;
+
+	case 2:
+		motor_mode = MOTOR_BK;
+		motor_r = motor_l = 8;
+		break;
+	}
+
+	mode = (random() >> 7) % 10;
+	if( mode > 2 )
+		mode = 0;
+
+	rand_walk_thresh = (random() >> 6) + 1;
 }

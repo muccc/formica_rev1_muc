@@ -9,6 +9,8 @@
 #include "motor.h"
 #include "leds.h"
 #include "virus.h"
+#include "net-rx.h"
+#include "battery.h"
 
 /* Initialises everything. */
 void init(void);
@@ -19,7 +21,9 @@ int main( void )
 {
 	init();
 
-	while(1);
+	while(1)
+	{
+	}
 }
 
 void init(void)
@@ -43,12 +47,14 @@ void init(void)
 
 	opamp1_init();
 	bias_init();
-	ir_receive_init();
-	ir_transmit_init();
 	adc10_init();
 	random_init();
+	net_rx_init();
+	ir_receive_init();
+	ir_transmit_init();
 	motor_init();
 	leds_init();
+	battery_init();
 
 	eint();
 

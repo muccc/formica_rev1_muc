@@ -10,7 +10,9 @@ static uint8_t pkt[] = {
 	/* Colour Version */
 	0,
 	/* Colour */
-	0
+	0,
+	/* Robot ID */
+	0,0
 };
 
 const uint8_t* net_tx_get_next_packet( uint8_t *len )
@@ -18,6 +20,9 @@ const uint8_t* net_tx_get_next_packet( uint8_t *len )
 	pkt[1] = virus_version;
 	pkt[2] = virus_colours;
 
-	*len = 3;
+	pkt[3] = net_id >> 8;
+	pkt[4] = net_id & 0xff;
+
+	*len = 5;
 	return pkt;
 }

@@ -7,4 +7,6 @@ enum
 	NET_CMD_COLOUR
 };
 
+extern uint16_t net_id;
+
 #endif	/* __NET_H */

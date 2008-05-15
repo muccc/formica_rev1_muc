@@ -1,7 +1,7 @@
 #include "virus.h"
 #include "leds.h"
 
-uint8_t virus_colours = RED;
+uint8_t virus_colours = GREEN;
 uint8_t virus_version = 2;
 
 static void virus_conf( void );
@@ -32,5 +32,4 @@ static void virus_conf( void )
 		leds_green_on();
 	else
 		leds_green_off();
-
 }
