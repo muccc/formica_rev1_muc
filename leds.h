@@ -1,5 +1,6 @@
 #ifndef __LEDS_H
 #define __LEDS_H
+#include "device.h"
 
 #define leds_init() do { P4OUT &= ~6; P4DIR |= 6; } while (0)
 
