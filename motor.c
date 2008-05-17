@@ -131,14 +131,13 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	}
 
 	motor_off();
-/* 	P1DIR |= conf; */
+	P1DIR |= conf;
 
 	count++;
 	if( count == MAX_SPEED )
 		count = 0;
 
-
-	if( ir_count == 300 )
+	if( ir_count == 1500 )
 	{
 		net_tx_enable_for(10);
 		ir_count = 0;

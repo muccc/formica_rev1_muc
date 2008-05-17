@@ -4,6 +4,7 @@
 #include "freq.h"
 #include "ir-tx-data.h"
 #include "ir.h"
+#include "ir-rx.h"
 
 /* Puts the timer into stop mode */
 #define timer_b_dis() do { TBCTL &= ~MC_3; } while (0)
@@ -64,6 +65,8 @@ interrupt (TIMERB0_VECTOR) timer_b_isr(void)
 	{
 		/* No data: disable transmission */
 		timer_b_dis();
+
+		ir_receive_en();
 	}
 		TBCCR0 = period_lut[ sym ];
 
@@ -78,6 +81,8 @@ interrupt (TIMERB1_VECTOR) timer_b_isr2(void)
 void ir_transmit_enable( void )
 {
 	timer_b_en();
+
+	ir_receive_dis();
 }
 
 bool ir_transmit_is_enabled( void )
