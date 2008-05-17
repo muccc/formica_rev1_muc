@@ -1,4 +1,4 @@
-#include "ir-receive.h"
+#include "ir-rx.h"
 #include "ir-bias.h"
 #include "device.h"
 #include "freq.h"

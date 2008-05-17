@@ -1,4 +1,4 @@
-#include "ir-transmit.h"
+#include "ir-tx.h"
 #include "device.h"
 #include <signal.h>
 #include "freq.h"

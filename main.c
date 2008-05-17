@@ -1,7 +1,7 @@
 #include "device.h"
 #include <signal.h>
-#include "ir-receive.h"
-#include "ir-transmit.h"
+#include "ir-rx.h"
+#include "ir-tx.h"
 #include "ir-bias.h"
 #include "opamp-1.h"
 #include "adc10.h"
