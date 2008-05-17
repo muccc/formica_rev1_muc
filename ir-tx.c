@@ -3,6 +3,7 @@
 #include <signal.h>
 #include "freq.h"
 #include "ir-tx-data.h"
+#include "ir.h"
 
 /* Puts the timer into stop mode */
 #define timer_b_dis() do { TBCTL &= ~MC_3; } while (0)
@@ -59,7 +60,12 @@ interrupt (TIMERB0_VECTOR) timer_b_isr(void)
 	period = 0;
 
 	sym = ir_tx_next_symbol();
-	TBCCR0 = period_lut[ sym ];
+	if( sym == INV_SYM )
+	{
+		/* No data: disable transmission */
+		timer_b_dis();
+	}
+		TBCCR0 = period_lut[ sym ];
 
 	/* Flag is automatically cleared */
 }
