@@ -5,4 +5,10 @@
 /* Invalid symbol */
 #define INV_SYM 255
 
+/* Nudge the IR transceiver */
+/* This should be called at regular intervals, 
+   and turns the tx back on after rx'ing for a certain amount of time */
+void ir_nudge( void );
+
+
 #endif	/* __IR_H */

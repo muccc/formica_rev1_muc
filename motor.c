@@ -4,8 +4,8 @@
 #include "random.h"
 #include "battery.h"
 
-#include "net-tx.h"
-#include "ir-tx.h"
+#include "ir.h"
+#include "leds.h"
 
 #define M1 (1<<0)
 #define MP (1<<1)
@@ -65,8 +65,6 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 {
 	static uint8_t count = 0;
 	static uint16_t cc = 0;
-
-	static uint16_t ir_count = 0;
 
 	/* The resulting motor configuration (to be ORed with P1DIR) */
 	uint8_t conf = 0;
@@ -137,15 +135,7 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	if( count == MAX_SPEED )
 		count = 0;
 
-	if( ir_count == 1500 )
-	{
-		net_tx_enable_for(10);
-		ir_count = 0;
-	}
-	else if( ir_count > 0 )
-		ir_count++;
-	else if( ir_transmit_is_enabled() )
-		ir_count = 1;	
+	ir_nudge();
 }
 
 void motor_rand_walk_change( void )
