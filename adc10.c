@@ -3,11 +3,12 @@
 #include "device.h"
 #include <signal.h>
 #include <stdint.h>
+#include "food.h"
 
 void adc10_init( void )
 {
 	ADC10CTL0 = SREF_0 	/* Use VCC and VSS as the references */
-		| ADC10SHT_DIV64 /* Longest sample-and-hold time */
+		| ADC10SHT_DIV4 /* 4 x ADC10CLKs */
 		/* ADC10SR = 0 -- Support 200 ksps sampling (TODO: maybe this can be set) */
 		/* REFOUT = 0 -- Reference output off */
 		/* REFBURST = 0 -- Reference buffer on continuously (TODO) */
@@ -21,16 +22,26 @@ void adc10_init( void )
 		/* ADC10DF = 0 -- Straight binary format */
 		/* ISSH = 0 -- No inversion on the s&h signal */
 		| ADC10DIV_7	/* Divide clock by 8 */
-		| ADC10SSEL_SMCLK
-		| CONSEQ_0; 	/* Signal-channel single-conversion mode */
+		| ADC10SSEL_ACLK
+		| CONSEQ_0; 	/* Single channel single conversion */
 		
 
-	/* PD1, PD2 and PD3 are on P2.1, P2.2 and P2.3 respectively */
-	/* P2.1, P2.2, P2.3 (page 60 of the MSP430F2234 datasheet) */
-	ADC10AE |= (1<<1) | (1<<2) | (1<<3);
-
+	/* PD1, PD2, PD3 and FOOD are on P2.1, P2.2, P2.3 and P2.4 respectively */
+	/* P2.1, P2.2, P2.3, P2.4 (page 60 of the MSP430F2234 datasheet) */
+	ADC10AE |= (1<<1) | (1<<2) | (1<<3) | (1<<4);
+	ADC10DTC0 |= ADC10CT; /*Data is transferred continuously. DTC operation is stopped only if
+							ADC10CT cleared, or ADC10SA is written to.*/
+	//ADC10SA = &pointer to some array
+	
+	ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
+	ADC10CTL1 |= INCH_A4; /*Food sensor*/
+	/* Start the conversion: */
+	ADC10CTL0 |= (ENC | ADC10SC);
+	
 /* 	bias_use2(); */
 }
+
+
 
 uint16_t readtemp( void )
 {
@@ -56,8 +67,44 @@ uint16_t readtemp( void )
 	return boottemp;
 }
 
+uint16_t a3data; /*output from PD3*/
+uint16_t a2data; /*output from PD2*/
+uint16_t a1data; /*output from PD1*/
 interrupt (ADC10_VECTOR) adc10_isr( void )
 {
-	nop();
+	switch(ADC10CTL1 & 0xF<< 12){ /*Reading the current sampling channel, IS THIS SANE?*/
+		case INCH_A1:
+			a1data = ADC10MEM;
+			/*Disable the ADC*/
+			ADC10CTL0 &= ~ENC;
+			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
+			ADC10CTL1 |= INCH_A4; /*Food sensor*/		
+			break;
+		case INCH_A2:
+			a2data = ADC10MEM;
+			/*Disable the ADC*/
+			ADC10CTL0 &= ~ENC;
+			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
+			ADC10CTL1 |= INCH_A1; /*Food sensor*/		
+			break;
+		case INCH_A3:
+			a3data = ADC10MEM;
+			/*Disable the ADC*/
+			ADC10CTL0 &= ~ENC;
+			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
+			ADC10CTL1 |= INCH_A2; /*Food sensor*/			
+			break;
+		case INCH_A4:
+			fooddata = ADC10MEM;
+			if(P2DIR & BIAS1){
+			/*Disable the ADC*/
+				ADC10CTL0 &= ~ENC;
+				ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
+				ADC10CTL1 |= INCH_A3; /*Food sensor*/
+			}
+			break;
+		default:
+			break;
+	}
 	ADC10CTL0 |= (ENC | ADC10SC);
 }
