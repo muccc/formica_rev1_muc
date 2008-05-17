@@ -6,4 +6,7 @@
 /* Returns the next packet to be sent */
 const uint8_t* net_tx_get_next_packet( uint8_t *len );
 
+/* Enable transmission for n packets */
+void net_tx_enable_for( uint8_t n );
+
 #endif	/* __NET_TX_H */

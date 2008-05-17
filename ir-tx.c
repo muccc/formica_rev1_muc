@@ -75,3 +75,15 @@ interrupt (TIMERB1_VECTOR) timer_b_isr2(void)
 	/* This interrupt should never happen */
 }
 
+void ir_transmit_enable( void )
+{
+	timer_b_en();
+}
+
+bool ir_transmit_is_enabled( void )
+{
+	if( (TBCTL & MC_3) == MC_UPTO_CCR0 )
+		return TRUE;
+
+	return FALSE;
+}	
