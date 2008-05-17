@@ -5,6 +5,7 @@
 #include "net-tx.h"
 #include <stddef.h>
 #include "smbus_pec.h"
+#include "ir.h"
 
 /* Generates the next byte to transmit */
 static uint8_t next_byte( void );
@@ -29,15 +30,14 @@ uint8_t ir_tx_next_symbol( void )
 {
 	static uint8_t curbyte;
 	/* How many symbols have been transmitted from the current byte */
-	static uint8_t cb_pos = SYMBOLS_PER_BYTE+1;
+	static uint8_t cb_pos = 0;
 	static uint8_t last_sym = 255;
 
 	uint8_t sym;
 
-	if( cb_pos == SYMBOLS_PER_BYTE+1 ) {
+	if( cb_pos == 0 ) {
 		/* Send the start byte symbol */
 		sym = 0;
-		cb_pos = 0;
 		curbyte = next_byte();
 	} else {
 		/* Grab the data from the byte */
@@ -56,6 +56,9 @@ uint8_t ir_tx_next_symbol( void )
 			sym++;
 	}
 	cb_pos++;
+
+	if( cb_pos == SYMBOLS_PER_BYTE+1 )
+		cb_pos = 0;
 
 	last_sym = sym;
 	return sym;
