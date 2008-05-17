@@ -71,7 +71,7 @@ void ir_receive_init( void )
 	P1SEL |= 0x04;
 
 	/*** Bias resistor config ***/
-	bias_use1();
+	bias_use2();
 
 	decoder_reset();
 
