@@ -81,14 +81,6 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	}
 	cc++;
 
-/* 	if( !battery_power_good() ) */
-/* 	{ */
-/* 		motor_mode == MOTOR_FWD; */
-/* 		motor_r = motor_l = 5; */
-/* 	} */
-/* 	else */
-/* 		motor_r = motor_l = 0; */
-
 	if( motor_mode == MOTOR_FWD )
 	{
 		conf = M_FWD;
@@ -122,6 +114,17 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 			conf = 0;
 	}
 
+	if( motor_mode == MOTOR_TURN_RIGHT )
+	{
+		conf = M_L_FWD;
+
+		if( count >= motor_r )
+			conf = M_R_BK;
+
+		if( count >= (motor_r << 1) )
+			conf = 0;
+	}
+
 	motor_off();
 	P1DIR |= conf;
 
@@ -150,10 +153,14 @@ void motor_rand_walk_change( void )
 		motor_mode = MOTOR_BK;
 		motor_r = motor_l = 8;
 		break;
+	case 3:
+		motor_mode = MOTOR_TURN_RIGHT;
+		motor_r = motor_l = 8;
+		break;
 	}
 
 	mode = (random() >> 7) % 10;
-	if( mode > 2 )
+	if( mode > 3 )
 		mode = 0;
 
 	rand_walk_thresh = (random() >> 6) + 1;
