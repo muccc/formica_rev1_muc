@@ -8,7 +8,7 @@
 #include "ir.h"
 
 /* Generates the next byte to transmit */
-static uint8_t next_byte( void );
+static bool next_byte( uint8_t* b );
 
 #if CONF_TX_SEQ==1
 uint8_t ir_tx_next_symbol( void )
@@ -38,7 +38,8 @@ uint8_t ir_tx_next_symbol( void )
 	if( cb_pos == 0 ) {
 		/* Send the start byte symbol */
 		sym = 0;
-		curbyte = next_byte();
+		if( !next_byte( &curbyte ) )
+			return INV_SYM;
 	} else {
 		/* Grab the data from the byte */
 		sym = curbyte & SYM_MASK;
@@ -65,7 +66,7 @@ uint8_t ir_tx_next_symbol( void )
 }
 #endif
 
-static uint8_t next_byte( void )
+static bool next_byte( uint8_t* b )
 {
 	/* The current packet that's being transmitted */
 	static const uint8_t *cur_packet = NULL;
@@ -80,35 +81,33 @@ static uint8_t next_byte( void )
 		static uint8_t checksum = 0;
 		static bool escaped = FALSE;
 
-		uint8_t b;
-
 		if( p == 0 ) {
 			/* Send the 'start of frame' byte */
-			b = 0x7E;
+			*b = 0x7E;
 			checksum = 0;
 		}
 		else {
 			if( p == 1 ) {
-				b = cp_len;
+				*b = cp_len;
 				if( !escaped )
-					checksum_add(checksum, b);
+					checksum_add(checksum, *b);
 			}
 			else if( p < (cp_len + 2) ) {
-				b = cur_packet[ p - 2 ];
+				*b = cur_packet[ p - 2 ];
 				if( !escaped )
-					checksum_add(checksum, b);
+					checksum_add(checksum, *b);
 			}
 			else
 				/* The checksum */
-				b = checksum;
+				*b = checksum;
 
-			if( !escaped && (b == 0x7e || b == 0x7d) ) {
+			if( !escaped && (*b == 0x7e || *b == 0x7d) ) {
 				escaped = TRUE;
-				b = 0x7d;
+				*b = 0x7d;
 			} 
 			else if( escaped ) {
 				escaped = FALSE;
-				b ^= 0x20;
+				*b ^= 0x20;
 			}
 		}
 
@@ -122,8 +121,8 @@ static uint8_t next_byte( void )
 				p++;
 		}
 
-		return b;
+		return TRUE;
 	}
 	else
-		return 0;
+		return FALSE;
 }
