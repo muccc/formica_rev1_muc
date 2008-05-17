@@ -78,7 +78,8 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			/*Disable the ADC*/
 			ADC10CTL0 &= ~ENC;
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
-			ADC10CTL1 |= INCH_A4; /*Food sensor*/		
+			ADC10CTL1 |= INCH_A4; /*Food sensor*/	
+			bias_use2(); // disabling biase1
 			break;
 		case INCH_A2:
 			a2data = ADC10MEM;
