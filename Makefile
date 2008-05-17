@@ -20,6 +20,8 @@ endif
 ifneq ($(strip $(WIN)),y)
 # Number of symbols we have to transmit per byte
 SYM_PER_BYTE := `./.sym_per_bit.py $(NBITS)`
+
+world: main .freq.h.win .freq.c.win
 else
 SYM_PER_BYTE := 3
 endif
@@ -38,6 +40,12 @@ freq.h: .freq.h .config
 	sed -i -e "s/_MIN_PERIOD/$(MIN_PERIOD)/" freq.h
 	sed -i -e "s/_MAX_PERIOD/$(MAX_PERIOD)/" freq.h
 	sed -i -e "s/_SYMBOLS_PER_BYTE/$(SYM_PER_BYTE)/" freq.h
+
+.freq.c.win: freq.c
+	cp -f freq.c .freq.c.win
+
+.freq.h.win: freq.h
+	cp -f freq.h .freq.h.win
 else
 # Alexis's windows mode
 freq.c: .freq.c.win
