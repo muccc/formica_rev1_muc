@@ -1,4 +1,5 @@
 #include "ir-rx.h"
+#include "ir.h"
 #include "ir-bias.h"
 #include "device.h"
 #include "freq.h"
@@ -18,7 +19,6 @@
 static uint8_t cb_pos = 0;
 static uint8_t curbyte = 0;
 
-#define INV_SYM 255
 /* The last symbol received */
 static uint8_t last_sym = INV_SYM;
 
@@ -266,4 +266,16 @@ static inline void decoder_newdata( uint16_t period )
 			d_pos = (d_pos==(DATA_LEN-1))?0:(d_pos+1);
 
 	}
+}
+
+void ir_receive_en( void )
+{
+	/* Enable the capture interrupt */
+	TACCTL1 |= CCIE;
+}
+
+void ir_receive_dis( void )
+{
+	/* Disable the capture interrupt */
+	TACCTL1 &= ~CCIE;
 }
