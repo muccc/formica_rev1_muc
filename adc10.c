@@ -67,6 +67,7 @@ uint16_t readtemp( void )
 	return boottemp;
 }
 
+uint16_t a4data; /*output from food*/
 uint16_t a3data; /*output from PD3*/
 uint16_t a2data; /*output from PD2*/
 uint16_t a1data; /*output from PD1*/
@@ -96,7 +97,8 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			ADC10CTL1 |= INCH_A2; /*Food sensor*/			
 			break;
 		case INCH_A4:
-			fooddata = ADC10MEM;
+			a4data = ADC10MEM;
+			foodCallback(a4data, INCH_A4>>12);
 			if(P2DIR & BIAS1){
 			/*Disable the ADC*/
 				ADC10CTL0 &= ~ENC;

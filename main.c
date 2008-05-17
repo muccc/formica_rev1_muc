@@ -11,6 +11,7 @@
 #include "virus.h"
 #include "net-rx.h"
 #include "battery.h"
+#include "food.h"
 
 /* Initialises everything. */
 void init(void);
@@ -20,7 +21,6 @@ int i = 0;
 int main( void )
 {
 	init();
-
 	while(1)
 	{
 	}
@@ -63,6 +63,7 @@ void init(void)
 	battery_init();
 
 	eint();
-
+	
 	virus_init();
+	food_init();
 }

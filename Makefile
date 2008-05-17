@@ -6,10 +6,10 @@ CC := msp430-gcc
 
 C_FILES := main.c ir-rx.c freq.c net-rx.c opamp-1.c ir-tx.c \
 	ir-tx-data.c net-tx.c adc10.c random.c motor.c virus.c \
-	smbus_pec.c battery.c ir.c
+	smbus_pec.c battery.c ir.c food.c
 H_FILES := device.h ir-rx.h freq.h net-rx.h opamp-1.h ir-bias.h \
 	ir-tx.h ir-tx-data.h net-tx.h adc10.h random.h motor.h net.h \
-	leds.h virus.h smbus_pec.h battery.h ir.h
+	leds.h virus.h smbus_pec.h battery.h ir.h food.h
 
 include .config
 

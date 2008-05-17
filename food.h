@@ -2,9 +2,10 @@
 #define __FOOD_H
 #include "device.h"
 
-uint16_t fooddata; //deprecated
+void foodCallback(uint16_t data, uint8_t channel);
+uint8_t hasfood(void);
+void food_init(void);
 
-food_init(void);
 #define NOFOOD 1000
 #define FLED (1<<3)
 
