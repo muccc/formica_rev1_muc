@@ -64,6 +64,6 @@ void init(void)
 
 	eint();
 	
-	virus_init();
-	food_init();
+	//virus_init();
+	//food_init();
 }

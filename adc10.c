@@ -5,6 +5,13 @@
 #include <stdint.h>
 #include "food.h"
 
+enum {
+	PD1,
+	PD2,
+	PD3,
+	FOOD
+} curreading = PD1;
+
 void adc10_init( void )
 {
 	ADC10CTL0 = SREF_0 	/* Use VCC and VSS as the references */
@@ -31,17 +38,17 @@ void adc10_init( void )
 	ADC10AE |= (1<<1) | (1<<2) | (1<<3) | (1<<4);
 	ADC10DTC0 |= ADC10CT; /*Data is transferred continuously. DTC operation is stopped only if
 							ADC10CT cleared, or ADC10SA is written to.*/
-	//ADC10SA = &pointer to some array
 	
-	ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
-	ADC10CTL1 |= INCH_A4; /*Food sensor*/
-	/* Start the conversion: */
-	ADC10CTL0 |= (ENC | ADC10SC);
-	
-/* 	bias_use2(); */
 }
 
-
+void startadc( void )
+{
+	ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
+	ADC10CTL1 |= INCH_A1; /* Start with sunlight 1 */
+	curreading = PD1;
+	/* Start the conversion: */
+	ADC10CTL0 |= (ENC | ADC10SC);
+}
 
 uint16_t readtemp( void )
 {
@@ -73,38 +80,35 @@ uint16_t a2data; /*output from PD2*/
 uint16_t a1data; /*output from PD1*/
 interrupt (ADC10_VECTOR) adc10_isr( void )
 {
-	switch(ADC10CTL1 & 0xF<< 12){ /*Reading the current sampling channel, IS THIS SANE?*/
-		case INCH_A1:
+	switch(curreading){
+		case PD1:
 			a1data = ADC10MEM;
 			/*Disable the ADC*/
 			ADC10CTL0 &= ~ENC;
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
-			ADC10CTL1 |= INCH_A4; /*Food sensor*/	
-			bias_use2(); // disabling biase1
+			ADC10CTL1 |= INCH_A2;
+			curreading = PD2;
 			break;
-		case INCH_A2:
+		case PD2:
 			a2data = ADC10MEM;
 			/*Disable the ADC*/
 			ADC10CTL0 &= ~ENC;
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
-			ADC10CTL1 |= INCH_A1; /*Food sensor*/		
+			curreading = PD3;
+			ADC10CTL1 |= INCH_A3;
 			break;
-		case INCH_A3:
+		case PD3:
 			a3data = ADC10MEM;
 			/*Disable the ADC*/
 			ADC10CTL0 &= ~ENC;
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
-			ADC10CTL1 |= INCH_A2; /*Food sensor*/			
+			curreading = FOOD;
+			ADC10CTL1 |= INCH_A4;
 			break;
-		case INCH_A4:
+		case FOOD:
 			a4data = ADC10MEM;
 			foodCallback(a4data, INCH_A4>>12);
-			if(P2DIR & BIAS1){
-			/*Disable the ADC*/
-				ADC10CTL0 &= ~ENC;
-				ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
-				ADC10CTL1 |= INCH_A3; /*Food sensor*/
-			}
+			ADC10CTL0 &= ~ENC; /* Disable the ADC */
 			break;
 		default:
 			break;

@@ -4,5 +4,5 @@
 
 void adc10_init( void );
 uint16_t readtemp( void );
-
+void startadc( void );
 #endif	/* __ADC_10_H */
