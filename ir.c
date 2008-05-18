@@ -34,8 +34,6 @@ void ir_nudge( void )
 				startadc();
 			}
 			else
-				if(ADC10CTL0 & ENC)
-					ir_tx_time = 5;
 				/* Bias for comms */
 				bias_use2();
 
