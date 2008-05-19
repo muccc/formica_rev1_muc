@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <stdint.h>
 #include "food.h"
+#include "bearing.h"
 
 enum {
 	PD1,
@@ -78,7 +79,7 @@ uint16_t readtemp( void )
 	return boottemp;
 }
 
-uint16_t a4data; /*output from food*/
+uint16_t fooddata; /*output from food*/
 uint16_t a3data; /*output from PD3*/
 uint16_t a2data; /*output from PD2*/
 uint16_t a1data; /*output from PD1*/
@@ -107,15 +108,20 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			ADC10CTL0 &= ~ENC;
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
 			ADC10CTL1 |= INCH_A4;
+			
+			setbearing(a1data, a2data, a3data);
+
 			curreading = FOOD;
 			break;
 		case FOOD:
-			a4data = ADC10MEM;
-			//foodCallback(a4data, INCH_A4>>12);
+			fooddata = ADC10MEM;
 			/*Disable the ADC*/
 			ADC10CTL0 &= ~ENC;
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
 			ADC10CTL1 |= INCH_A1;
+
+			//foodcallback(fooddata);
+			
 			curreading = PD1;
 			break;
 	}

@@ -2,7 +2,7 @@
 #define __FOOD_H
 #include "device.h"
 
-void foodCallback(uint16_t data, uint8_t channel);
+void foodcallback(uint16_t data);
 uint8_t hasfood(void);
 void food_init(void);
 

@@ -11,7 +11,7 @@ uint16_t mavg;
 uint8_t averageindex;
 
 /*Need to implement a moving  average based on the last 1sec? any major change from this average will trigger the food detection*/
-void foodCallback(uint16_t data, uint8_t channel){
+void foodcallback(uint16_t data){
 	uint8_t i;
 	if(data+50 < mavg){ //checking that the average buffer is full
 		gotfood = 1;
