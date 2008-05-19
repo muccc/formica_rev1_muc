@@ -40,7 +40,7 @@ void init(void)
 	BCSCTL1 |= 
 		/*XT2O=0: XT2 is on*/
 		/*XTS=0: LFXT1 mode select. 0 -Low frequency mode*/
-		DIVA_3 /* ACLK Divider 3: /8 */
+		DIVA_0 /* ACLK Divider 0: /1 */
 		|CALBC1_16MHZ; /* BCSCTL1 Calibration Data for 16MHz */
 
 	BCSCTL2 = SELM_DCOCLK	/* MCLK from DCO */
@@ -53,8 +53,11 @@ void init(void)
 	
 	opamp1_init();
 	bias_init();
-	adc10_init();
-	random_init();
+
+	adc10_init(); /* The order here matters. This configures the ADC */
+	random_init(); /* Grab some random data */
+	streamadc(); /* Prepare the ADC for streaming in data */
+	
 	net_rx_init();
 	ir_receive_init();
 	ir_transmit_init();

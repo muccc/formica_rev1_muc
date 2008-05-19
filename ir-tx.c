@@ -5,6 +5,7 @@
 #include "ir-tx-data.h"
 #include "ir.h"
 #include "ir-rx.h"
+#include "adc10.h"
 
 /* Puts the timer into stop mode */
 #define timer_b_dis() do { TBCTL &= ~MC_3; } while (0)
@@ -53,6 +54,9 @@ interrupt (TIMERB0_VECTOR) timer_b_isr(void)
 	/* Only change output period during the low section */
 	if( P4IN & 1 )
 		return;
+	else
+		/* LEDs currently off */
+		grabadc();
 
 	period++;
 	/* Transmit 3 periods of each frequency */

@@ -25,20 +25,7 @@ void ir_nudge( void )
 			net_tx_enable_for(5);
 		}
 		else
-		{
-			/* For the first tick, take a sunlight reading */
-			if(ir_count==0)
-			{
-				/* Sunlight bias */
-				bias_use1();
-				startadc();
-			}
-			else
-				/* Bias for comms */
-				bias_use2();
-
 			/* Continue receiving */
 			ir_count++;
-		}
 	}
 }
