@@ -52,7 +52,7 @@ void grabadc( void )
 {
 	/* Start the conversion: */
 	ADC10CTL0 |= (ENC | ADC10SC);
-	bias_use1();
+	bias_use2();
 }
 
 uint16_t readtemp( void )
@@ -125,5 +125,5 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			curreading = PD1;
 			break;
 	}
-	bias_use2();
+	bias_use1();
 }

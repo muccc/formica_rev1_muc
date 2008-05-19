@@ -7,6 +7,8 @@
 #include "ir.h"
 #include "leds.h"
 
+#include "bearing.h"
+
 #define M1 (1<<0)
 #define MP (1<<1)
 #define M2 (1<<3)
@@ -136,6 +138,27 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 		count = 0;
 
 	ir_nudge();
+	
+	{
+		uint16_t bearing = getbearing();
+
+		if(bearing > 300 || bearing <= 60)
+		{
+			leds_green_off();
+			leds_red_on();
+		}
+		else if(bearing > 60 && bearing <= 180)
+		{
+			leds_red_off();
+			leds_green_on();
+		}
+		else
+		{
+			leds_red_on();
+			leds_green_on();
+		}
+	}
+
 }
 
 void motor_rand_walk_change( void )
