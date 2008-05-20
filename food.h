@@ -1,9 +1,10 @@
 #ifndef __FOOD_H
 #define __FOOD_H
 #include "device.h"
+#include "types.h"
 
-void foodcallback(uint16_t data);
-uint8_t hasfood(void);
+void foodcallback(uint16_t dataoff, uint16_t dataon);
+bool hasfood(void);
 void food_init(void);
 
 #define NOFOOD 1000

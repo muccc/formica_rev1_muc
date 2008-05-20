@@ -1,36 +1,48 @@
 #include "device.h"
-#define MALENGTH 16
+#include "motor.h"
+static uint16_t curbearing = 0;
+static uint16_t strength = 0;
 
-static uint16_t history[MALENGTH];
-static uint16_t curbearing;
+static uint16_t l = 0, r = 0;
 
 void setbearing(uint16_t a, uint16_t b, uint16_t c)
 {
-	static uint16_t hispos = 0;
-
-	if(a > b)
-		if(a > c)
-			history[hispos] = 0;
+	l = c; r = b;
+	if(a < b)
+		if(a < c)
+		{
+			curbearing = 0;
+			strength = a;
+		}
 		else
-			history[hispos] = 240;
+		{
+			curbearing = 240;
+			strength = c;
+		}
 	else
-		if(b > c)
-			history[hispos] = 120;
+		if(b < c)
+		{
+			curbearing = 120;
+			strength = b;
+		}
 		else
-			history[hispos] = 240;
-	
-	if(++hispos == MALENGTH)
-		hispos = 0;
+		{
+			curbearing = 240;
+			strength = c;
+		}
+}
 
-	uint16_t sum = 0;
-	uint16_t i = 0;
-	for(i=0;i<MALENGTH;i++)
-		sum += history[i];
-	
-	curbearing = sum/MALENGTH;
+void setmotorspeeds( void )
+{
+	set_motor_ratio(l, r);
 }
 
 uint16_t getbearing( void )
 {
 	return curbearing;	
+}
+
+uint16_t getstrength( void )
+{
+	return strength;
 }

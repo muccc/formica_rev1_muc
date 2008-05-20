@@ -10,13 +10,15 @@ enum {
 	PD1,
 	PD2,
 	PD3,
-	FOOD
+	FOOD0,
+	FOOD1
 } curreading = PD1;
 
 void adc10_init( void )
 {
 	ADC10CTL0 = SREF_0 	/* Use VCC and VSS as the references */
-		| ADC10SHT_DIV4 /* 4 x ADC10CLKs */
+		| ADC10SHT_DIV64 /* 64 x ADC10CLKs
+				    32us*/
 		/* ADC10SR = 0 -- Support 200 ksps sampling (TODO: maybe this can be set) */
 		/* REFOUT = 0 -- Reference output off */
 		/* REFBURST = 0 -- Reference buffer on continuously (TODO) */
@@ -52,7 +54,10 @@ void grabadc( void )
 {
 	/* Start the conversion: */
 	ADC10CTL0 |= (ENC | ADC10SC);
-	bias_use2();
+	if(curreading == FOOD1)
+		fled_on();
+	else
+		bias_use2();
 }
 
 uint16_t readtemp( void )
@@ -79,7 +84,8 @@ uint16_t readtemp( void )
 	return boottemp;
 }
 
-uint16_t fooddata; /*output from food*/
+uint16_t food0; /*output from food with LED off*/
+uint16_t food1; /*output from food with LED on*/
 uint16_t a3data; /*output from PD3*/
 uint16_t a2data; /*output from PD2*/
 uint16_t a1data; /*output from PD1*/
@@ -111,19 +117,31 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			
 			setbearing(a1data, a2data, a3data);
 
-			curreading = FOOD;
+			curreading = FOOD0;
 			break;
-		case FOOD:
-			fooddata = ADC10MEM;
+		case FOOD0:
+			/* FLED Off */
+			food0 = ADC10MEM;
+			/*Disable the ADC*/
+			ADC10CTL0 &= ~ENC;
+			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
+			ADC10CTL1 |= INCH_A4;
+
+			curreading = FOOD1;
+			break;
+		case FOOD1:
+			/* Fled ON */
+			food1 = ADC10MEM;
 			/*Disable the ADC*/
 			ADC10CTL0 &= ~ENC;
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
 			ADC10CTL1 |= INCH_A1;
 
-			//foodcallback(fooddata);
+			foodcallback(food0, food1);
 			
 			curreading = PD1;
 			break;
 	}
 	bias_use1();
+	fled_off();
 }

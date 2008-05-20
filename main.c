@@ -12,6 +12,7 @@
 #include "net-rx.h"
 #include "battery.h"
 #include "food.h"
+#include "bearing.h"
 
 /* Initialises everything. */
 void init(void);
@@ -23,6 +24,53 @@ int main( void )
 	init();
 	while(1)
 	{
+		if(hasfood())
+		{
+			leds_red_on();
+			uint16_t strength = getstrength();
+			if(strength < 150)
+			{
+				motor_r = motor_l = 6;
+				motor_mode = MOTOR_BK;
+				uint32_t i;
+				for(i=0;i<100000;i++);
+			}
+			else if(strength < 750)
+			{
+				leds_green_on();
+				/* Braitenburg vehicle mode */
+				random_walk_disable();
+				uint16_t bearing = getbearing();
+				switch(bearing)
+				{
+					case 0:
+						motor_mode = MOTOR_FWD;
+						setmotorspeeds();
+						break;
+					case 120:
+						motor_mode = MOTOR_TURN_RIGHT;
+						break;
+					case 240:
+						motor_mode = MOTOR_TURN_LEFT;
+						break;
+					default:
+						break;
+				}
+			}
+			else
+			{
+				leds_green_off();
+				/* Random Walk */
+				random_walk_enable();
+			}
+		}
+		else
+		{
+			/* Not got food, just do random walk */
+			leds_green_off();
+			leds_red_off();
+			random_walk_enable();
+		}
 	}
 }
 
@@ -53,6 +101,7 @@ void init(void)
 	
 	opamp1_init();
 	bias_init();
+	bias_use1();
 
 	adc10_init(); /* The order here matters. This configures the ADC */
 	random_init(); /* Grab some random data */
@@ -64,9 +113,9 @@ void init(void)
 	motor_init();
 	leds_init();
 	battery_init();
+	food_init();
 
 	eint();
 	
 	//virus_init();
-	//food_init();
 }

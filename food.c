@@ -1,43 +1,54 @@
 /*
 Food sensor Code, for now just contains a callback function
 */
+#include "types.h"
 #include "food.h"
 
-#define AVERAGE_SIZE 3
+#define AVERAGE_SIZE 16
+#define FOOD_TRIGGER 100
 
-uint8_t gotfood;
-uint16_t average[AVERAGE_SIZE];
-uint16_t mavg;
-uint8_t averageindex;
+static uint16_t average[AVERAGE_SIZE];
+static bool gotfood = FALSE;
 
-/*Need to implement a moving  average based on the last 1sec? any major change from this average will trigger the food detection*/
-void foodcallback(uint16_t data){
+void foodcallback(uint16_t dataoff, uint16_t dataon)
+{
+	static uint8_t averageindex = 0;
 	uint8_t i;
-	if(data+50 < mavg){ //checking that the average buffer is full
-		gotfood = 1;
-	}else{
-		gotfood = 0;
-	
-		/*Calculating moving average*/
-		average[averageindex] = data;
-		mavg = 0;
-		for(i=0; i<AVERAGE_SIZE; i++){
-			mavg = mavg+ average[i];
-		}
-		mavg = mavg/AVERAGE_SIZE;
-		/*not using modulo*/
-		averageindex++;
-		if(averageindex ==AVERAGE_SIZE ){
-			averageindex = 0;
-		}
+	uint8_t data;
+
+	/* Dataoff should always be higher than dataon */
+	if(dataoff < dataon)
+		return;
+	data = dataoff - dataon;
+
+	/* Save the data in the array */
+	average[averageindex++] = data;
+	if(averageindex == AVERAGE_SIZE ){
+		averageindex = 0;
 	}
+
+	/*Calculating moving average*/
+	uint16_t mavg = 0;
+	for(i=0; i<AVERAGE_SIZE; i++)
+		mavg += average[i];
+
+	mavg = mavg/AVERAGE_SIZE;
+	
+	if(mavg < FOOD_TRIGGER)
+		gotfood = TRUE;
+	else
+		gotfood = FALSE;
 }
 
-uint8_t hasfood(void){
+bool hasfood(void)
+{
 	return gotfood;
 }
-void food_init(void){
-	gotfood = 0;
+
+void food_init(void)
+{
+	uint16_t i;
+	for(i=0;i<AVERAGE_SIZE;i++)
+		average[i] = 0;
 	fled_init();
-	fled_on();
 }

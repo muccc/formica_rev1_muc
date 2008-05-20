@@ -37,10 +37,42 @@
 
 motor_mode_t motor_mode = MOTOR_FWD;
 
-uint8_t motor_r = 8;
-uint8_t motor_l = 8;
-
+uint8_t motor_r = 3;
+uint8_t motor_l = 3;
+void motor_rand_walk_change( void );
 static uint8_t rand_walk_thresh = 0;
+static bool random_walk_en = 0;
+
+void random_walk_enable( void )
+{
+	random_walk_en = TRUE;
+	motor_r = motor_l = 3;
+}
+
+void random_walk_disable( void )
+{
+	random_walk_en = FALSE;
+	motor_r = motor_l = 3;
+}
+
+void set_motor_ratio(uint16_t l, uint16_t r)
+{
+	if(l>r)
+	{
+		motor_l = 5;
+		motor_r = 1;
+	}
+	else if (r > l)
+	{
+		motor_r = 5;
+		motor_l = 1;
+	}
+	else
+	{
+		motor_r = 3;
+		motor_l = 3;
+	}
+}
 
 void motor_init( void )
 {
@@ -66,25 +98,27 @@ void motor_init( void )
 interrupt (WDT_VECTOR) motor_wdt_isr(void)
 {
 	static uint8_t count = 0;
-	static uint16_t cc = 0;
 
 	/* The resulting motor configuration (to be ORed with P1DIR) */
 	uint8_t conf = 0;
-
-	if( cc == 100 )
+	static uint16_t cc = 0;
+	if(random_walk_en)
 	{
-		static uint8_t j = 0;
-		cc = 0;
-
-		if( j == rand_walk_thresh )
+		if( cc == 100 )
 		{
-			j = 0;
-			motor_rand_walk_change();
-		}
+			static uint8_t j = 0;
+			cc = 0;
 
-		j++;
+			if( j == rand_walk_thresh )
+			{
+				j = 0;
+				motor_rand_walk_change();
+			}
+
+			j++;
+		}
+		cc++;
 	}
-	cc++;
 
 	if( motor_mode == MOTOR_FWD )
 	{
@@ -138,27 +172,6 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 		count = 0;
 
 	ir_nudge();
-	
-	{
-		uint16_t bearing = getbearing();
-
-		if(bearing > 300 || bearing <= 60)
-		{
-			leds_green_off();
-			leds_red_on();
-		}
-		else if(bearing > 60 && bearing <= 180)
-		{
-			leds_red_off();
-			leds_green_on();
-		}
-		else
-		{
-			leds_red_on();
-			leds_green_on();
-		}
-	}
-
 }
 
 void motor_rand_walk_change( void )
@@ -169,21 +182,21 @@ void motor_rand_walk_change( void )
 	{
 	case 0:
 		motor_mode = MOTOR_FWD;
-		motor_r = motor_l = 8;
+		//motor_r = motor_l = 8;
 		break;
 
 	case 1:
 		motor_mode = MOTOR_TURN_LEFT;
-		motor_r = motor_l = 8;
+		//motor_r = motor_l = 8;
 		break;
 
 	case 2:
 		motor_mode = MOTOR_BK;
-		motor_r = motor_l = 8;
+		//motor_r = motor_l = 8;
 		break;
 	case 3:
 		motor_mode = MOTOR_TURN_RIGHT;
-		motor_r = motor_l = 8;
+		//motor_r = motor_l = 8;
 		break;
 	}
 
@@ -193,3 +206,4 @@ void motor_rand_walk_change( void )
 
 	rand_walk_thresh = (random() >> 6) + 1;
 }
+
