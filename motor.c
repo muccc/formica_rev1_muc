@@ -46,13 +46,11 @@ static bool random_walk_en = 0;
 void random_walk_enable( void )
 {
 	random_walk_en = TRUE;
-	motor_r = motor_l = 3;
 }
 
 void random_walk_disable( void )
 {
 	random_walk_en = FALSE;
-	motor_r = motor_l = 3;
 }
 
 void set_motor_ratio(uint16_t l, uint16_t r)
