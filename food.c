@@ -1,6 +1,3 @@
-/*
-Food sensor Code, for now just contains a callback function
-*/
 #include "types.h"
 #include "food.h"
 
@@ -50,5 +47,7 @@ void food_init(void)
 	uint16_t i;
 	for(i=0;i<AVERAGE_SIZE;i++)
 		average[i] = 0;
-	fled_init();
+
+	fled_off();
+	P4DIR |= FLED;
 }
