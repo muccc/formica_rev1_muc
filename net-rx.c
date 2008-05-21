@@ -10,8 +10,6 @@ uint16_t net_id = 0;
 
 void net_rx_proc_incoming( uint8_t* frame, uint8_t len )
 {
-	uint8_t l = len;
-
 	/* Frames of length 0 aren't helpful */
 	if( len == 0 )
 		return;
