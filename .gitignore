@@ -2,3 +2,4 @@ freq.h
 freq.c
 main
 main-top
+.fw_ver
