@@ -13,4 +13,13 @@ void adc10_stream( void );
 
 /* Grab a single reading */
 void adc10_grab( void );
+
+/* The readings from the photodiodes */
+extern uint16_t pd_value[3];
+
+/* Which photodiode is which */
+#define PD_FRONT 0
+#define PD_RIGHT 1
+#define PD_LEFT 2
+
 #endif	/* __ADC_10_H */

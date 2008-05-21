@@ -47,7 +47,8 @@ int main( void )
 				{
 					case 0:
 						motor_mode = MOTOR_FWD;
-						setmotorspeeds();
+						motor_set_ratio( pd_value[PD_LEFT], 
+								 pd_value[PD_RIGHT] );
 						break;
 					case 120:
 						motor_mode = MOTOR_TURN_RIGHT;

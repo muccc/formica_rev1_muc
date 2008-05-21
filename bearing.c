@@ -4,36 +4,28 @@
 uint16_t bearing = 0;
 uint16_t bearing_strength = 0;
 
-static uint16_t l = 0, r = 0;
-
-void bearing_set(uint16_t a, uint16_t b, uint16_t c)
+void bearing_set( uint16_t *pdr )
 {
-	l = c; r = b;
-	if(a < b)
-		if(a < c)
+	if(pdr[0] < pdr[1])
+		if(pdr[0] < pdr[2])
 		{
 			bearing = 0;
-			bearing_strength = a;
+			bearing_strength = pdr[0];
 		}
 		else
 		{
 			bearing = 240;
-			bearing_strength = c;
+			bearing_strength = pdr[2];
 		}
 	else
-		if(b < c)
+		if(pdr[1] < pdr[2])
 		{
 			bearing = 120;
-			bearing_strength = b;
+			bearing_strength = pdr[1];
 		}
 		else
 		{
 			bearing = 240;
-			bearing_strength = c;
+			bearing_strength = pdr[2];
 		}
-}
-
-void setmotorspeeds( void )
-{
-	motor_set_ratio(l, r);
 }

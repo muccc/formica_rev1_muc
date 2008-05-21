@@ -9,6 +9,8 @@
 /* Disable the ADC */
 #define adc10_dis() do { ADC10CTL0 &= ~ENC; } while (0)
 
+uint16_t pd_value[3];
+
 static enum {
 	PD1,
 	PD2,
@@ -90,13 +92,10 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 {
 	static uint16_t food0; /*output from food with LED off*/
 	static uint16_t food1; /*output from food with LED on*/
-	static uint16_t a3data; /*output from PD3*/
-	static uint16_t a2data; /*output from PD2*/
-	static uint16_t a1data; /*output from PD1*/
 
 	switch(curreading){
 		case PD1:
-			a1data = ADC10MEM;
+			pd_value[0] = ADC10MEM;
 
 			adc10_dis();
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
@@ -104,7 +103,7 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			curreading = PD2;
 			break;
 		case PD2:
-			a2data = ADC10MEM;
+			pd_value[1] = ADC10MEM;
 
 			adc10_dis();
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
@@ -112,13 +111,13 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			curreading = PD3;
 			break;
 		case PD3:
-			a3data = ADC10MEM;
+			pd_value[2] = ADC10MEM;
 
 			adc10_dis();
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
 			ADC10CTL1 |= INCH_A4;
 			
-			bearing_set(a1data, a2data, a3data);
+			bearing_set( pd_value );
 
 			curreading = FOOD0;
 			break;
