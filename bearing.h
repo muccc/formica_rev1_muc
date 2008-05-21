@@ -7,11 +7,14 @@
 void bearing_set(uint16_t a, uint16_t b, uint16_t c);
 
 /* Get the bearing (0-359). */
-uint16_t bearing_get( void );
+#define bearing_get() ( bearing )
 
 /* Get the maximum measured light intensity (0-1023) */
-uint16_t bearing_get_strength( void );
+#define bearing_get_strength() ( bearing_strength )
 
 void setmotorspeeds( void );
+
+extern uint16_t bearing;
+extern uint16_t bearing_strength;
 
 #endif
