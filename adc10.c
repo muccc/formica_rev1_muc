@@ -6,7 +6,7 @@
 #include "food.h"
 #include "bearing.h"
 
-enum {
+static enum {
 	PD1,
 	PD2,
 	PD3,
@@ -84,13 +84,14 @@ uint16_t adc10_readtemp( void )
 	return boottemp;
 }
 
-uint16_t food0; /*output from food with LED off*/
-uint16_t food1; /*output from food with LED on*/
-uint16_t a3data; /*output from PD3*/
-uint16_t a2data; /*output from PD2*/
-uint16_t a1data; /*output from PD1*/
 interrupt (ADC10_VECTOR) adc10_isr( void )
 {
+	static uint16_t food0; /*output from food with LED off*/
+	static uint16_t food1; /*output from food with LED on*/
+	static uint16_t a3data; /*output from PD3*/
+	static uint16_t a2data; /*output from PD2*/
+	static uint16_t a1data; /*output from PD1*/
+
 	switch(curreading){
 		case PD1:
 			a1data = ADC10MEM;
