@@ -1,4 +1,5 @@
-CFLAGS := -mmcu=msp430x2234 -g -Wall
+ARCH=msp430x2254
+CFLAGS := -mmcu=$(ARCH) -g -Wall
 CFLAGS += -mendup-at=main
 LDFLAGS :=
 
@@ -26,7 +27,7 @@ else
 SYM_PER_BYTE := 3
 endif
 
-main: $(C_FILES) $(H_FILES)
+main: $(C_FILES) $(H_FILES) lkr/$(ARCH)-norm.x
 	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES)
 
 ifneq ($(strip $(WIN)),y)
