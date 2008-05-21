@@ -6,6 +6,7 @@
 #include "random.h"
 #include "motor.h"
 #include "flash.h"
+#include "net-tx.h"
 
 uint16_t net_id = 0;
 
@@ -17,21 +18,42 @@ void net_rx_proc_incoming( uint8_t* frame, uint8_t len )
 
 	switch( frame[0] )
 	{
-	case NET_CMD_COLOUR: {
-		uint16_t fw_ver;
-		if( len != 23 )
+	case NET_CMD_COLOUR:
+		/* Receive a new colour */
+		if( len != 3 )
 			return;
 
-		//virus_set( frame[1], frame[2] );
+		virus_set( frame[1], frame[2] );
+		break;
 
-		fw_ver = (((uint16_t)frame[3]) << 8) | frame[4];
+	case NET_CMD_FW_BLOB:
+	{
+		/* Receive a blob of firmware */
+		uint16_t fw_ver, chunk;
+		if( len != 21 )
+			return;
+
+		fw_ver = (((uint16_t)frame[1]) << 8) | frame[2];
+		chunk = (((uint16_t)frame[3]) << 8) | frame[4];
 
 /* 		if( fw_ver > FIRMWARE_VERSION ) */
-			flash_rx_chunk( (((uint16_t)frame[5]) << 8) | frame[6],
+			flash_rx_chunk( chunk,
 					(const uint16_t*)(frame + 7) );
-		
 		break;
 	}
+
+	case NET_CMD_FW_NEXT:
+	{
+		/* Receive a hint about what chunk to transmit next */
+		uint16_t chunk;
+		if( len != 3 )
+			return;
+
+		chunk = (((uint16_t)frame[1]) << 8) | frame[2];
+		net_tx_chunk_hint(chunk);
+		break;
+	}
+	
 	}
 }
 

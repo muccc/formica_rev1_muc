@@ -10,6 +10,7 @@
 #include "leds.h"
 #include "virus.h"
 #include "net-rx.h"
+#include "net-tx.h"
 #include "battery.h"
 #include "food.h"
 #include "bearing.h"
@@ -114,6 +115,7 @@ void init(void)
 	streamadc(); /* Prepare the ADC for streaming in data */
 	
 	net_rx_init();
+	net_tx_init();
 	ir_receive_init();
 	ir_transmit_init();
 	motor_init();

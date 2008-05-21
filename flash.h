@@ -34,4 +34,7 @@ const uint16_t* flash_chunk_n( uint16_t n );
 /* Current firmware version */
 const extern uint16_t FIRMWARE_VERSION;
 
+/* The next firmware chunk that's required */
+extern uint16_t next_chunk;
+
 #endif	/* __FLASH_H */

@@ -30,7 +30,7 @@
 #if CHUNK_SIZE != 16
 #error The type of the following variable needs to be changed for CHUNK_SIZE != 16
 #endif
-static uint16_t next_chunk;
+uint16_t next_chunk;
 
 /* Pointer to the last area to be erased */
 static uint16_t *last_erased;
@@ -106,9 +106,6 @@ void flash_rx_chunk( uint16_t cnum, const uint16_t *fw)
 	flash_lock();
 
 	next_chunk++;
-
-	if( cnum == N_CHUNKS-1 )
-		leds_green_on();
 }
 
 const uint16_t* flash_chunk_n( uint16_t n )
