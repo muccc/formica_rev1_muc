@@ -24,6 +24,7 @@ int i = 0;
 int main( void )
 {
 	init();
+
 	while(1)
 	{
 		if(hasfood())
@@ -66,7 +67,6 @@ int main( void )
 			{
 				leds_green_off();
 				/* Random Walk */
-				motor_r = motor_l = 3;
 				random_walk_enable();
 			}
 		}
@@ -75,7 +75,6 @@ int main( void )
 			/* Not got food, just do random walk */
 			leds_green_off();
 			leds_red_off();
-			motor_r = motor_l = 3;
 			random_walk_enable();
 		}
 	}
