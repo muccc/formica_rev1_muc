@@ -118,7 +118,7 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
 			ADC10CTL1 |= INCH_A4;
 			
-			setbearing(a1data, a2data, a3data);
+			bearing_set(a1data, a2data, a3data);
 
 			curreading = FOOD0;
 			break;

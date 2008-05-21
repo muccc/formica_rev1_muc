@@ -53,7 +53,7 @@ void random_walk_disable( void )
 	random_walk_en = FALSE;
 }
 
-void set_motor_ratio(uint16_t l, uint16_t r)
+void motor_set_ratio(uint16_t l, uint16_t r)
 {
 	if(l>r)
 	{

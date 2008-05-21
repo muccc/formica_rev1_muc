@@ -5,7 +5,7 @@ static uint16_t strength = 0;
 
 static uint16_t l = 0, r = 0;
 
-void setbearing(uint16_t a, uint16_t b, uint16_t c)
+void bearing_set(uint16_t a, uint16_t b, uint16_t c)
 {
 	l = c; r = b;
 	if(a < b)
@@ -34,15 +34,15 @@ void setbearing(uint16_t a, uint16_t b, uint16_t c)
 
 void setmotorspeeds( void )
 {
-	set_motor_ratio(l, r);
+	motor_set_ratio(l, r);
 }
 
-uint16_t getbearing( void )
+uint16_t bearing_get( void )
 {
 	return curbearing;	
 }
 
-uint16_t getstrength( void )
+uint16_t bearing_get_strength( void )
 {
 	return strength;
 }

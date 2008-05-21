@@ -29,7 +29,7 @@ int main( void )
 		if(hasfood())
 		{
 			leds_red_on();
-			uint16_t strength = getstrength();
+			uint16_t strength = bearing_get_strength();
 			if(strength < 10)
 			{
 				motor_r = motor_l = 6;
@@ -42,7 +42,7 @@ int main( void )
 				leds_green_on();
 				/* Braitenburg vehicle mode */
 				random_walk_disable();
-				uint16_t bearing = getbearing();
+				uint16_t bearing = bearing_get();
 				switch(bearing)
 				{
 					case 0:
