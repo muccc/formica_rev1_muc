@@ -3,10 +3,8 @@
 #include <signal.h>
 #include "random.h"
 #include "battery.h"
-
 #include "ir.h"
 #include "leds.h"
-
 #include "bearing.h"
 
 #define M1 (1<<0)
@@ -176,25 +174,23 @@ void motor_rand_walk_change( void )
 {
 	static uint8_t mode = 0;
 
+	motor_r = motor_l = RAND_WALK_SPEED;
 	switch(mode)
 	{
 	case 0:
 		motor_mode = MOTOR_FWD;
-		//motor_r = motor_l = 8;
 		break;
 
 	case 1:
 		motor_mode = MOTOR_TURN_LEFT;
-		//motor_r = motor_l = 8;
 		break;
 
 	case 2:
 		motor_mode = MOTOR_BK;
-		//motor_r = motor_l = 8;
 		break;
+
 	case 3:
 		motor_mode = MOTOR_TURN_RIGHT;
-		//motor_r = motor_l = 8;
 		break;
 	}
 

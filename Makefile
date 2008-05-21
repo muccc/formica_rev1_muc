@@ -20,6 +20,8 @@ ifeq ($(strip $(CONF_TX_SEQ)),y)
 CFLAGS += -DCONF_TX_SEQ=1
 endif
 
+CFLAGS += -DRAND_WALK_SPEED=$(RAND_WALK_SPEED)
+
 ifneq ($(strip $(WIN)),y)
 # Number of symbols we have to transmit per byte
 SYM_PER_BYTE := `./.sym_per_bit.py $(NBITS)`
