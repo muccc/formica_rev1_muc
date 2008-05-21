@@ -1,6 +1,7 @@
 #include "flash.h"
 #include "device.h"
 #include "leds.h"
+#include <signal.h>
 
 /* Values of the registers */
 #define FCTL1_VAL 0
@@ -41,6 +42,8 @@ static uint16_t *other_area;
 static uint16_t *this_area;
 
 const uint16_t FIRMWARE_VERSION = FW_VER;
+
+static uint16_t ivt_buf[32];
 
 void flash_init( void )
 {
@@ -91,24 +94,62 @@ void flash_rx_chunk( uint16_t cnum, const uint16_t *fw)
 	uint16_t *c = other_area + ((CHUNK_SIZE/2) * cnum);
 
 	/* Discard things that are out of range */
-	if( cnum >= N_CHUNKS || cnum != next_chunk )
+	if( cnum > LAST_CHUNK || cnum != next_chunk )
 		return;
 
-	/* Check that the section has been erased */
-	if( last_erased < mem_segment( c ) )
-		flash_erase_segment( c );
+	leds_red_on();
+	if( cnum >= N_CHUNKS )
+	{
+		/* It's an interrupt vector table entry */
+		uint8_t cpos = (cnum - N_CHUNKS) * (CHUNK_SIZE / 2);
 
-	flash_unlock();
-	flash_write_mode();
-	/* Now write it */
-	for( i=0; i<(CHUNK_SIZE/2); i++ )
-		*(c + i) = *(fw + i);
-	flash_lock();
+		for( i=0; i<(CHUNK_SIZE/2); i++ )
+			ivt_buf[i + cpos] = fw[i];
+
+		if( cnum == LAST_CHUNK )
+		{
+			/* Got the IVT */
+			/* Disable interrupts */
+			dint();
+
+			/* Erase the last segment */
+			flash_erase_segment( mem_segment(IVT) );
+
+			flash_unlock();
+			flash_write_mode();
+
+			for( i=0; i<32; i++ )
+				*(IVT + i) = ivt_buf[i];
+
+			flash_lock();
+
+			/* Finished loading new firmware! */
+			/* Jump to the reset vector! */
+			(*(void (*)()) (ivt_buf[31])) ();
+		}
+	}
+	else
+	{
+		/* Check that the section has been erased */
+		if( last_erased < mem_segment( c ) )
+			flash_erase_segment( c );
+
+		flash_unlock();
+		flash_write_mode();
+		/* Now write it */
+		for( i=0; i<(CHUNK_SIZE/2); i++ )
+			*(c + i) = *(fw + i);
+		flash_lock();
+	}
 
 	next_chunk++;
 }
 
 const uint16_t* flash_chunk_n( uint16_t n )
 {
+	/* Is the chunk in the IVT? */
+	if( n >= N_CHUNKS )
+		return IVT + ((CHUNK_SIZE/2) * (n - N_CHUNKS));
+
 	return this_area + ((CHUNK_SIZE/2) * n);
 }

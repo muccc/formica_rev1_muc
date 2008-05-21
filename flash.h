@@ -7,6 +7,8 @@
 #define AREA_1 0xe000
 #define AREA_LEN 0x1e00
 
+#define IVT ((uint16_t*)0xFFC0)
+
 /* The number of (512 byte) segments: */
 #define N_SEGMENTS (AREA_LEN / 512)
 
