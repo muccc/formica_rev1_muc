@@ -55,12 +55,8 @@ freq.h: .freq.h.win
 	cp .freq.h.win freq.h
 endif
 
-.PHONY: clean tx-test
-
-tx-test: freq.c freq.h
-	$(MAKE) -C ./tx-test
+.PHONY: clean
 
 clean: 
 	-rm -f main freq.{h,c}
-	$(MAKE) -C ./tx-test clean
 
