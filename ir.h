@@ -5,6 +5,9 @@
 /* Invalid symbol */
 #define INV_SYM 255
 
+/* Number of packets to transmit in a lump */
+#define TX_AT_A_TIME 3
+
 /* Nudge the IR transceiver */
 /* This should be called at regular intervals, 
    and turns the tx back on after rx'ing for a certain amount of time */

@@ -13,6 +13,7 @@
 #include "battery.h"
 #include "food.h"
 #include "bearing.h"
+#include "flash.h"
 
 /* Initialises everything. */
 void init(void);
@@ -103,6 +104,7 @@ void init(void)
 
 	BCSCTL3 = LFXT1S1; /*VLOCLK */
 	
+	flash_init();
 	opamp1_init();
 	bias_init();
 	bias_use1();

@@ -12,8 +12,7 @@ void ir_nudge( void )
 	static uint16_t ir_tx_time = 1500; /* Time spent transmitting */
 
 	if( ir_transmit_is_enabled() ) {
-		/* Continue transmitting */
-		ir_tx_time++;
+		ir_tx_time += 4;
 	}
 	else
 	{
@@ -22,7 +21,7 @@ void ir_nudge( void )
 			/* Finished receiving, start transmit cycle */
 			ir_tx_time = 0;
 			ir_count = 0;
-			net_tx_enable_for(5);
+			net_tx_enable_for(TX_AT_A_TIME);
 		}
 		else
 			/* Continue receiving */

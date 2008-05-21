@@ -7,12 +7,14 @@ CC := msp430-gcc
 
 C_FILES := main.c ir-rx.c freq.c net-rx.c opamp-1.c ir-tx.c \
 	ir-tx-data.c net-tx.c adc10.c random.c motor.c virus.c \
-	smbus_pec.c battery.c ir.c food.c bearing.c
+	smbus_pec.c battery.c ir.c food.c bearing.c flash.c
 H_FILES := device.h ir-rx.h freq.h net-rx.h opamp-1.h ir-bias.h \
 	ir-tx.h ir-tx-data.h net-tx.h adc10.h random.h motor.h net.h \
-	leds.h virus.h smbus_pec.h battery.h ir.h food.h bearing.h
+	leds.h virus.h smbus_pec.h battery.h ir.h food.h bearing.h flash.h
 
 include .config
+
+world: main main-top
 
 ifeq ($(strip $(CONF_TX_SEQ)),y)
 CFLAGS += -DCONF_TX_SEQ=1
@@ -27,12 +29,20 @@ else
 SYM_PER_BYTE := 3
 endif
 
-# Build an executable suitable for the lower half of the msp430
-LKR_SCRIPT=lkr/$(ARCH)-lower.x
-LDFLAGS +=  -Wl,-T,$(LKR_SCRIPT)
+# Get a new firmware revision number!
+FW_VER = `cat .fw_ver`
+CFLAGS += -DFW_VER=`cat .fw_ver`
 
-main: $(C_FILES) $(H_FILES) $(LKR_SCRIPT)
-	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES)
+.fw_ver: $(C_FILES) $(H_FILES) lkr/$(ARCH)-lower.x lkr/$(ARCH)-upper.x
+	curl -s http://users.ecs.soton.ac.uk/rds204/formica/rev.php > .fw_ver
+
+main: $(C_FILES) $(H_FILES) lkr/$(ARCH)-lower.x .fw_ver
+	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES) -Wl,-T,lkr/$(ARCH)-lower.x
+	@echo Firmware revision $(FW_VER)
+
+main-top: $(C_FILES) $(H_FILES) lkr/$(ARCH)-upper.x .fw_ver
+	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES) -Wl,-T,lkr/$(ARCH)-upper.x
+	@echo Firmware revision $(FW_VER)
 
 ifneq ($(strip $(WIN)),y)
 freq.c: freq.py .config
@@ -63,5 +73,5 @@ endif
 .PHONY: clean
 
 clean: 
-	-rm -f main freq.{h,c}
+	-rm -f main main-top freq.{h,c}
 
