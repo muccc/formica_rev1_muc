@@ -26,9 +26,6 @@ static uint8_t last_sym = INV_SYM;
 static uint8_t data[DATA_LEN];
 static uint8_t d_pos = 0;
 
-static uint8_t r_log[16];
-static uint8_t rl_pos = 0;
-
 /* Debug flag pins */
 /* #define debug_symbol_lock() do { P1OUT |= 1; } while (0) */
 /* #define debug_symbol_nolock() do { P1OUT &= ~1; } while (0) */
@@ -36,7 +33,6 @@ static uint8_t rl_pos = 0;
 #define debug_symbol_lock() do { ; } while (0)
 #define debug_symbol_nolock() do { ; } while (0)
 #define debug_flag_flip() do { ; } while (0)
-
 
 /* Resets/initialises the bit decoder.
    For calling on initialisation or when the signal is lost. */
@@ -228,9 +224,6 @@ static inline void decoder_newdata( uint16_t period )
 
 		/* We now have a full byte */
 		cb_pos = 0;
-
-		r_log[rl_pos] = curbyte;
-		rl_pos = (rl_pos==15)?0:(rl_pos+1);
 
 		if( curbyte == 0x7e ) {
 			/* Start of frame */
