@@ -147,7 +147,6 @@ void flash_rx_chunk( uint16_t cnum, const uint16_t *fw)
 
 uint16_t flash_chunk_n( uint16_t n )
 {
-	uint16_t _n = n;
 	/* Is the chunk in the IVT? */
 	if( n >= N_CHUNKS )
 		return (uint16_t)(IVT + ((CHUNK_SIZE/2) * (n - N_CHUNKS)));
