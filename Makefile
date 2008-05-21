@@ -34,7 +34,11 @@ FW_VER = `cat .fw_ver`
 CFLAGS += -DFW_VER=`cat .fw_ver`
 
 .fw_ver: $(C_FILES) $(H_FILES) lkr/$(ARCH)-lower.x lkr/$(ARCH)-upper.x
+ifeq ($(strip $(FW)),)
 	curl -s http://users.ecs.soton.ac.uk/rds204/formica/rev.php > .fw_ver
+else
+	echo $(FW) > .fw_ver
+endif
 
 main: $(C_FILES) $(H_FILES) lkr/$(ARCH)-lower.x .fw_ver
 	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES) -Wl,-T,lkr/$(ARCH)-lower.x
