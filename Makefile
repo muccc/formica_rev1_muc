@@ -27,7 +27,11 @@ else
 SYM_PER_BYTE := 3
 endif
 
-main: $(C_FILES) $(H_FILES) lkr/$(ARCH)-norm.x
+# Build an executable suitable for the lower half of the msp430
+LKR_SCRIPT=lkr/$(ARCH)-lower.x
+LDFLAGS +=  -Wl,-T,$(LKR_SCRIPT)
+
+main: $(C_FILES) $(H_FILES) $(LKR_SCRIPT)
 	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES)
 
 ifneq ($(strip $(WIN)),y)
