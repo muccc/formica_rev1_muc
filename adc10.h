@@ -22,4 +22,8 @@ extern uint16_t pd_value[3];
 #define PD_RIGHT 1
 #define PD_LEFT 2
 
+#define pd_front (pd_value[PD_FRONT])
+#define pd_right (pd_value[PD_RIGHT])
+#define pd_left (pd_value[PD_LEFT])
+
 #endif	/* __ADC_10_H */

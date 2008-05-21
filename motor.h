@@ -25,10 +25,4 @@ void motor_rand_walk_change( void );
 void random_walk_enable( void );
 void random_walk_disable( void );
 
-/* Set the power ratio of the motors.
-   Arguments:
-    - l: The weighting of the left motor
-    - r: The weighting of the right motor */
-void motor_set_ratio(uint16_t l, uint16_t r);
-
 #endif	/* __MOTOR_H */

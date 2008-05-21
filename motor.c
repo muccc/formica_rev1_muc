@@ -51,25 +51,6 @@ void random_walk_disable( void )
 	random_walk_en = FALSE;
 }
 
-void motor_set_ratio(uint16_t l, uint16_t r)
-{
-	if(l>r)
-	{
-		motor_l = 5;
-		motor_r = 1;
-	}
-	else if (r > l)
-	{
-		motor_r = 5;
-		motor_l = 1;
-	}
-	else
-	{
-		motor_r = 3;
-		motor_l = 3;
-	}
-}
-
 void motor_init( void )
 {
 	/* Set all as inputs -- all motors off */

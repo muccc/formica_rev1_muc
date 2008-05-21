@@ -15,6 +15,7 @@
 #include "food.h"
 #include "bearing.h"
 #include "flash.h"
+#include "behav/braitenberg.h"
 
 /* Initialises everything. */
 void init(void);
@@ -40,28 +41,11 @@ int main( void )
 			}
 			else if(strength < 750)
 			{
-				leds_green_on();
 				/* Braitenburg vehicle mode */
+				leds_green_on();
 				random_walk_disable();
-				uint16_t bearing = bearing_get();
-				switch(bearing)
-				{
-					case 0:
-						motor_mode = MOTOR_FWD;
-						motor_set_ratio( pd_value[PD_LEFT], 
-								 pd_value[PD_RIGHT] );
-						break;
-					case 120:
-						motor_mode = MOTOR_TURN_RIGHT;
-						motor_r = motor_l = 5;
-						break;
-					case 240:
-						motor_mode = MOTOR_TURN_LEFT;
-						motor_r = motor_l = 5;
-						break;
-					default:
-						break;
-				}
+				braitenberg_update();
+
 			}
 			else
 			{
