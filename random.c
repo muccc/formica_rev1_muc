@@ -8,7 +8,7 @@ uint16_t lfsr;
 void random_init( void )
 {
 	/* Seed with a temperature reading */
-	lfsr = readtemp() & (~0x03ff);
+	lfsr = adc10_readtemp() & (~0x03ff);
 
 	/*Spin a few times to spice it up a bit*/
 	random();

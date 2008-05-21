@@ -112,7 +112,7 @@ void init(void)
 
 	adc10_init(); /* The order here matters. This configures the ADC */
 	random_init(); /* Grab some random data */
-	streamadc(); /* Prepare the ADC for streaming in data */
+	adc10_stream(); /* Prepare the ADC for streaming in data */
 	
 	net_rx_init();
 	net_tx_init();

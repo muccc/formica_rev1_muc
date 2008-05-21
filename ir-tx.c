@@ -56,7 +56,7 @@ interrupt (TIMERB0_VECTOR) timer_b_isr(void)
 		return;
 	else
 		/* LEDs currently off */
-		grabadc();
+		adc10_grab();
 
 	period++;
 	/* Transmit 3 periods of each frequency */

@@ -43,14 +43,14 @@ void adc10_init( void )
 	
 }
 
-void streamadc( void )
+void adc10_stream( void )
 {
 	ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
 	ADC10CTL1 |= INCH_A1; /* Start with sunlight 1 */
 	curreading = PD1;
 }
 
-void grabadc( void )
+void adc10_grab( void )
 {
 	/* Start the conversion: */
 	ADC10CTL0 |= (ENC | ADC10SC);
@@ -60,7 +60,7 @@ void grabadc( void )
 		bias_use2();
 }
 
-uint16_t readtemp( void )
+uint16_t adc10_readtemp( void )
 {
 	uint16_t boottemp;
 
