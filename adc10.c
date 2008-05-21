@@ -6,6 +6,9 @@
 #include "food.h"
 #include "bearing.h"
 
+/* Disable the ADC */
+#define adc10_dis() do { ADC10CTL0 &= ~ENC; } while (0)
+
 static enum {
 	PD1,
 	PD2,
@@ -40,7 +43,6 @@ void adc10_init( void )
 	/* P2.1, P2.2, P2.3, P2.4 (page 60 of the MSP430F2234 datasheet) */
 	ADC10AE |= (1<<1) | (1<<2) | (1<<3) | (1<<4);
 	ADC10DTC0 |= ADC10CT; /* DTC Not used. This makes it continuous */
-	
 }
 
 void adc10_stream( void )
@@ -80,7 +82,7 @@ uint16_t adc10_readtemp( void )
 	boottemp = ADC10MEM;
 
 	/*Disable the ADC*/
-	ADC10CTL0 &= ~ENC;
+	adc10_dis();
 	return boottemp;
 }
 
@@ -95,24 +97,24 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 	switch(curreading){
 		case PD1:
 			a1data = ADC10MEM;
-			/*Disable the ADC*/
-			ADC10CTL0 &= ~ENC;
+
+			adc10_dis();
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
 			ADC10CTL1 |= INCH_A2;
 			curreading = PD2;
 			break;
 		case PD2:
 			a2data = ADC10MEM;
-			/*Disable the ADC*/
-			ADC10CTL0 &= ~ENC;
+
+			adc10_dis();
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
 			ADC10CTL1 |= INCH_A3;
 			curreading = PD3;
 			break;
 		case PD3:
 			a3data = ADC10MEM;
-			/*Disable the ADC*/
-			ADC10CTL0 &= ~ENC;
+
+			adc10_dis();
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
 			ADC10CTL1 |= INCH_A4;
 			
@@ -123,8 +125,8 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 		case FOOD0:
 			/* FLED Off */
 			food0 = ADC10MEM;
-			/*Disable the ADC*/
-			ADC10CTL0 &= ~ENC;
+
+			adc10_dis();
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
 			ADC10CTL1 |= INCH_A4;
 
@@ -133,8 +135,8 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 		case FOOD1:
 			/* Fled ON */
 			food1 = ADC10MEM;
-			/*Disable the ADC*/
-			ADC10CTL0 &= ~ENC;
+
+			adc10_dis();
 			ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
 			ADC10CTL1 |= INCH_A1;
 
