@@ -22,7 +22,7 @@ static uint8_t curbyte = 0;
 /* The last symbol received */
 static uint8_t last_sym = INV_SYM;
 
-#define DATA_LEN 10
+#define DATA_LEN 32
 static uint8_t data[DATA_LEN];
 static uint8_t d_pos = 0;
 

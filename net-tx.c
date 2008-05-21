@@ -12,8 +12,13 @@ static uint8_t pkt[] = {
 	0,
 	/* Colour */
 	0,
-	/* Robot ID */
-	0,0
+	/* Firmware version number (MSB, LSB) */
+	0,0,
+	/* Flash chunk number (MSB, LSB) */
+	0,0,
+	/* Chunk of flash */
+	0,0,0,0,0,0,0,0,
+	0,0,0,0,0,0,0,0
 };
 
 /* How many more packets to transmit */
@@ -28,7 +33,7 @@ const uint8_t* net_tx_get_next_packet( uint8_t *len )
 		pkt[3] = net_id >> 8;
 		pkt[4] = net_id & 0xff;
 
-		*len = 5;
+		*len = 23;
 		tx_count--;
 		return pkt;
 	} else {
