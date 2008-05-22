@@ -15,6 +15,7 @@
 #include "food.h"
 #include "bearing.h"
 #include "flash.h"
+#include "time.h"
 #include "behav/braitenberg.h"
 
 /* Initialises everything. */
@@ -24,20 +25,25 @@ int i = 0;
 
 int main( void )
 {
+	uint32_t next_time = 0;
+
 	init();
 
+	random_walk_disable();
 	while(1)
 	{
-		if(hasfood())
+		if( hasfood() )
 		{
 			leds_red_on();
 
 			if(bearing_strength < 10)
 			{
+				random_walk_disable();
 				motor_r = motor_l = 6;
 				motor_mode = MOTOR_BK;
-				uint32_t i;
-				for(i=0;i<100000;i++);
+
+				uint32_t i = the_time + 4;
+				while( the_time < i );
 			}
 			else if(bearing_strength < 750)
 			{
@@ -61,6 +67,19 @@ int main( void )
 			leds_red_off();
 			random_walk_enable();
 		}
+
+		if(0)
+			if( !battery_power_good() )
+			{
+				motor_mode = MOTOR_FWD;
+				motor_l = motor_r = 4;
+			}
+			else
+			{
+				motor_mode = MOTOR_FWD;
+				motor_l = motor_r = 0;
+			}
+		
 	}
 }
 
