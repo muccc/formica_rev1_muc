@@ -31,15 +31,15 @@ int main( void )
 		if(hasfood())
 		{
 			leds_red_on();
-			uint16_t strength = bearing_get_strength();
-			if(strength < 10)
+
+			if(bearing_strength < 10)
 			{
 				motor_r = motor_l = 6;
 				motor_mode = MOTOR_BK;
 				uint32_t i;
 				for(i=0;i<100000;i++);
 			}
-			else if(strength < 750)
+			else if(bearing_strength < 750)
 			{
 				/* Braitenburg vehicle mode */
 				leds_green_on();
