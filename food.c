@@ -1,8 +1,8 @@
 #include "types.h"
 #include "food.h"
 
-#define AVERAGE_SIZE 16
-#define FOOD_TRIGGER 80
+#define AVERAGE_SIZE 3
+#define FOOD_TRIGGER 100
 
 static uint16_t average[AVERAGE_SIZE];
 static bool gotfood = FALSE;
