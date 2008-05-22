@@ -6,6 +6,8 @@
 #include "ir.h"
 #include "leds.h"
 #include "bearing.h"
+#include "time.h"
+#include "behav/braitenberg.h"
 
 #define M1 (1<<0)
 #define MP (1<<1)
@@ -40,6 +42,8 @@ uint8_t motor_l = 3;
 void motor_rand_walk_change( void );
 static uint8_t rand_walk_thresh = 0;
 static bool random_walk_en = 0;
+
+uint8_t MAX_SPEED = 8;
 
 void random_walk_enable( void )
 {
@@ -79,12 +83,16 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	/* The resulting motor configuration (to be ORed with P1DIR) */
 	uint8_t conf = 0;
 	static uint16_t cc = 0;
-	if(random_walk_en)
+
+	if( cc == 100 )
 	{
-		if( cc == 100 )
+		the_time++;
+		cc = 0;
+
+		if(random_walk_en)
 		{
+
 			static uint8_t j = 0;
-			cc = 0;
 
 			if( j == rand_walk_thresh )
 			{
@@ -94,11 +102,14 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 			j++;
 		}
-		cc++;
 	}
+	cc++;
+
 
 	if( motor_mode == MOTOR_FWD )
 	{
+		MAX_SPEED = 8;
+
 		conf = M_FWD;
 
 		if( count >= motor_r )
@@ -110,6 +121,8 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 	if( motor_mode == MOTOR_BK )
 	{
+		MAX_SPEED = 8;
+
 		conf = M_BK;
 
 		if( count >= motor_r )
@@ -121,6 +134,9 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 	if( motor_mode == MOTOR_TURN_LEFT )
 	{
+		MAX_SPEED = 255;
+		motor_l = 127;
+		
 		conf = M_R_FWD;
 
 		if( count >= motor_l )
@@ -132,6 +148,9 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 	if( motor_mode == MOTOR_TURN_RIGHT )
 	{
+		MAX_SPEED = 255;
+		motor_r = 127;
+
 		conf = M_L_FWD;
 
 		if( count >= motor_r )

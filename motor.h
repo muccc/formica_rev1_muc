@@ -14,7 +14,7 @@ typedef enum {
 extern motor_mode_t motor_mode;
 
 /* The motor speeds */
-#define MAX_SPEED 8
+extern uint8_t MAX_SPEED;
 extern uint8_t motor_r;
 extern uint8_t motor_l;
 
