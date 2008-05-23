@@ -17,6 +17,7 @@
 #include "flash.h"
 #include "time.h"
 #include "behav/braitenberg.h"
+#include "behav/parking.h"
 
 /* Initialises everything. */
 void init(void);
@@ -30,9 +31,14 @@ int main( void )
 	random_walk_disable();
 	while(1)
 	{
+		uint32_t last_food_seen = 0;
+
 		if( hasfood() )
 		{
 			leds_red_on();
+			leds_green_off();
+
+			last_food_seen = the_time;
 
 			if(light_intensity < 10)
 			{
@@ -51,11 +57,14 @@ int main( void )
 				braitenberg_update();
 			}
 			else
-			{
-				leds_green_off();
 				/* Random Walk */
 				random_walk_enable();
-			}
+		}
+		else if( (the_time - last_food_seen) > (20 * 5) )
+		{
+			leds_green_on();
+			leds_red_off();
+			parking_update();
 		}
 		else
 		{
