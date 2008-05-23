@@ -10,31 +10,6 @@
 #include "behav/braitenberg.h"
 #include "food.h"
 
-#define M1 (1<<0)
-#define MP (1<<1)
-#define M2 (1<<3)
-#define MN (1<<4)
-
-#define M_ALL (M1 | MP | M2 | MN)
-
-/* Both motors forward */
-#define M_FWD ( MP | MN )
-/* Both motors backward */
-#define M_BK ( M1 | M2 )
-
-/* Left hand motor forward */
-#define M_L_FWD ( MP | MN | M2 )
-/* Left hand motor backward */
-#define M_L_BK  ( M1 )
-
-/* Right hand motor forward */
-#define M_R_FWD ( M1 | MP | MN )
-/* Right hand motor backward */
-#define M_R_BK ( M2 )
-
-#define motor_off() do { P1DIR &= ~M_ALL; } while (0)
-#define motor_fwd() do { P1DIR &= ~M_ALL; P1DIR |= M_FWD; } while (0)
-#define motor_bk() do { P1DIR &= ~M_ALL; P1DIR |= M_BK; } while (0)
 
 motor_mode_t motor_mode = MOTOR_FWD;
 
@@ -205,6 +180,6 @@ void motor_rand_walk_change( void )
 	if( mode > 3 )
 		mode = 0;
 
-	rand_walk_thresh = (random() >> 6) + 1;
+	rand_walk_thresh = (random() >> 4) + 1;
 }
 

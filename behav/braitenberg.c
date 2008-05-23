@@ -18,16 +18,16 @@ void braitenberg_update( void )
 
 		if(pd_left>pd_right)
 		{
-			motor_l = 5;
-			motor_r = 1;
+			motor_l = 6;
+			motor_r = 2;
 		}
 		else if (pd_right > pd_left)
 		{
-			motor_r = 5;
-			motor_l = 1;
+			motor_r = 6;
+			motor_l = 2;
 		}
 		else
-			motor_r = motor_l = 3;
+			motor_r = motor_l = 5;
 		break;
 
 	case 120:

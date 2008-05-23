@@ -18,9 +18,16 @@
 #include "time.h"
 #include "behav/braitenberg.h"
 #include "behav/parking.h"
+#include "behav/watchdog.h"
+
+#define FOOD_THRESHOLD (20 * 180)
 
 /* Initialises everything. */
 void init(void);
+
+/* Performs emergency power off.
+   Never returns. */
+void low_power(void);
 
 int i = 0;
 
@@ -31,6 +38,21 @@ int main( void )
 	random_walk_disable();
 	while(1)
 	{
+		if( battery_critical() )
+			low_power();
+
+		/* Go to the charger if... */
+		if( battery_low()
+		    /* Or we've reached a deficiency of food */
+		    || ( !hasfood() && food_level > FOOD_THRESHOLD ) )
+		{
+			leds_green_on();
+			leds_red_off();
+			parking_update();
+			continue;
+		}
+
+		/* We may have finished charging */
 		if( charge_complete )
 		{
 			food_level = 0;
@@ -40,27 +62,33 @@ int main( void )
 			motor_r = motor_l = 6;
 			motor_mode = MOTOR_BK;
 
-			uint32_t i = the_time + 10;
-			while( the_time < i );
+			time_wait(10);
+			continue;
 		}
+
+		/* Parking involves a static situation, which is incompatible 
+		   with the watchdog - hence leave it here. */
+		watchdog_update();
 
 		if( hasfood() )
 		{
 			leds_red_on();
 			leds_green_off();
 
+			/* Are we at the light source? */
 			if(light_intensity == 0)
 			{
+				/* Deposit food here */
 				random_walk_disable();
 				motor_r = motor_l = 6;
 				motor_mode = MOTOR_BK;
 
-				uint32_t i = the_time + 10;
-				while( the_time < i );
+				time_wait(10);
 			}
+
+			/* Do we have a reasonable bearing? */
 			else if(bearing_strength > 10)
 			{
-				/* Braitenburg vehicle mode */
 				leds_green_on();
 				random_walk_disable();
 				braitenberg_update();
@@ -69,12 +97,6 @@ int main( void )
 				/* Random Walk */
 				random_walk_enable();
 		}
-		else if( food_level > (20 * 10) )
-		{
-			leds_green_on();
-			leds_red_off();
-			parking_update();
-		}
 		else
 		{
 			/* Not got food, just do random walk */
@@ -82,7 +104,6 @@ int main( void )
 			leds_red_off();
 			random_walk_enable();
 		}
-
 	}
 }
 
@@ -131,4 +152,23 @@ void init(void)
 	eint();
 	
 /* 	virus_init(); */
+}
+
+void low_power(void)
+{
+	/* Use as little power as possible */
+	random_walk_disable();
+
+	motor_off();
+	fled_off();
+			
+	/* IR Led off */
+	P4OUT &= ~1;
+	P4DIR |= 1;
+	P4SEL &= ~1;
+
+	dint();
+
+	_BIS_SR(LPM3_bits);
+	while(1);
 }
