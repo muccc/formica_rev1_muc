@@ -6,6 +6,7 @@
 #include "food.h"
 #include "bearing.h"
 #include "ir-tx.h"
+#include "battery.h"
 
 /* Disable the ADC */
 #define adc10_dis() do { ADC10CTL0 &= ~ENC; } while (0)
@@ -20,6 +21,7 @@ static enum {
 	PD1,
 	PD2,
 	PD3,
+	BATT,
 	FOOD0,
 	FOOD1
 } curreading = PD1;
@@ -28,6 +30,7 @@ static enum {
 #define PD2_CHANNEL 2
 #define PD3_CHANNEL 3
 #define FOOD_CHANNEL 4
+#define BATT_CHANNEL 15
 
 void adc10_init( void )
 {
@@ -38,7 +41,8 @@ void adc10_init( void )
 		/* REFOUT = 0 -- Reference output off */
 		/* REFBURST = 0 -- Reference buffer on continuously (TODO) */
 		| MSC		/* Move onto the next conversion after the previous*/
-		/* REF2_5V = REFON = 0 -- Not using internal reference */
+		| REF2_5V
+		| REFON         /* Use 2.5V reference */
 		| ADC10ON	/* Peripheral on */
 		| ADC10IE;	/* Interrupt enabled */
 
@@ -53,7 +57,7 @@ void adc10_init( void )
 
 	/* PD1, PD2, PD3 and FOOD are on P2.1, P2.2, P2.3 and P2.4 respectively */
 	/* P2.1, P2.2, P2.3, P2.4 (page 60 of the MSP430F2234 datasheet) */
-	ADC10AE |= (1<<1) | (1<<2) | (1<<3) | (1<<4);
+	ADC10AE |= (1<<1) | (1<<2) | (1<<3) | (1<<4) | (1<<7);
 	ADC10DTC0 |= ADC10CT; /* DTC Not used. This makes it continuous */
 }
 
@@ -123,10 +127,35 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			pd_value[2] = ADC10MEM;
 
 			adc10_dis();
-			adc10_set_channel(FOOD_CHANNEL);
+			adc10_set_channel(BATT_CHANNEL);
+
+			ADC10CTL1 &= ~ADC10SSEL_SMCLK; /* Goto Aux Clock */
+			ADC10CTL1 |= ADC10SSEL_ACLK;   /* 12Khz */
+			ADC10CTL1 &= ~ADC10DIV_7;      /* Remove clock divide */
+			ADC10CTL1 |= ADC10DIV_0;
+
+			ADC10CTL0 |= SREF_1; /* Use 2.5V Reference */
+
+			ADC10CTL0 &= ~ADC10SHT_DIV64; /* Go from divide by 64 */
+			ADC10CTL0 |= ADC10SHT_DIV4; /* to divide by 4 */
 			
 			bearing_set( pd_value );
 
+			curreading = BATT;
+			break;
+		case BATT:
+			battval = ADC10MEM;
+
+			adc10_dis();
+			adc10_set_channel(FOOD_CHANNEL);
+
+			ADC10CTL1 &= ~ADC10SSEL_SMCLK;
+			ADC10CTL1 |= ADC10SSEL_MCLK; /* Bacl to master clock*/
+			ADC10CTL1 |= ADC10DIV_7; /* Divide by 7 */
+
+			ADC10CTL0 &= ~SREF_7; /* Vcc - Vss rails */
+			ADC10CTL0 |= ADC10SHT_DIV64; /* Divide clock by 64 */
+	
 			curreading = FOOD0;
 			break;
 		case FOOD0:
