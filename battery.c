@@ -11,7 +11,7 @@
 #define get_stat1() (P3IN & STAT1)
 #define get_stat2() (P3IN & STAT2)
 
-uint16_t battval = 0;
+uint16_t battval = 65000;
 
 bool battery_low( void )
 {
