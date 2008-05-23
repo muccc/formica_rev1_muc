@@ -2,7 +2,7 @@
 #include "food.h"
 
 #define AVERAGE_SIZE 3
-#define FOOD_TRIGGER 100
+#define FOOD_TRIGGER 500
 
 static uint16_t average[AVERAGE_SIZE];
 static bool gotfood = FALSE;
@@ -11,7 +11,7 @@ void foodcallback(uint16_t dataoff, uint16_t dataon)
 {
 	static uint8_t averageindex = 0;
 	uint8_t i;
-	uint8_t data;
+	uint16_t data;
 
 	/* Dataoff should always be higher than dataon */
 	if(dataoff < dataon)
