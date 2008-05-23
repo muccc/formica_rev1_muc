@@ -31,18 +31,31 @@ int main( void )
 	random_walk_disable();
 	while(1)
 	{
+		if( charge_complete )
+		{
+			food_level = 0;
+			charge_complete = FALSE;
+
+			random_walk_disable();
+			motor_r = motor_l = 6;
+			motor_mode = MOTOR_BK;
+
+			uint32_t i = the_time + 10;
+			while( the_time < i );
+		}
+
 		if( hasfood() )
 		{
 			leds_red_on();
 			leds_green_off();
 
-			if(light_intensity < 10)
+			if(light_intensity == 0)
 			{
 				random_walk_disable();
 				motor_r = motor_l = 6;
 				motor_mode = MOTOR_BK;
 
-				uint32_t i = the_time + 4;
+				uint32_t i = the_time + 10;
 				while( the_time < i );
 			}
 			else if(bearing_strength > 10)
@@ -56,7 +69,7 @@ int main( void )
 				/* Random Walk */
 				random_walk_enable();
 		}
-		else if( (food_level) > (20 * 10) )
+		else if( food_level > (20 * 10) )
 		{
 			leds_green_on();
 			leds_red_off();
