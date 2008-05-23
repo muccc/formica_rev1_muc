@@ -8,6 +8,7 @@
 #include "bearing.h"
 #include "time.h"
 #include "behav/braitenberg.h"
+#include "food.h"
 
 #define M1 (1<<0)
 #define MP (1<<1)
@@ -186,7 +187,10 @@ void motor_rand_walk_change( void )
 		break;
 
 	case 2:
-		motor_mode = MOTOR_BK;
+		if( !hasfood() )
+			motor_mode = MOTOR_BK;
+		else
+			motor_mode = MOTOR_FWD;
 		break;
 
 	case 3:

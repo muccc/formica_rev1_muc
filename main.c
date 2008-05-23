@@ -34,7 +34,7 @@ int main( void )
 		{
 			leds_red_on();
 
-			if(bearing_strength < 10)
+			if(light_intensity < 10)
 			{
 				random_walk_disable();
 				motor_r = motor_l = 6;
@@ -43,13 +43,12 @@ int main( void )
 				uint32_t i = the_time + 4;
 				while( the_time < i );
 			}
-			else if(bearing_strength < 750)
+			else if(bearing_strength > 10)
 			{
 				/* Braitenburg vehicle mode */
 				leds_green_on();
 				random_walk_disable();
 				braitenberg_update();
-
 			}
 			else
 			{
