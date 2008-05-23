@@ -1,8 +1,11 @@
 #include "braitenberg.h"
+#include "stdint.h"
 #include "../motor.h"
 #include "../adc10.h"
 #include "../bearing.h"
 #include "../leds.h"
+#include "../types.h"
+#include "../time.h"
 
 #define HYSTERESIS 2
 
@@ -44,20 +47,18 @@ void braitenberg_update( void )
 
 void rev_braitenberg_update( void )
 {
-	leds_red_off();
 	switch(bearing)
 	{
 		case 0:
+			/* Turn right/left */
 			motor_mode = MOTOR_TURN_RIGHT;
 			motor_r = motor_l = 5;
 			break;
 		case 120:
 		case 240:
 			motor_mode = MOTOR_FWD;
-
 			if(pd_left>(pd_right+HYSTERESIS))
 			{
-				leds_red_on();
 				/* Right stronger */
 				motor_l = 1;
 				motor_r = 5;
@@ -69,7 +70,8 @@ void rev_braitenberg_update( void )
 				motor_l = 5;
 			}
 			else
-				motor_r = motor_l = 3;
+				motor_r = motor_l = 5;
+
 			break;
 	}
 }

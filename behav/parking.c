@@ -34,8 +34,6 @@ void parking_update( void )
 	 * After 200ms if still got power goto state == WEDGED and turn off
 	 * 	motors
 	 */
-	leds_green_off();
-	leds_red_off();
 	charge_complete = FALSE;
 	if(battery_power_good())
 	{
@@ -44,7 +42,6 @@ void parking_update( void )
 		{
 			case NOTHIT:
 			case FALLEN:
-				leds_red_on();
 
 				motor_l = motor_r = 4;
 				
@@ -52,8 +49,6 @@ void parking_update( void )
 				hit = JUSTHIT;
 				break;
 			case JUSTHIT:
-				leds_red_on();
-
 				motor_l = motor_r = 4;
 				
 				if(t < the_time)
@@ -68,8 +63,6 @@ void parking_update( void )
 					charge_complete = TRUE;
 
 				motor_l = motor_r = 0;
-				leds_green_on();
-				leds_red_on();
 
 				break;
 		}
