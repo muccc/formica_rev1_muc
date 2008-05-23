@@ -31,6 +31,8 @@ void low_power(void);
 
 int i = 0;
 
+bool now_parking = FALSE;
+
 int main( void )
 {
 	init();
@@ -44,9 +46,12 @@ int main( void )
 		/* Go to the charger if... */
 		if( battery_low()
 		    /* Or we've reached a deficiency of food */
-		    || ( !hasfood() && food_level > FOOD_THRESHOLD ) )
+		    || ( food_level > FOOD_THRESHOLD ) 
+		    || ( now_parking ))
 		{
+			now_parking = !charge_complete;
 			parking_update();
+			food_level = 0;
 			continue;
 		}
 

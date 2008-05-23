@@ -51,18 +51,23 @@ void parking_update( void )
 				break;
 			case JUSTHIT:
 				motor_l = motor_r = 4;
+
+				if(c == 0)
+					c = the_time + CHARGE_TIME;
 				
 				if(t < the_time)
 				{
 					hit = WEDGED;
-					c = the_time + CHARGE_TIME;
 				}
 				break;
 			case WEDGED:
 				leds_green_on();
 				if(c < the_time)
+				{
 					/* Finished charging */
 					charge_complete = TRUE;
+					c = 0;
+				}
 
 				motor_l = motor_r = 0;
 
