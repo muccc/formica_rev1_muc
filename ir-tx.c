@@ -6,11 +6,14 @@
 #include "ir.h"
 #include "ir-rx.h"
 #include "adc10.h"
+#include "types.h"
 
 /* Puts the timer into stop mode */
 #define timer_b_dis() do { TBCTL &= ~MC_3; } while (0)
 /* Puts the timer into up mode */
 #define timer_b_en() do { TBCTL |= MC_UPTO_CCR0; } while (0)
+
+static bool ir_tx_enabled = TRUE;
 
 void ir_transmit_init( void )
 {
@@ -51,6 +54,13 @@ interrupt (TIMERB0_VECTOR) timer_b_isr(void)
 	static uint8_t period = 0;
 	uint8_t sym;
 
+	if( !ir_tx_enabled ) 
+	{
+		adc10_grab();
+		TBCCR0 = period_lut[0] << 1;
+		return;
+	}
+
 	/* Only change output period during the low section */
 	if( P4IN & 1 )
 		return;
@@ -68,10 +78,11 @@ interrupt (TIMERB0_VECTOR) timer_b_isr(void)
 	if( sym == INV_SYM )
 	{
 		/* No data: disable transmission */
-		timer_b_dis();
+		ir_tx_enabled = FALSE;
 
 		ir_receive_en();
 	}
+	else
 		TBCCR0 = period_lut[ sym ];
 
 	/* Flag is automatically cleared */
@@ -84,6 +95,7 @@ interrupt (TIMERB1_VECTOR) timer_b_isr2(void)
 
 void ir_transmit_enable( void )
 {
+	ir_tx_enabled = TRUE;
 	timer_b_en();
 
 	ir_receive_dis();
@@ -91,8 +103,5 @@ void ir_transmit_enable( void )
 
 bool ir_transmit_is_enabled( void )
 {
-	if( (TBCTL & MC_3) == MC_UPTO_CCR0 )
-		return TRUE;
-
-	return FALSE;
+	return ir_tx_enabled;
 }	
