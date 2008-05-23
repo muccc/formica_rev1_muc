@@ -57,7 +57,7 @@ interrupt (TIMERB0_VECTOR) timer_b_isr(void)
 	if( !ir_tx_enabled ) 
 	{
 		adc10_grab();
-		TBCCR0 = period_lut[0] << 1;
+		TBCCR0 = 32000;
 		return;
 	}
 
