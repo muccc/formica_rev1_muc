@@ -4,6 +4,8 @@
 #include "../bearing.h"
 #include "../leds.h"
 
+#define HYSTERESIS 2
+
 void braitenberg_update( void )
 {
 	switch(bearing)
@@ -42,6 +44,7 @@ void braitenberg_update( void )
 
 void rev_braitenberg_update( void )
 {
+	leds_red_off();
 	switch(bearing)
 	{
 		case 0:
@@ -52,18 +55,17 @@ void rev_braitenberg_update( void )
 		case 240:
 			motor_mode = MOTOR_FWD;
 
-			if(pd_left>pd_right)
+			if(pd_left>(pd_right+HYSTERESIS))
 			{
 				leds_red_on();
 				/* Right stronger */
-				motor_l = 3;
+				motor_l = 1;
 				motor_r = 5;
 			}
-			else if (pd_right > pd_left)
+			else if (pd_right > (pd_left+HYSTERESIS))
 			{
-				leds_red_off();
 				/* Left stronger */
-				motor_r = 3;
+				motor_r = 1;
 				motor_l = 5;
 			}
 			else
