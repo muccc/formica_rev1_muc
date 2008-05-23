@@ -1,5 +1,6 @@
 #ifndef __BEARING_H
 #define __BEARING_H
+#include <stdint.h>
 
 /* Set the bearing with new ADC readings.
    Argument:
