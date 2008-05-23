@@ -140,7 +140,8 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 		
 		conf = M_R_FWD;
 
-		if( count >= motor_l )
+		/* Don't go slightly backwards if we have food */
+		if( !hasfood() && count >= motor_l )
 			conf = M_L_BK;
 
 		if( count >= (motor_l << 1) )
@@ -154,7 +155,8 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 		conf = M_L_FWD;
 
-		if( count >= motor_r )
+		/* Don't go slightly backwards if we have food */
+		if( !hasfood() && count >= motor_r )
 			conf = M_R_BK;
 
 		if( count >= (motor_r << 1) )
