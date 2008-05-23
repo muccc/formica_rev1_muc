@@ -12,6 +12,9 @@ enum
 	/* Ask for the next firmware blob */
 	NET_CMD_FW_NEXT,
 
+	/* Last time I saw food */
+	NET_CMD_FOOD,
+
 	NET_CMD_LAST
 };
 

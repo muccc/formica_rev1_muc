@@ -17,4 +17,9 @@ void food_init(void);
 #define fled_on() do { P4OUT |= FLED; } while (0)
 #define fled_off() do { P4OUT &= ~FLED; } while (0)
 
+extern uint32_t food_level;
+
+/* Add another food time from someone else */
+void food_gotinfo( uint32_t *since );
+
 #endif	/* __FOOD_H */

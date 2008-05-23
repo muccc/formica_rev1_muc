@@ -7,6 +7,8 @@
 #include "flash.h"
 #include "ir.h"
 #include "random.h"
+#include "time.h"
+#include "food.h"
 
 static uint8_t pkt[32];
 
@@ -26,6 +28,12 @@ static uint8_t pkt[32];
   0: NET_CMD_FW_NEXT
   1,2: Next chunk that we need (MSB, LSB)
 */
+
+/* 
+  0: NET_CMD_FOOD
+  1,2,3,4: Time since last food (MSB...LSB)
+ */
+
 
 /* How many more packets to transmit */
 static uint8_t tx_count = 0;
@@ -97,6 +105,18 @@ const uint8_t* net_tx_get_next_packet( uint8_t *len )
 			pkt[1] = next_chunk >> 8;
 			pkt[2] = next_chunk & 0xff;
 			break;
+
+		case NET_CMD_FOOD:
+		{
+			*len = 5;
+
+			pkt[1] = food_level >> 24;
+			pkt[2] = (food_level >> 16) & 0xff;
+			pkt[3] = (food_level >> 8) & 0xff;
+			pkt[4] = food_level & 0xff;;
+			break;
+		}
+
 		}
 
 		next_type++;

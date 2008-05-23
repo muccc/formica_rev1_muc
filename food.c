@@ -1,11 +1,15 @@
 #include "types.h"
 #include "food.h"
+#include "time.h"
+#include "leds.h"
 
 #define AVERAGE_SIZE 3
 #define FOOD_TRIGGER 500
 
 static uint16_t average[AVERAGE_SIZE];
 static bool gotfood = FALSE;
+
+uint32_t food_level = 0;
 
 void foodcallback(uint16_t dataoff, uint16_t dataon)
 {
@@ -32,7 +36,10 @@ void foodcallback(uint16_t dataoff, uint16_t dataon)
 	mavg = mavg/AVERAGE_SIZE;
 	
 	if(mavg > FOOD_TRIGGER)
+	{
 		gotfood = TRUE;
+		food_level = 0;
+	}
 	else
 		gotfood = FALSE;
 }
@@ -51,3 +58,9 @@ void food_init(void)
 	fled_off();
 	P4DIR |= FLED;
 }
+
+void food_gotinfo( uint32_t *since )
+{
+	food_level = (food_level + *since) >> 1;
+}
+

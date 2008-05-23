@@ -31,14 +31,10 @@ int main( void )
 	random_walk_disable();
 	while(1)
 	{
-		uint32_t last_food_seen = 0;
-
 		if( hasfood() )
 		{
 			leds_red_on();
 			leds_green_off();
-
-			last_food_seen = the_time;
 
 			if(light_intensity < 10)
 			{
@@ -60,7 +56,7 @@ int main( void )
 				/* Random Walk */
 				random_walk_enable();
 		}
-		else if( (the_time - last_food_seen) > (20 * 5) )
+		else if( (food_level) > (20 * 10) )
 		{
 			leds_green_on();
 			leds_red_off();
@@ -105,7 +101,6 @@ void init(void)
 	flash_init();
 	opamp1_init();
 	bias_init();
-	bias_use1();
 
 	adc10_init(); /* The order here matters. This configures the ADC */
 	random_init(); /* Grab some random data */
@@ -122,5 +117,5 @@ void init(void)
 
 	eint();
 	
-	//virus_init();
+/* 	virus_init(); */
 }

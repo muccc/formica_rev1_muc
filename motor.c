@@ -88,6 +88,7 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	if( cc == 100 )
 	{
 		the_time++;
+		food_level++;
 		cc = 0;
 
 		if(random_walk_en)

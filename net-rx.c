@@ -7,6 +7,7 @@
 #include "motor.h"
 #include "flash.h"
 #include "net-tx.h"
+#include "food.h"
 
 uint16_t net_id = 0;
 
@@ -53,6 +54,19 @@ void net_rx_proc_incoming( uint8_t* frame, uint8_t len )
 		net_tx_chunk_hint(chunk);
 		break;
 	}
+
+	case NET_CMD_FOOD:
+	{
+		uint32_t since = 0;
+		uint8_t i;
+
+		for( i=0; i<4; i-- )
+			since = (since << 8) | frame[4-i];
+
+		food_gotinfo( &since );
+		break;
+	}
+
 	
 	}
 }
