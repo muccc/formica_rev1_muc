@@ -6,7 +6,7 @@
 #define INV_SYM 255
 
 /* Number of packets to transmit in a lump */
-#define TX_AT_A_TIME 5
+#define TX_AT_A_TIME 2
 
 /* Nudge the IR transceiver */
 /* This should be called at regular intervals, 

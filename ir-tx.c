@@ -79,6 +79,9 @@ interrupt (TIMERB0_VECTOR) timer_b_isr(void)
 	{
 		/* No data: disable transmission */
 		ir_tx_enabled = FALSE;
+		/* Disable the compare unit's control of the IR */
+		P4OUT &= ~1;
+		P4SEL &= ~1;
 
 		ir_receive_en();
 	}
@@ -96,6 +99,9 @@ interrupt (TIMERB1_VECTOR) timer_b_isr2(void)
 void ir_transmit_enable( void )
 {
 	ir_tx_enabled = TRUE;
+	/* Enable compare unit control of IR */
+	P4SEL |= 1;
+
 	timer_b_en();
 
 	ir_receive_dis();

@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include "food.h"
 #include "bearing.h"
+#include "ir-tx.h"
 
 /* Disable the ADC */
 #define adc10_dis() do { ADC10CTL0 &= ~ENC; } while (0)
@@ -67,8 +68,8 @@ void adc10_grab( void )
 {
 	if(curreading == FOOD1)
 		fled_on();
-	else
-		bias_use2();
+	else if( ir_transmit_is_enabled() )
+		bias_use1();
 
 	/* Start the conversion: */
 	ADC10CTL0 |= (ENC | ADC10SC);
@@ -149,6 +150,6 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			curreading = PD1;
 			break;
 	}
-	bias_use1();
+	bias_use2();
 	fled_off();
 }
