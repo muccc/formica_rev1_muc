@@ -20,7 +20,7 @@
 #include "behav/parking.h"
 #include "behav/watchdog.h"
 
-#define FOOD_THRESHOLD (20 * 180)
+#define FOOD_THRESHOLD (20 * 30)
 
 /* Initialises everything. */
 void init(void);
@@ -46,8 +46,6 @@ int main( void )
 		    /* Or we've reached a deficiency of food */
 		    || ( !hasfood() && food_level > FOOD_THRESHOLD ) )
 		{
-			leds_green_on();
-			leds_red_off();
 			parking_update();
 			continue;
 		}
@@ -89,7 +87,6 @@ int main( void )
 			/* Do we have a reasonable bearing? */
 			else if(bearing_strength > 10)
 			{
-				leds_green_on();
 				random_walk_disable();
 				braitenberg_update();
 			}

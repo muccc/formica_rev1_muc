@@ -7,11 +7,10 @@
 #include "../types.h"
 #include "../leds.h"
 
-#define CHARGE_TIME (20 * 20)
+#define CHARGE_TIME (20 * 30)
 #define FALLOUT_WAIT 10
 #define OVERPUSH 8
 
-uint32_t time_charging = 0;
 bool charge_complete = FALSE;
 
 void parking_update( void )
@@ -35,6 +34,8 @@ void parking_update( void )
 	 * 	motors
 	 */
 	charge_complete = FALSE;
+	leds_green_off();
+
 	if(battery_power_good())
 	{
 		random_walk_disable();
@@ -42,7 +43,7 @@ void parking_update( void )
 		{
 			case NOTHIT:
 			case FALLEN:
-
+				
 				motor_l = motor_r = 4;
 				
 				t = the_time + OVERPUSH;
@@ -58,6 +59,7 @@ void parking_update( void )
 				}
 				break;
 			case WEDGED:
+				leds_green_on();
 				if(c < the_time)
 					/* Finished charging */
 					charge_complete = TRUE;
