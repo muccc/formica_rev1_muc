@@ -81,5 +81,5 @@ endif
 .PHONY: clean
 
 clean: 
-	-rm -f main main-top freq.{h,c}
+	-rm -f main main-top freq.{h,c} .fw_ver
 
