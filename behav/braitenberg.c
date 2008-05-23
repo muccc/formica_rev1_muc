@@ -5,6 +5,9 @@
 
 void braitenberg_update( void )
 {
+	if( bearing_strength < 20 )
+		return;
+
 	switch(bearing)
 	{
 	case 0:

@@ -14,5 +14,6 @@ void bearing_set( uint16_t* pdr );
 
 extern uint16_t bearing;
 extern uint16_t bearing_strength;
+extern uint16_t light_intensity;
 
 #endif
