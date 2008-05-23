@@ -25,8 +25,6 @@ int i = 0;
 
 int main( void )
 {
-	uint32_t next_time = 0;
-
 	init();
 
 	random_walk_disable();
@@ -68,18 +66,6 @@ int main( void )
 			random_walk_enable();
 		}
 
-		if(0)
-			if( !battery_power_good() )
-			{
-				motor_mode = MOTOR_FWD;
-				motor_l = motor_r = 4;
-			}
-			else
-			{
-				motor_mode = MOTOR_FWD;
-				motor_l = motor_r = 0;
-			}
-		
 	}
 }
 
