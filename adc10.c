@@ -23,11 +23,16 @@ static enum {
 	FOOD1
 } curreading = PD1;
 
+#define PD1_CHANNEL 1
+#define PD2_CHANNEL 2
+#define PD3_CHANNEL 3
+#define FOOD_CHANNEL 4
+
 void adc10_init( void )
 {
 	ADC10CTL0 = SREF_0 	/* Use VCC and VSS as the references */
 		| ADC10SHT_DIV64 /* 64 x ADC10CLKs
-				    32us*/
+				    32 us */
 		/* ADC10SR = 0 -- Support 200 ksps sampling (TODO: maybe this can be set) */
 		/* REFOUT = 0 -- Reference output off */
 		/* REFBURST = 0 -- Reference buffer on continuously (TODO) */
@@ -60,12 +65,13 @@ void adc10_stream( void )
 
 void adc10_grab( void )
 {
-	/* Start the conversion: */
-	ADC10CTL0 |= (ENC | ADC10SC);
 	if(curreading == FOOD1)
 		fled_on();
 	else
 		bias_use2();
+
+	/* Start the conversion: */
+	ADC10CTL0 |= (ENC | ADC10SC);
 }
 
 uint16_t adc10_readtemp( void )
@@ -102,21 +108,21 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			pd_value[0] = ADC10MEM;
 
 			adc10_dis();
-			adc10_set_channel(2);
+			adc10_set_channel(PD2_CHANNEL);
 			curreading = PD2;
 			break;
 		case PD2:
 			pd_value[1] = ADC10MEM;
 
 			adc10_dis();
-			adc10_set_channel(3);
+			adc10_set_channel(PD3_CHANNEL);
 			curreading = PD3;
 			break;
 		case PD3:
 			pd_value[2] = ADC10MEM;
 
 			adc10_dis();
-			adc10_set_channel(4);
+			adc10_set_channel(FOOD_CHANNEL);
 			
 			bearing_set( pd_value );
 
@@ -127,7 +133,7 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			food0 = ADC10MEM;
 
 			adc10_dis();
-			adc10_set_channel(4);
+			adc10_set_channel(FOOD_CHANNEL);
 
 			curreading = FOOD1;
 			break;
@@ -136,7 +142,7 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			food1 = ADC10MEM;
 
 			adc10_dis();
-			adc10_set_channel(1);
+			adc10_set_channel(PD1_CHANNEL);
 
 			foodcallback(food0, food1);
 			
