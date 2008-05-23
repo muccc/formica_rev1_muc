@@ -1,4 +1,5 @@
 #include "parking.h"
+#include "braitenberg.h"
 #include "../motor.h"
 #include "../battery.h"
 #include "../bearing.h"
@@ -78,7 +79,7 @@ void parking_update( void )
 		switch(hit)
 		{
 			case NOTHIT:
-				random_walk_enable();
+				rev_braitenberg_update();
 				break;
 			case JUSTHIT:
 			case WEDGED:

@@ -4,5 +4,6 @@
 /* Updates the motor speeds according to the current
    photodiode situation. */
 void braitenberg_update( void );
+void rev_braitenberg_update( void );
 
 #endif	/* __BRAITENBERG_H */
