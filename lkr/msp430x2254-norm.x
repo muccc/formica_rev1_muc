@@ -1,33 +1,14 @@
-/*  Copyright 2008 Stephen English, Jeffrey Gough, Alexis Johnson, 
-        Robert Spanton and Joanna A. Sun.
-
-    This file is part of the Formica robot firmware.
-
-    Foobar is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    Foobar is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with the Formica robot firmware.  
-    If not, see <http://www.gnu.org/licenses/>.  */
-
 /* Default linker script, for normal executables */
 OUTPUT_FORMAT("elf32-msp430","elf32-msp430","elf32-msp430")
 OUTPUT_ARCH(msp:22)
 MEMORY
 {
-  text   (rx)   	: ORIGIN = 0xc000,    LENGTH = 0x3fe0
-  data   (rwx)  	: ORIGIN = 0x0200, 	  LENGTH = 512
-  vectors (rw)  	: ORIGIN = 0xffe0 LENGTH = 32
-  bootloader(rx)	: ORIGIN = 0x0c00,	      LENGTH = 1K
-  infomem(rx)		: ORIGIN = 0x1000,	      LENGTH = 256
-  infomemnobits(rx)	: ORIGIN = 0x1000,        LENGTH = 256
+  text   (rx)       : ORIGIN = 0xc000,    LENGTH = 0x3fe0
+  data   (rwx)      : ORIGIN = 0x0200,    LENGTH = 512
+  vectors (rw)      : ORIGIN = 0xffe0,    LENGTH = 32
+  bootloader(rx)    : ORIGIN = 0x0c00,     LENGTH = 1K
+  infomem(rx)       : ORIGIN = 0x1000,     LENGTH = 256
+  infomemnobits(rx) : ORIGIN = 0x1000,     LENGTH = 256
 }
 SECTIONS
 {
@@ -93,50 +74,77 @@ SECTIONS
   {
     . = ALIGN(2);
     *(.init)
-    *(.init0)  /* Start here after reset.  */
-    *(.init1)
-    *(.init2)  /* Copy data loop  */
-    *(.init3)
-    *(.init4)  /* Clear bss  */
-    *(.init5)
-    *(.init6)  /* C++ constructors.  */
-    *(.init7)
-    *(.init8)
-    *(.init9)  /* Call main().  */
+    KEEP(*(.init))
+    *(.init0)  /* Start here after reset.               */
+    KEEP(*(.init0))
+    *(.init1)  /* User definable.                       */
+    KEEP(*(.init1))
+    *(.init2)  /* Initialize stack.                     */
+    KEEP(*(.init2))
+    *(.init3)  /* Initialize hardware, user definable.  */
+    KEEP(*(.init3))
+    *(.init4)  /* Copy data to .data, clear bss.        */
+    KEEP(*(.init4))
+    *(.init5)  /* User definable.                       */
+    KEEP(*(.init5))
+    *(.init6)  /* C++ constructors.                     */
+    KEEP(*(.init6))
+    *(.init7)  /* User definable.                       */
+    KEEP(*(.init7))
+    *(.init8)  /* User definable.                       */
+    KEEP(*(.init8))
+    *(.init9)  /* Call main().                          */
+    KEEP(*(.init9))
      __ctors_start = . ;
      *(.ctors)
+     KEEP(*(.ctors))
      __ctors_end = . ;
      __dtors_start = . ;
      *(.dtors)
+     KEEP(*(.dtors))
      __dtors_end = . ;
     . = ALIGN(2);
     *(.text)
     . = ALIGN(2);
     *(.text.*)
     . = ALIGN(2);
-    *(.fini9)  /*   */
-    *(.fini8)
-    *(.fini7)
-    *(.fini6)  /* C++ destructors.  */
-    *(.fini5)
-    *(.fini4)
-    *(.fini3)
-    *(.fini2)
-    *(.fini1)
+    *(.fini9)  /* Jumps here after main(). User definable.  */
+    KEEP(*(.fini9))
+    *(.fini8)  /* User definable.                           */
+    KEEP(*(.fini8))
+    *(.fini7)  /* User definable.                           */
+    KEEP(*(.fini7))
+    *(.fini6)  /* C++ destructors.                          */
+    KEEP(*(.fini6))
+    *(.fini5)  /* User definable.                           */
+    KEEP(*(.fini5))
+    *(.fini4)  /* User definable.                           */
+    KEEP(*(.fini4))
+    *(.fini3)  /* User definable.                           */
+    KEEP(*(.fini3))
+    *(.fini2)  /* User definable.                           */
+    KEEP(*(.fini2))
+    *(.fini1)  /* User definable.                           */
+    KEEP(*(.fini1))
     *(.fini0)  /* Infinite loop after program termination.  */
+    KEEP(*(.fini0))
     *(.fini)
+    KEEP(*(.fini))
     _etext = .;
   }  > text
-  .data   : AT (ADDR (.text) + SIZEOF (.text))
+  .data   :
   {
      PROVIDE (__data_start = .) ;
     . = ALIGN(2);
     *(.data)
+    *(SORT_BY_ALIGNMENT(.data.*))
     . = ALIGN(2);
     *(.gnu.linkonce.d*)
     . = ALIGN(2);
      _edata = . ;
-  }  > data
+  }  > data AT > text
+    PROVIDE (__data_load_start = LOADADDR(.data) );
+    PROVIDE (__data_size = SIZEOF(.data) );
   /* Bootloader.  */
   .bootloader   :
   {
@@ -159,18 +167,21 @@ SECTIONS
     . = ALIGN(2);
     *(.infomemnobits.*)
   }  > infomemnobits
-  .bss  SIZEOF(.data) + ADDR(.data) :
+  .bss   :
   {
      PROVIDE (__bss_start = .) ;
     *(.bss)
+    *(SORT_BY_ALIGNMENT(.bss.*))
     *(COMMON)
      PROVIDE (__bss_end = .) ;
      _end = . ;
   }  > data
-  .noinit  SIZEOF(.bss) + ADDR(.bss) :
+    PROVIDE (__bss_size = SIZEOF(.bss) );
+  .noinit   :
   {
      PROVIDE (__noinit_start = .) ;
     *(.noinit)
+    *(.noinit.*)
     *(COMMON)
      PROVIDE (__noinit_end = .) ;
      _end = . ;
@@ -179,6 +190,7 @@ SECTIONS
   {
      PROVIDE (__vectors_start = .) ;
     *(.vectors*)
+    KEEP(*(.vectors*))
      _vectors_end = . ;
   }  > vectors
   /* Stabs for profiling information*/
