@@ -201,7 +201,7 @@ void motor_rand_walk_change( void )
 		break;
 	}
 
-	mode = (random() >> 7) % 4;
+	mode = (random() >> 7) % 5;
 	if( mode > 3 )
 		mode = 0;
 

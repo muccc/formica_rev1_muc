@@ -19,6 +19,7 @@
 #include "parking.h"
 #include "braitenberg.h"
 #include "watchdog.h"
+#include "../food.h"
 #include "../motor.h"
 #include "../battery.h"
 #include "../bearing.h"
@@ -115,6 +116,18 @@ void parking_update( void )
 			  rev_braitenberg_update();
 			  /* want the stuck-on-object watchdog active */
 			  /* whilst seeking charger */
+			  if (hasfood())
+			    {
+			      motor_l = motor_r=6;
+			      motor_mode = MOTOR_BK;
+			      time_wait(15);
+			      motor_mode = MOTOR_TURN_LEFT;
+			      time_wait(10);
+			      motor_mode = MOTOR_FWD;
+			      time_wait(10);
+			      motor_mode = MOTOR_TURN_RIGHT;
+			      time_wait(10);
+			    }
 			  watchdog_update();
 			  break;
 			case JUSTHIT:
