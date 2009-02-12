@@ -39,7 +39,7 @@
 #include "behav/watchdog.h"
 
 /* when food_level rises above this amount, go to charger */
-#define FOOD_THRESHOLD (20 * 30)
+#define FOOD_THRESHOLD (20 * 60)
 
 
 /* Initialises everything. */
