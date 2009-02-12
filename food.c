@@ -79,6 +79,7 @@ void food_init(void)
 
 void food_gotinfo( uint32_t *since )
 {
+  /* average our food level with that received from another robot */
   food_level = (food_level + *since) >> 1;
   tempmood = MOOD_HEARD_ABOUT_FOOD;
 }

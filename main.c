@@ -38,6 +38,7 @@
 #include "behav/parking.h"
 #include "behav/watchdog.h"
 
+/* when food_level rises above this amount, go to charger */
 #define FOOD_THRESHOLD (20 * 30)
 
 
@@ -60,7 +61,6 @@ int main( void )
 
 	random_walk_disable();
 
-	//	now_parking=TRUE;
 	while(1)
 	  {
 	    leds_update_mood();
@@ -78,7 +78,6 @@ int main( void )
 		  
 		  now_parking = !charge_complete;
 		  parking_update();
-		  food_level = 0;
 		  continue;
 		}
 

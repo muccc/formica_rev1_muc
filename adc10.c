@@ -33,6 +33,7 @@
 
 void adc10_dis()
 {
+  bias_use2();			/* back to IR reception bias */
   while ( ADC10CTL1 & ADC10BUSY );
   ADC10CTL0 &= ~ENC;
 }
@@ -103,11 +104,13 @@ void adc10_grab( void )
 {
 	if(curreading == FOOD1)
 		fled_on();
-	else if( ir_transmit_is_enabled() )
-	  bias_use1();
-
-	/* Start the conversion: */
-	ADC10CTL0 |= (ADC10SC | ENC);
+	//else if( ir_transmit_is_enabled() )
+	//{
+	    bias_use1();
+	
+	    /* Start the conversion: */
+	    ADC10CTL0 |= (ADC10SC | ENC);
+	    //}
 }
 
 uint16_t adc10_readtemp( void )
@@ -217,6 +220,5 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			curreading = PD1;
 			break;
 	}
-	bias_use2();
 	fled_off();
 }
