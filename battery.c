@@ -30,6 +30,7 @@
 #define get_stat2() (P3IN & STAT2)
 
 uint16_t battval = 65000;
+bool pg_inverted = FALSE;
 
 bool battery_low( void )
 {
@@ -50,12 +51,20 @@ void battery_init( void )
   P3DIR &= ~(PG | STAT1 | STAT2);
   P3REN |= (PG | STAT1 | STAT2);
   P3OUT |= (PG | STAT1 | STAT2);
+
+  /* some robots have a hardware fault; !PG signal is inverted  */
+  /* due to damaged charge controller! So at boot up (not connected */
+  /* to charger) measure the !PG state. */
+
+  if ( !get_pg() )
+    pg_inverted = TRUE;
+  
 }
 
 bool battery_charge_complete( void )
 {
-	/* stat1 = high, stat2 = low, pg = low */
-	if( get_stat1() && (!get_stat2()) && (!get_pg()) )
+	/* stat1 = high, stat2 = low */
+	if( get_stat1() && (!get_stat2()) )
 		return TRUE;
 	else
 		return FALSE;		       
@@ -63,8 +72,17 @@ bool battery_charge_complete( void )
 
 bool battery_charge_in_progress( void )
 {
-	/* stat1 = low, stat2 = high, pg = low */
-	if( (!get_stat1()) && get_stat2() && (!get_pg()) )
+	/* stat1 = low, stat2 = high */
+	if( (!get_stat1()) && get_stat2() )
+		return TRUE;
+	else
+		return FALSE;
+}
+
+bool battery_charge_standby( void )
+{
+  /* stat1 = high, stat2 = high */
+	if( ( get_stat1()) && get_stat2() )
 		return TRUE;
 	else
 		return FALSE;
@@ -72,8 +90,15 @@ bool battery_charge_in_progress( void )
 
 bool battery_power_good( void )
 {
-	if( !get_pg() )
-		return TRUE;
+  bool retval = FALSE;
+  
+  if( !get_pg() )
+    retval  =  TRUE;
+  else
+    retval = FALSE;
+  
+  if (pg_inverted)
+    retval = !retval;
 
-	return FALSE;
+  return retval;
 }

@@ -34,8 +34,9 @@ void watchdog_update( void )
 {
 	if( the_time > thresh_time )
 	{
-	  tempmood = MOOD_AM_STUCK;
-	  leds_update_mood();
+	  //	  tempmood = MOOD_AM_STUCK;
+	  //leds_update_mood();
+	  leds_flash(RED);
 		motor_mode = MOTOR_BK;
 		motor_l = motor_r = 5;
 

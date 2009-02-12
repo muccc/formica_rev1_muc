@@ -132,7 +132,6 @@ void parking_update( void )
 			      time_wait(3);
 			      motor_mode = MOTOR_FWD;
 			    }
-			  watchdog_update();
 			  break;
 			case JUSTHIT:
 			case WEDGED:

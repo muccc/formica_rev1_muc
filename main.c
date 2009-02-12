@@ -53,16 +53,29 @@ int i = 0;
 
 int main( void )
 {
+        uint32_t chargeopportunity = 0;
 	init();
 
 	random_walk_disable();
-
-	/* if we boot up touching the charger, start charging immediately  */
+	
+	time_wait(8);
+	if (pg_inverted)
+	  leds_flash(RED);
+	else
+	  leds_flash(GREEN);
+	
 	time_wait(5);
-	if (battery_power_good())
-	  now_parking = !charge_complete;
-	    
 
+	/* start charging if touching charger within 1 second */
+	chargeopportunity = the_time + 20;
+	leds_set(ORANGE);
+	while (the_time < chargeopportunity)
+	  {
+	    if ( battery_power_good() )
+	      now_parking = !charge_complete;
+	  }
+	leds_set(NONE);
+	
 	while(1)
 	  {
 	    leds_update_mood();

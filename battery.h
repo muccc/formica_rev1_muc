@@ -26,10 +26,12 @@ void battery_init( void );
 bool battery_charge_complete( void );
 bool battery_charge_in_progress( void );
 bool battery_power_good( void );
+bool battery_charge_standby( void );
 
 bool battery_critical( void );
 bool battery_low( void );
 
 extern uint16_t battval;
+extern bool pg_inverted;
 
 #endif	/* __BATTERY_H */
