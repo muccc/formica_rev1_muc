@@ -27,7 +27,7 @@
 #include "../types.h"
 #include "../leds.h"
 
-#define CHARGE_TIME (20 * 60 * 45)	/* Each tick is 50ms, so 20 ticks per second */
+#define CHARGE_TIME (20L * 60 * 45)	/* Each tick is 50ms, so 20 ticks per second */
 #define FALLOUT_WAIT 60
 #define RUNUP_WAIT 20
 #define OVERPUSH 3
