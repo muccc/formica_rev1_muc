@@ -25,8 +25,6 @@
 #include "../time.h"
 #include "../types.h"
 #include "../leds.h"
-#include "../food.h"
-
 
 #define CHARGE_TIME (20 * 60 * 45)	/* Each tick is 50ms, so 20 ticks per second */
 #define FALLOUT_WAIT 60
@@ -36,10 +34,16 @@
 bool charge_complete = FALSE;
 bool now_parking = FALSE;
 
-hitstate_t hit = NOTHIT;
-
 void parking_update( void )
 {
+	static enum {
+		NOTHIT,     /* Moving around in a random walk */
+		JUSTHIT,    /* Just touched power */
+		WEDGED,	    /* Been touching power for a while, wedged in */
+		FALLEN,     /* Was touching power, not at the moment */
+		ANOTHERRUNUP 	/* Can't reastablish contact. Having a second run-up */
+	} hit = NOTHIT;
+
 	static uint32_t t = 0; /* Time stop running motors after hitting the wall */
 	static uint32_t r = 0; /* Time to go for a run-up */
 	static uint32_t c = 0; /* Time to finish charging */
@@ -109,21 +113,9 @@ void parking_update( void )
 		 	case NOTHIT:
 			  c = 0;
 			  rev_braitenberg_update();
-			  /* if we hit food on the way to the charger, go around it */
-			  //	  if (hasfood() && (hit == NOTHIT) )
-			  //  {
-			  //    motor_mode = MOTOR_BK;
-			  //    motor_l = motor_r = 6;
-			  //    time_wait(10);
-			  //    motor_mode = MOTOR_TURN_LEFT;
-			  //    time_wait(15);
-			  //    motor_mode = MOTOR_FWD;
-			  //    motor_l = motor_r = 6;
-			  //    time_wait(10);
-			  //    motor_mode = MOTOR_TURN_RIGHT;
-			  //    time_wait(15);
-			  //    motor_mode = MOTOR_FWD;
-			  //  }		      
+			  /* want the stuck-on-object watchdog active */
+			  /* whilst seeking charger */
+			  watchdog_update();
 			  break;
 			case JUSTHIT:
 			case WEDGED:

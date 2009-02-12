@@ -26,6 +26,7 @@
 #include "adc10.h"
 #include "types.h"
 #include "ir-bias.h"
+#include "behav/parking.h"
 
 /* Puts the timer into stop mode */
 #define timer_b_dis() do { TBCTL &= ~MC_3; } while (0)
@@ -118,17 +119,16 @@ interrupt (TIMERB1_VECTOR) timer_b_isr2(void)
 void ir_transmit_enable( void )
 {
 	ir_tx_enabled = TRUE;
-	/* Enable compare unit control of IR */
-	P4SEL |= 1;
+	
+	/* Enable compare unit control of IR unless parking*/
+	if (now_parking)
+	  P4SEL &= ~1;
+	else
+	  P4SEL |= 1;
 
 	timer_b_en();
 
 	ir_receive_dis();
-}
-
-void ir_transmit_disable( void )
-{
-  //	ir_tx_enabled = FALSE;
 }
 
 bool ir_transmit_is_enabled( void )

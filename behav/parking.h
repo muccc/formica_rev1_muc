@@ -24,6 +24,10 @@
 void parking_update( void );
 
 extern bool charge_complete;
+<<<<<<< .mine
+extern bool now_parking;
+
+=======
 extern bool now_parking;
 
 
@@ -37,4 +41,5 @@ typedef enum {
 
 extern hitstate_t hit;
 
+>>>>>>> .r489
 #endif
