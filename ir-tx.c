@@ -74,17 +74,17 @@ interrupt (TIMERB0_VECTOR) timer_b_isr(void)
 
 	if( !ir_tx_enabled ) 
 	{
-		adc10_grab();
-		TBCCR0 = 32000;
-		return;
+	  adc10_grab();
+	  TBCCR0 = 32000;
+	  return;
 	}
 
 	/* Only change output period during the low section */
 	if( P4IN & 1 )
-		return;
+	  return;
 	else
-		/* LEDs currently off */
-		adc10_grab();
+	  /* LEDs currently off */
+	  adc10_grab();
 
 	period++;
 	/* Transmit 3 periods of each frequency */

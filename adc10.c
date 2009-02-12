@@ -25,13 +25,21 @@
 #include "bearing.h"
 #include "ir-tx.h"
 #include "battery.h"
+#include "leds.h"
+#include "time.h"
 
 /* Disable the ADC */
-#define adc10_dis() do { ADC10CTL0 &= ~ENC; } while (0)
+//#define adc10_dis() do { ADC10CTL0 &= ~ENC; } while (0)
 
-/* Select a channel (0 <= x <= 7) */
-#define adc10_set_channel(x) do { ADC10CTL1 &= ~INCH_15; \
-		ADC10CTL1 |= x << 12; } while (0)
+void adc10_dis()
+{
+  while ( ADC10CTL1 & ADC10BUSY );
+  ADC10CTL0 &= ~ENC;
+}
+
+/* Select a channel (0 <= x <= 15) */
+#define adc10_set_channel(x) do { ADC10CTL1 &= ~INCH_15;	\
+    ADC10CTL1 |= x << 12; } while (0)
 
 uint16_t pd_value[3];
 
@@ -50,6 +58,10 @@ static enum {
 #define FOOD_CHANNEL 4
 #define BATT_CHANNEL 15
 
+#define CHANNEL_CONFIG (1<<1) | (1<<2) | (1<<3) | (1<<4) | (1<<7)
+
+#define BATT_INTERVAL 10
+
 void adc10_init( void )
 {
 	ADC10CTL0 = SREF_0 	/* Use VCC and VSS as the references */
@@ -58,11 +70,12 @@ void adc10_init( void )
 		/* ADC10SR = 0 -- Support 200 ksps sampling (TODO: maybe this can be set) */
 		/* REFOUT = 0 -- Reference output off */
 		/* REFBURST = 0 -- Reference buffer on continuously (TODO) */
-		| MSC		/* Move onto the next conversion after the previous*/
+	  //	| MSC		/* Move onto the next conversion after the previous*/
 		| REF2_5V
 		| REFON         /* Use 2.5V reference */
 		| ADC10ON	/* Peripheral on */
-		| ADC10IE;	/* Interrupt enabled */
+	        | ADC10IE;       /* Interrupt enabled */
+	  //  | ENC; 		/* ADC Enabled */
 
 	ADC10CTL1 = /* Select the channel later... */
 		SHS_0		/* ADC10SC is the sample-and-hold selector */
@@ -75,26 +88,26 @@ void adc10_init( void )
 
 	/* PD1, PD2, PD3 and FOOD are on P2.1, P2.2, P2.3 and P2.4 respectively */
 	/* P2.1, P2.2, P2.3, P2.4 (page 60 of the MSP430F2234 datasheet) */
-	ADC10AE |= (1<<1) | (1<<2) | (1<<3) | (1<<4) | (1<<7);
+	/* RX is on P3.7 (A7) */
+	ADC10AE0 = CHANNEL_CONFIG;
+	/* Enable A15 (Batt) */
+	ADC10AE1 = 0x80;
+
 	ADC10DTC0 |= ADC10CT; /* DTC Not used. This makes it continuous */
+	
+	adc10_set_channel(PD1_CHANNEL);
 }
 
-void adc10_stream( void )
-{
-	ADC10CTL1 &= ~INCH_15; /*Clearing the channel selection*/
-	ADC10CTL1 |= INCH_A1; /* Start with sunlight 1 */
-	curreading = PD1;
-}
 
 void adc10_grab( void )
 {
 	if(curreading == FOOD1)
 		fled_on();
 	else if( ir_transmit_is_enabled() )
-		bias_use1();
+	  bias_use1();
 
 	/* Start the conversion: */
-	ADC10CTL0 |= (ENC | ADC10SC);
+	ADC10CTL0 |= (ADC10SC | ENC);
 }
 
 uint16_t adc10_readtemp( void )
@@ -125,62 +138,70 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 {
 	static uint16_t food0; /*output from food with LED off*/
 	static uint16_t food1; /*output from food with LED on*/
+	static uint32_t batt_time = 0;
+
+	adc10_dis();
 
 	switch(curreading){
 		case PD1:
-			pd_value[0] = ADC10MEM;
+		        pd_value[0] = ADC10MEM;
 
-			adc10_dis();
 			adc10_set_channel(PD2_CHANNEL);
 			curreading = PD2;
 			break;
 		case PD2:
-			pd_value[1] = ADC10MEM;
+		        pd_value[1] = ADC10MEM;
 
-			adc10_dis();
 			adc10_set_channel(PD3_CHANNEL);
 			curreading = PD3;
 			break;
 		case PD3:
-			pd_value[2] = ADC10MEM;
+		        pd_value[2] = ADC10MEM;
 
-			adc10_dis();
-			adc10_set_channel(BATT_CHANNEL);
+			/* sample the battery voltage once in a while */
+		        if (the_time > batt_time)
+			  {
+			    batt_time = the_time + BATT_INTERVAL;
 
-			ADC10CTL1 &= ~ADC10SSEL_SMCLK; /* Goto Aux Clock */
-			ADC10CTL1 |= ADC10SSEL_ACLK;   /* 12Khz */
-			ADC10CTL1 &= ~ADC10DIV_7;      /* Remove clock divide */
-			ADC10CTL1 |= ADC10DIV_0;
+			    adc10_set_channel(BATT_CHANNEL);
+			    curreading = BATT;
 
-			ADC10CTL0 |= SREF_1; /* Use 2.5V Reference */
+			    /* disable other channels to prevent coupling of photocurrents */
+			    ADC10AE0 = 0;
+			    ADC10CTL1 &= ~ADC10SSEL_SMCLK; /* Goto Aux Clock */
+			    ADC10CTL1 |= ADC10SSEL_ACLK;   /* 12Khz */
+			    ADC10CTL1 &= ~ADC10DIV_7;      /* Remove clock divide */
+			    ADC10CTL1 |= ADC10DIV_0;
+			    ADC10CTL0 |= SREF_1; /* Use 2.5V Reference */
+			    ADC10CTL0 &= ~ADC10SHT_DIV64; /* Go from divide by 64 */
+			    ADC10CTL0 |= ADC10SHT_DIV4; /* to divide by 4 */
+			  }
+			else
+			  {
+			    adc10_set_channel(FOOD_CHANNEL);
+			    curreading = FOOD0;
+			  }
 
-			ADC10CTL0 &= ~ADC10SHT_DIV64; /* Go from divide by 64 */
-			ADC10CTL0 |= ADC10SHT_DIV4; /* to divide by 4 */
-			
 			bearing_set( pd_value );
 
-			curreading = BATT;
 			break;
 		case BATT:
 			battval = ADC10MEM;
 
-			adc10_dis();
 			adc10_set_channel(FOOD_CHANNEL);
-
+			ADC10AE0 = CHANNEL_CONFIG;
 			ADC10CTL1 &= ~ADC10SSEL_SMCLK;
 			ADC10CTL1 |= ADC10SSEL_MCLK; /* Bacl to master clock*/
 			ADC10CTL1 |= ADC10DIV_7; /* Divide by 7 */
-
 			ADC10CTL0 &= ~SREF_7; /* Vcc - Vss rails */
-			ADC10CTL0 |= ADC10SHT_DIV64; /* Divide clock by 64 */
-	
+			ADC10CTL0 |= ADC10SHT_DIV4; /* Divide clock by 64 */
+			
 			curreading = FOOD0;
 			break;
 		case FOOD0:
 			/* FLED Off */
 			food0 = ADC10MEM;
 
-			adc10_dis();
 			adc10_set_channel(FOOD_CHANNEL);
 
 			curreading = FOOD1;
@@ -189,7 +210,6 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 			/* Fled ON */
 			food1 = ADC10MEM;
 
-			adc10_dis();
 			adc10_set_channel(PD1_CHANNEL);
 
 			foodcallback(food0, food1);

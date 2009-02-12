@@ -129,32 +129,33 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 	if( motor_mode == MOTOR_TURN_LEFT )
 	{
-		MAX_SPEED = 255;
-		motor_l = 127;
+		MAX_SPEED = 8;
+		motor_l = 0;
+		motor_r = 7;
 		
-		conf = M_R_FWD;
+		conf = M_FWD;
 
-		/* Don't go slightly backwards if we have food */
-		if( !hasfood() && count >= motor_l )
-			conf = M_L_BK;
+		if( count >= motor_r )
+			conf |= M2;
 
-		if( count >= (motor_l << 1) )
-			conf = 0;
+		if( count >= motor_l )
+			conf |= M1;
 	}
 
 	if( motor_mode == MOTOR_TURN_RIGHT )
 	{
-		MAX_SPEED = 255;
-		motor_r = 127;
+		MAX_SPEED = 8;
+		motor_l = 6;
+		motor_r = 7;
+		
+		conf = M_FWD;
 
-		conf = M_L_FWD;
+		if( count >= motor_r )
+			conf |= M2;
 
-		/* Don't go slightly backwards if we have food */
-		if( !hasfood() && count >= motor_r )
-			conf = M_R_BK;
+		if( count >= motor_l )
+			conf |= M1;
 
-		if( count >= (motor_r << 1) )
-			conf = 0;
 	}
 
 	motor_off();
@@ -194,10 +195,10 @@ void motor_rand_walk_change( void )
 		break;
 	}
 
-	mode = (random() >> 7) % 5;
+	mode = (random() >> 7) % 3;
 	if( mode > 3 )
 		mode = 0;
 
-	rand_walk_thresh = (random() >> 4) + 1;
+	rand_walk_thresh = (random() >> 6) + 1;
 }
 

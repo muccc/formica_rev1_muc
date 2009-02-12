@@ -40,6 +40,7 @@
 
 #define FOOD_THRESHOLD (20 * 30)
 
+
 /* Initialises everything. */
 void init(void);
 
@@ -51,26 +52,34 @@ int i = 0;
 
 bool now_parking = FALSE;
 
+
+
 int main( void )
 {
 	init();
 
 	random_walk_disable();
-	while(1)
-	{
-		if( battery_critical() )
-			low_power();
 
-		/* Go to the charger if... */
+	//	now_parking=TRUE;
+	while(1)
+	  {
+	    leds_update_mood();
+
+	    /* Go to the charger if... */
 		if( battery_low()
-		    /* Or we've reached a deficiency of food */
+		    /* Or we've reached a defficiency of food */
 		    || ( food_level > FOOD_THRESHOLD ) 
-		    || ( now_parking ))
+		    || ( now_parking )  ) 
 		{
-			now_parking = !charge_complete;
-			parking_update();
-			food_level = 0;
-			continue;
+		  if (battery_low() )
+		    mood = MOOD_DRIVING_TO_CHARGER_FLATBATT;
+		  else if ( food_level > FOOD_THRESHOLD ) 
+		    mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
+		  
+		  now_parking = !charge_complete;
+		  parking_update();
+		  food_level = 0;
+		  continue;
 		}
 
 		/* We may have finished charging */
@@ -89,17 +98,17 @@ int main( void )
 
 		/* Parking involves a static situation, which is incompatible 
 		   with the watchdog - hence leave it here. */
-		watchdog_update();
+		//watchdog_update();
 
 		if( hasfood() )
 		{
-			leds_red_on();
-			leds_green_off();
+		  mood = MOOD_GOT_FOOD;
 
 			/* Are we at the light source? */
 			if(light_intensity == 0)
 			{
 				/* Deposit food here */
+			  mood = MOOD_AT_LAMP;
 				random_walk_disable();
 				motor_r = motor_l = 6;
 				motor_mode = MOTOR_BK;
@@ -114,15 +123,15 @@ int main( void )
 				braitenberg_update();
 			}
 			else
-				/* Random Walk */
-				random_walk_enable();
+			  /* Random Walk */
+			  random_walk_enable();
+
 		}
 		else
 		{
 			/* Not got food, just do random walk */
-			leds_green_off();
-			leds_red_off();
-			random_walk_enable();
+		  mood = MOOD_NONE;
+		  random_walk_enable();
 		}
 	}
 }
@@ -158,7 +167,7 @@ void init(void)
 
 	adc10_init(); /* The order here matters. This configures the ADC */
 	random_init(); /* Grab some random data */
-	adc10_stream(); /* Prepare the ADC for streaming in data */
+
 	
 	net_rx_init();
 	net_tx_init();
@@ -186,7 +195,7 @@ void low_power(void)
 	P4OUT &= ~1;
 	P4DIR |= 1;
 	P4SEL &= ~1;
-
+	
 	dint();
 
 	_BIS_SR(LPM3_bits);

@@ -20,10 +20,29 @@
 #define __LEDS_H
 #include "device.h"
 
+void leds_flash(uint8_t colour);
+void leds_set(uint8_t colour);
+void leds_update_mood();
+
+
 #define leds_init() do { P4OUT &= ~6; P4DIR |= 6; } while (0)
 
 #define RED (2)
 #define GREEN (4)
+#define ORANGE (6)
+#define NONE (0)
+
+
+typedef enum {
+  MOOD_NONE,
+  MOOD_DRIVING_TO_CHARGER_NOFOOD,
+  MOOD_DRIVING_TO_CHARGER_FLATBATT,
+  MOOD_CHARGING,
+  MOOD_GOT_FOOD,
+  MOOD_AT_LAMP
+} mood_t;
+
+extern mood_t mood;
 
 #define leds_red_on() do { P4OUT |= RED; } while (0)
 #define leds_red_off() do { P4OUT &= ~RED; } while (0)
