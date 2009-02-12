@@ -77,7 +77,7 @@ void leds_update_mood()
       leds_flash(NONE);
       break;
     case MOOD_BORED_CHARGING:
-      leds_flash(ORANGE);
+      leds_flash(RED);
       leds_flash(NONE);
       break;
     case MOOD_AM_STUCK:

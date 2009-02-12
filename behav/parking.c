@@ -30,7 +30,7 @@
 #define CHARGE_TIME (20L * 60 * 60)	/* Each tick is 50ms, so 20 ticks per second */
 #define FALLOUT_WAIT 60
 #define RUNUP_WAIT 20
-#define OVERPUSH 3
+#define OVERPUSH 2
 
 bool charge_complete = FALSE;
 bool now_parking = FALSE;
@@ -92,6 +92,7 @@ void parking_update( void )
 				  tempmood = MOOD_BORED_CHARGING;
 				  charge_complete = TRUE;
 				  c = 0;
+				  hit = NOTHIT;
 				}
 				if (battery_charge_complete())
 				  {
@@ -100,6 +101,7 @@ void parking_update( void )
 				    tempmood = MOOD_CHARGED;
 				    charge_complete = TRUE;
 				    c = 0;
+				    hit = NOTHIT;
 				  }
 
 				motor_l = motor_r = 0;

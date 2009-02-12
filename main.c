@@ -77,6 +77,7 @@ int main( void )
 		charge_complete = FALSE;
 		now_parking = 0;
 		
+		/* reverse out of the charger */
 		random_walk_disable();
 		motor_r = motor_l = 6;
 		motor_mode = MOTOR_BK;
