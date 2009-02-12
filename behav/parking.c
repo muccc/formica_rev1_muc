@@ -120,13 +120,14 @@ void parking_update( void )
 			    {
 			      motor_l = motor_r=6;
 			      motor_mode = MOTOR_BK;
-			      time_wait(15);
+			      time_wait(3);
 			      motor_mode = MOTOR_TURN_LEFT;
-			      time_wait(3);
+			      time_wait(2);
 			      motor_mode = MOTOR_FWD;
-			      time_wait(10);
-			      motor_mode = MOTOR_TURN_RIGHT;
 			      time_wait(3);
+			      motor_mode = MOTOR_TURN_RIGHT;
+			      time_wait(2);
+			      motor_mode = MOTOR_FWD;
 			    }
 			  watchdog_update();
 			  break;
