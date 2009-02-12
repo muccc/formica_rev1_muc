@@ -22,7 +22,7 @@
 #include "leds.h"
 
 #define AVERAGE_SIZE 3
-#define FOOD_TRIGGER 500
+#define FOOD_TRIGGER 10
 
 static uint16_t average[AVERAGE_SIZE];
 static bool gotfood = FALSE;
@@ -53,7 +53,7 @@ void foodcallback(uint16_t dataoff, uint16_t dataon)
 
 	mavg = mavg/AVERAGE_SIZE;
 	
-	if(mavg > FOOD_TRIGGER)
+	if(mavg < FOOD_TRIGGER)
 	{
 		gotfood = TRUE;
 		food_level = 0;

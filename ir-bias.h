@@ -31,6 +31,7 @@
 #define bias_use1() do { P2DIR &= ~(BIAS1|BIAS2); P2OUT |= BIAS1; P2DIR |= BIAS1; } while (0)
 
 /* Use bias resistor 2 */
-#define bias_use2() do { P2DIR &= ~(BIAS1|BIAS2); P2OUT |= BIAS2; P2DIR |= BIAS2; } while (0)
+//#define bias_use2() do { P2DIR &= ~(BIAS1|BIAS2); P2OUT |= BIAS2; P2DIR |= BIAS2; } while (0)
+#define bias_use2() bias_use1();
 
 #endif	/* __IR_BIAS_H */
