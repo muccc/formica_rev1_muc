@@ -25,9 +25,10 @@
 #include "../types.h"
 #include "../leds.h"
 
-#define CHARGE_TIME (20 * 30)
-#define FALLOUT_WAIT 10
-#define OVERPUSH 8
+#define CHARGE_TIME (20 * 60 * 45)	/* Each tick is 50ms, so 20 ticks per second */
+#define FALLOUT_WAIT 60
+#define RUNUP_WAIT 20
+#define OVERPUSH 3
 
 bool charge_complete = FALSE;
 
@@ -37,13 +38,14 @@ void parking_update( void )
 		NOTHIT,     /* Moving around in a random walk */
 		JUSTHIT,    /* Just touched power */
 		WEDGED,	    /* Been touching power for a while, wedged in */
-		FALLEN      /* Was touching power, not at the moment */
+		FALLEN,     /* Was touching power, not at the moment */
+		ANOTHERRUNUP 	/* Can't reastablish contact. Having a second run-up */
 	} hit = NOTHIT;
 
 	static uint32_t t = 0; /* Time stop running motors after hitting the wall */
-	static uint32_t e = 0; /* Time to give up pushing forward into the wall */
+	static uint32_t r = 0; /* Time to go for a run-up */
 	static uint32_t c = 0; /* Time to finish charging */
-
+	static uint32_t e = 0; /* Time to give up pushing forward into the wall */
 
 	/* Charging algorithm:
 	 * Random walk until power detected (state == NOTHIT)
@@ -51,24 +53,24 @@ void parking_update( void )
 	 * After 200ms if still got power goto state == WEDGED and turn off
 	 * 	motors
 	 */
-	charge_complete = FALSE;
-	leds_green_off();
 
 	if(battery_power_good())
 	{
-		random_walk_disable();
+	  random_walk_disable();
 		switch(hit)
 		{
 			case NOTHIT:
 			case FALLEN:
-				
-				motor_l = motor_r = 4;
+			case ANOTHERRUNUP:
+			        motor_mode = MOTOR_FWD;
+				motor_l = motor_r = 6;
 				
 				t = the_time + OVERPUSH;
 				hit = JUSTHIT;
 				break;
 			case JUSTHIT:
-				motor_l = motor_r = 4;
+			        motor_mode = MOTOR_FWD;
+				motor_l = motor_r = 6;
 
 				if(c == 0)
 					c = the_time + CHARGE_TIME;
@@ -79,36 +81,65 @@ void parking_update( void )
 				}
 				break;
 			case WEDGED:
-				leds_green_on();
+			        mood = MOOD_CHARGING;
 				if(c < the_time)
 				{
-					/* Finished charging */
+				  mood = MOOD_NONE;
+				        leds_flash(RED);
+					/* Bored of charging */
 					charge_complete = TRUE;
 					c = 0;
 				}
+				if (battery_charge_complete())
+				  {
+				    mood = MOOD_NONE;
+				    /* finished charging */
+				    leds_flash(GREEN);
+				    charge_complete = TRUE;
+				    c = 0;
+				  }
 
 				motor_l = motor_r = 0;
 
 				break;
 		}
 	}
-	else
+	else			/* not touching the charger */
 	{
 		switch(hit)
 		{
-			case NOTHIT:
-				rev_braitenberg_update();
-				break;
+		 	case NOTHIT:
+			  c = 0;
+			  rev_braitenberg_update();
+			  break;
 			case JUSTHIT:
 			case WEDGED:
-				motor_l = motor_r = 4;
-				e = the_time + FALLOUT_WAIT;
+			        mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
+			        motor_mode = MOTOR_FWD;
+				motor_l = motor_r = 6;
+				r = the_time + RUNUP_WAIT;
 				hit = FALLEN;
 				break;
 			case FALLEN:
-				motor_l = motor_r = 4;
+				motor_l = motor_r = 6;
+  			        motor_mode = MOTOR_FWD;
+				
+				e = the_time + FALLOUT_WAIT;
+
+				if(r < the_time)
+				  hit = ANOTHERRUNUP;
 				if(e < the_time)
-					hit = NOTHIT;
+				  hit = NOTHIT;
+			
+				break;
+		       case ANOTHERRUNUP:
+			        motor_l = motor_r = 6;
+  			        motor_mode = MOTOR_BK;
+				time_wait(2);
+				motor_mode = MOTOR_FWD;	
+			
+				if(e < the_time)
+				  hit = NOTHIT;
 				break;
 		}
 	}

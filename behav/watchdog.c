@@ -37,6 +37,7 @@ void watchdog_update( void )
 		motor_l = motor_r = 5;
 
 		time_wait(40);
+		leds_flash(GREEN);
 
 		thresh_time = the_time + (20 * 4);
 	}
