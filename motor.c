@@ -179,31 +179,30 @@ void motor_rand_walk_change( void )
 	static uint8_t mode = 0;
 
 	motor_r = motor_l = RAND_WALK_SPEED;
+	
+	mode = (random() >> 6) % 10;
+	
 	switch(mode)
-	{
-	case 0:
-		motor_mode = MOTOR_FWD;
-		break;
-
-	case 1:
-		motor_mode = MOTOR_TURN_LEFT;
-		break;
-
-	case 2:
-		if( !hasfood() )
-			motor_mode = MOTOR_BK;
-		else
-			motor_mode = MOTOR_FWD;
-		break;
-
-	case 3:
-		motor_mode = MOTOR_TURN_RIGHT;
-		break;
-	}
-
-	mode = (random() >> 7) % 5;
-	if( mode > 3 )
-		mode = 0;
+	  {
+	  case 0:
+	  case 1:
+	    motor_mode = MOTOR_TURN_LEFT;
+	    break;
+	  case 2:
+	  case 3:
+	  motor_mode = MOTOR_TURN_RIGHT;
+	  break;
+	  case 4:
+	    if( !hasfood() )
+	      motor_mode = MOTOR_BK;
+	    else
+	      motor_mode = MOTOR_FWD;
+	    break;
+	    
+	  default:
+	    motor_mode = MOTOR_FWD;
+	    break;
+	  }
 
 	rand_walk_thresh = (random() >> 5) + 1;
 }
