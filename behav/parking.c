@@ -18,6 +18,7 @@
     If not, see <http://www.gnu.org/licenses/>.  */
 #include "parking.h"
 #include "braitenberg.h"
+#include "watchdog.h"
 #include "../motor.h"
 #include "../battery.h"
 #include "../bearing.h"
@@ -84,17 +85,17 @@ void parking_update( void )
 			        mood = MOOD_CHARGING;
 				if(c < the_time)
 				{
+				  /* Bored of charging */
 				  mood = MOOD_NONE;
-				        leds_flash(RED);
-					/* Bored of charging */
-					charge_complete = TRUE;
-					c = 0;
+				  tempmood = MOOD_BORED_CHARGING;
+				  charge_complete = TRUE;
+				  c = 0;
 				}
 				if (battery_charge_complete())
 				  {
-				    mood = MOOD_NONE;
 				    /* finished charging */
-				    leds_flash(GREEN);
+				    mood = MOOD_NONE;
+				    tempmood = MOOD_CHARGED;
 				    charge_complete = TRUE;
 				    c = 0;
 				  }
@@ -111,6 +112,9 @@ void parking_update( void )
 		 	case NOTHIT:
 			  c = 0;
 			  rev_braitenberg_update();
+			  /* want the stuck-on-object watchdog active */
+			  /* whilst seeking charger */
+			  watchdog_update();
 			  break;
 			case JUSTHIT:
 			case WEDGED:

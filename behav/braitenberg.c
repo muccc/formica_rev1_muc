@@ -49,13 +49,13 @@ void braitenberg_update( void )
 
 		if(pd_left>pd_right)
 		{
-			motor_l = 6;
-			motor_r = 2;
+			motor_l = 7;
+			motor_r = 4;
 		}
 		else if (pd_right > pd_left)
 		{
-			motor_r = 6;
-			motor_l = 2;
+			motor_r = 7;
+			motor_l = 4;
 		}
 		else
 		  motor_r = motor_l = 7;
@@ -63,22 +63,20 @@ void braitenberg_update( void )
 
 	case 120:
 	        motor_mode = MOTOR_TURN_RIGHT;
-		leds_set(RED);
 		break;
 
 	case 240:
 		motor_mode = MOTOR_TURN_LEFT;
-		leds_set(GREEN);
 		break;
-
+		
 	default:
-		break;
+	  break;
 	}
-    }
-}
+     }
+ }
 
-void rev_braitenberg_update( void )
-{
+ void rev_braitenberg_update( void )
+ {
   static uint32_t bbtime = 0;
   
   if (the_time > bbtime)

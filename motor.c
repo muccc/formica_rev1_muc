@@ -31,8 +31,8 @@
 
 motor_mode_t motor_mode = MOTOR_FWD;
 
-uint8_t motor_r = 3;
-uint8_t motor_l = 3;
+uint8_t motor_r = 0;
+uint8_t motor_l = 0;
 void motor_rand_walk_change( void );
 static uint8_t rand_walk_thresh = 0;
 static bool random_walk_en = 0;
@@ -100,6 +100,8 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	}
 	cc++;
 
+	//	motor_mode = MOTOR_FWD;
+	//motor_l = motor_r = 6;
 
 	if( motor_mode == MOTOR_FWD )
 	{
@@ -145,8 +147,8 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	if( motor_mode == MOTOR_TURN_RIGHT )
 	{
 		MAX_SPEED = 8;
-		motor_l = 6;
-		motor_r = 7;
+		motor_l = 7;
+		motor_r = 0;
 		
 		conf = M_FWD;
 
@@ -195,7 +197,7 @@ void motor_rand_walk_change( void )
 		break;
 	}
 
-	mode = (random() >> 7) % 3;
+	mode = (random() >> 7) % 4;
 	if( mode > 3 )
 		mode = 0;
 

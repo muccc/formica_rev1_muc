@@ -61,10 +61,32 @@ int main( void )
 
 	random_walk_disable();
 
+	/* if we boot up touching the charger, start charging immediately  */
+	time_wait(5);
+	if (battery_power_good())
+	  now_parking = !charge_complete;
+	    
+
 	while(1)
 	  {
 	    leds_update_mood();
 
+	    
+	    /* We may have finished charging */
+	    if( charge_complete )
+	      {
+		food_level = 0;
+		charge_complete = FALSE;
+		now_parking = 0;
+		
+		random_walk_disable();
+		motor_r = motor_l = 6;
+		motor_mode = MOTOR_BK;
+		
+		time_wait(5);
+		continue;
+	      }
+		
 	    /* Go to the charger if... */
 		if( battery_low()
 		    /* Or we've reached a defficiency of food */
@@ -81,23 +103,9 @@ int main( void )
 		  continue;
 		}
 
-		/* We may have finished charging */
-		if( charge_complete )
-		{
-			food_level = 0;
-			charge_complete = FALSE;
-
-			random_walk_disable();
-			motor_r = motor_l = 6;
-			motor_mode = MOTOR_BK;
-
-			time_wait(10);
-			continue;
-		}
-
 		/* Parking involves a static situation, which is incompatible 
 		   with the watchdog - hence leave it here. */
-		//watchdog_update();
+		watchdog_update();
 
 		if( hasfood() )
 		{
@@ -108,6 +116,7 @@ int main( void )
 			{
 				/* Deposit food here */
 			  mood = MOOD_AT_LAMP;
+			  leds_update_mood();
 				random_walk_disable();
 				motor_r = motor_l = 6;
 				motor_mode = MOTOR_BK;

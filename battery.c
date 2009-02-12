@@ -47,9 +47,9 @@ bool battery_critical( void )
 
 void battery_init( void )
 {
-	P3DIR &= ~(PG | STAT1 | STAT2);
-	P3REN |= (PG | STAT1 | STAT2);
-	P3OUT |= (PG | STAT1 | STAT2);
+  P3DIR &= ~(PG | STAT1 | STAT2);
+  P3REN |= (PG | STAT1 | STAT2);
+  P3OUT |= (PG | STAT1 | STAT2);
 }
 
 bool battery_charge_complete( void )

@@ -6,7 +6,7 @@
 
 mood_t mood = MOOD_NONE;
 mood_t tempmood = MOOD_NONE;
-#define FLASHTIME 2
+#define FLASHTIME 3
 
 void leds_flash(uint8_t colour)
 {
@@ -72,6 +72,19 @@ void leds_update_mood()
     case MOOD_HEARD_ABOUT_FOOD:
       leds_flash(ORANGE);
       break;
+    case MOOD_CHARGED:
+      leds_flash(GREEN);
+      leds_flash(NONE);
+      break;
+    case MOOD_BORED_CHARGING:
+      leds_flash(ORANGE);
+      leds_flash(NONE);
+      break;
+    case MOOD_AM_STUCK:
+      leds_flash(RED);
+      leds_flash(NONE);
+      break;
+
     default:
       mood = MOOD_NONE;
     }
