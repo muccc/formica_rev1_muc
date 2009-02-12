@@ -24,22 +24,6 @@
 void parking_update( void );
 
 extern bool charge_complete;
-<<<<<<< .mine
-extern bool now_parking;
+extern bool now_parking; 
 
-=======
-extern bool now_parking;
-
-
-typedef enum {
-  NOTHIT,     /* Moving around in a random walk */
-  JUSTHIT,    /* Just touched power */
-  WEDGED,	    /* Been touching power for a while, wedged in */
-  FALLEN,     /* Was touching power, not at the moment */
-  ANOTHERRUNUP 	/* Can't reastablish contact. Having a second run-up */
-} hitstate_t;
-
-extern hitstate_t hit;
-
->>>>>>> .r489
 #endif

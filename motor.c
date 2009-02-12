@@ -171,10 +171,7 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 		count = 0;
 
 	/* don't transmit data when parking */
- 	if (!now_parking)
-	  	  ir_nudge();
-	else
-	  ir_transmit_disable();
+	ir_nudge();
 }
 
 void motor_rand_walk_change( void )
