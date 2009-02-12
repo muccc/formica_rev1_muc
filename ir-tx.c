@@ -126,6 +126,11 @@ void ir_transmit_enable( void )
 	ir_receive_dis();
 }
 
+void ir_transmit_disable( void )
+{
+  //	ir_tx_enabled = FALSE;
+}
+
 bool ir_transmit_is_enabled( void )
 {
 	return ir_tx_enabled;

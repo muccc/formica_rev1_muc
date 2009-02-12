@@ -27,6 +27,9 @@
 #include "time.h"
 #include "behav/braitenberg.h"
 #include "food.h"
+#include "behav/parking.h"
+#include "ir-tx.h"
+
 
 
 motor_mode_t motor_mode = MOTOR_FWD;
@@ -167,7 +170,11 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	if( count == MAX_SPEED )
 		count = 0;
 
-	ir_nudge();
+	/* don't transmit data when parking */
+	if (!now_parking)
+	  	  ir_nudge();
+	else
+	  ir_transmit_disable();
 }
 
 void motor_rand_walk_change( void )
@@ -201,6 +208,6 @@ void motor_rand_walk_change( void )
 	if( mode > 3 )
 		mode = 0;
 
-	rand_walk_thresh = (random() >> 6) + 1;
+	rand_walk_thresh = (random() >> 5) + 1;
 }
 

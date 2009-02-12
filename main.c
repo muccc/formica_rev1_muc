@@ -51,10 +51,6 @@ void low_power(void);
 
 int i = 0;
 
-bool now_parking = FALSE;
-
-
-
 int main( void )
 {
 	init();
@@ -70,7 +66,11 @@ int main( void )
 	while(1)
 	  {
 	    leds_update_mood();
-
+	    
+	    if (battery_critical())
+	      {
+		low_power();
+	      }
 	    
 	    /* We may have finished charging */
 	    if( charge_complete )
@@ -86,16 +86,20 @@ int main( void )
 		time_wait(5);
 		continue;
 	      }
-		
+	
+	    /* use the watchdog if we're not parking, or parking but haven't hit the charger  */
+	    //	    if (!now_parking || hit == NOTHIT)
+	    //watchdog_update();
+
 	    /* Go to the charger if... */
 		if( battery_low()
 		    /* Or we've reached a defficiency of food */
 		    || ( food_level > FOOD_THRESHOLD ) 
 		    || ( now_parking )  ) 
 		{
-		  if (battery_low() )
+		  if (battery_low() && !now_parking)
 		    mood = MOOD_DRIVING_TO_CHARGER_FLATBATT;
-		  else if ( food_level > FOOD_THRESHOLD ) 
+		  else if ( (food_level > FOOD_THRESHOLD) && !now_parking) 
 		    mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
 		  
 		  now_parking = !charge_complete;
@@ -103,9 +107,6 @@ int main( void )
 		  continue;
 		}
 
-		/* Parking involves a static situation, which is incompatible 
-		   with the watchdog - hence leave it here. */
-		watchdog_update();
 
 		if( hasfood() )
 		{
@@ -114,14 +115,14 @@ int main( void )
 			/* Are we at the light source? */
 			if(light_intensity == 0)
 			{
-				/* Deposit food here */
+			  /* Deposit food here */
 			  mood = MOOD_AT_LAMP;
 			  leds_update_mood();
-				random_walk_disable();
-				motor_r = motor_l = 6;
-				motor_mode = MOTOR_BK;
-
-				time_wait(10);
+			  random_walk_disable();
+			  motor_r = motor_l = 6;
+			  motor_mode = MOTOR_BK;
+			  
+			  time_wait(10);
 			}
 
 			/* Do we have a reasonable bearing? */
@@ -137,7 +138,7 @@ int main( void )
 		}
 		else
 		{
-			/* Not got food, just do random walk */
+		  /* Not got food, just do random walk */
 		  mood = MOOD_NONE;
 		  random_walk_enable();
 		}

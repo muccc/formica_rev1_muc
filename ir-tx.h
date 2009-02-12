@@ -25,6 +25,9 @@ void ir_transmit_init( void );
 /* Enable IR transmission */
 void ir_transmit_enable( void );
 
+/* disable IR transmission */
+void ir_transmit_disable( void );
+
 /* Returns TRUE if IR transmission is enabled */
 bool ir_transmit_is_enabled( void );
 

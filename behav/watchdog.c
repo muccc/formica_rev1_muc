@@ -21,6 +21,7 @@
 #include "../time.h"
 #include "../motor.h"
 #include "../leds.h"
+#include "parking.h"
 
 static uint32_t thresh_time = 0;
 static uint16_t watchdog_last_bearing = 0;
@@ -39,8 +40,12 @@ void watchdog_update( void )
 		motor_l = motor_r = 5;
 
 		time_wait(20);
-
-		thresh_time = the_time + (20 * 5);
+ 
+		/* 8x threshold time if parking */
+		if (now_parking)
+		  thresh_time = the_time + (WATCHDOG_THRESH << 3);
+		else
+		  thresh_time = the_time + WATCHDOG_THRESH;
 	}
 }
 
@@ -72,8 +77,13 @@ void watchdog_bearing_change()
 			s = 0;
 
 		if( s != watchdog_last_bearing )
-			thresh_time = the_time + (20 * 4);
-
+		  {
+		  /* 8x threshold time if parking */
+		    if (now_parking)
+		      thresh_time = the_time + (WATCHDOG_THRESH << 3);
+		    else
+		      thresh_time = the_time + WATCHDOG_THRESH;
+		  }
 		watchdog_last_bearing = s;
 	}
 }

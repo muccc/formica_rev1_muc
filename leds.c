@@ -87,6 +87,7 @@ void leds_update_mood()
 
     default:
       mood = MOOD_NONE;
+      leds_set(NONE);
     }
 }
 
