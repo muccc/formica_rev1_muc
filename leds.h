@@ -39,10 +39,12 @@ typedef enum {
   MOOD_DRIVING_TO_CHARGER_FLATBATT,
   MOOD_CHARGING,
   MOOD_GOT_FOOD,
-  MOOD_AT_LAMP
+  MOOD_AT_LAMP,
+  MOOD_HEARD_ABOUT_FOOD
 } mood_t;
 
 extern mood_t mood;
+extern mood_t tempmood;
 
 #define leds_red_on() do { P4OUT |= RED; } while (0)
 #define leds_red_off() do { P4OUT &= ~RED; } while (0)

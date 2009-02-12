@@ -5,6 +5,8 @@
 /* produce a single flash of a colour, as defined in leds.h */
 
 mood_t mood = MOOD_NONE;
+mood_t tempmood = MOOD_NONE;
+#define FLASHTIME 2
 
 void leds_flash(uint8_t colour)
 {
@@ -13,7 +15,7 @@ void leds_flash(uint8_t colour)
   prev_led_state = P4OUT & 0x06;
   P4OUT &= ~(0x06);
   P4OUT |= (colour & 0x06);
-  time_wait(2);
+  time_wait(FLASHTIME);
   P4OUT &= ~(0x06);
   P4OUT |= prev_led_state;
 }
@@ -26,6 +28,24 @@ void leds_set(uint8_t colour)
 
 void leds_update_mood()
 {
+  static mood_t oldmood;
+  static uint32_t temptime=0;
+
+  if (tempmood != MOOD_NONE)
+    {
+      oldmood = mood;
+      mood = tempmood;
+
+      if (temptime == 0)
+	temptime = the_time + FLASHTIME;
+      else if (the_time > temptime)
+	{
+	  mood = oldmood;
+	  tempmood = MOOD_NONE;
+	  temptime = 0;
+	}
+    }
+    
   switch (mood)
     {
     case MOOD_NONE:
@@ -48,6 +68,10 @@ void leds_update_mood()
       break;
     case MOOD_AT_LAMP:
       leds_set(RED);
+      break;
+    case MOOD_HEARD_ABOUT_FOOD:
+      leds_flash(ORANGE);
+      break;
     default:
       mood = MOOD_NONE;
     }

@@ -80,6 +80,6 @@ void food_init(void)
 void food_gotinfo( uint32_t *since )
 {
   food_level = (food_level + *since) >> 1;
-  leds_flash(GREEN);
+  tempmood = MOOD_HEARD_ABOUT_FOOD;
 }
 
