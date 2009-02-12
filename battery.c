@@ -33,14 +33,16 @@ uint16_t battval = 65000;
 
 bool battery_low( void )
 {
-	/* Low = 3.5V. 1.75 out of divider, 1.75/2.5*1023 = 716 */
-	return battval < 716 ? TRUE : FALSE;
+  /* Low = 3.5V. 1.75 out of divider, 1.75/2.5*1023 = 716 */
+  /* tweaked slightly by experiment */
+  return battval < 721 ? TRUE : FALSE;
 }
 
 bool battery_critical( void )
 {
-	/* Low = 3.3V. 1.65 out of divider, 1.65/2.5*1023 = 675 */
-	return battval < 675 ? TRUE : FALSE;
+  /* Low = 3.3V. 1.65 out of divider, 1.65/2.5*1023 = 675 */
+  /* tweaked slightly by experiment */
+  return battval < 684 ? TRUE : FALSE;
 }
 
 void battery_init( void )

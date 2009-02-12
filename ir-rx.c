@@ -84,6 +84,12 @@ void ir_receive_init( void )
 	P1DIR &= ~0x04;
 	P1SEL |= 0x04;
 
+	/* Make the PD1,2,3 signals low outputs, so they are clamped when */
+	/* their analogue channels are deselected. This prevents photocurrent */
+	/* from flowing into the battery measurement input. Insane! */
+	P2DIR |= 0x0f;
+	P2OUT &= 0xf0;
+
 	/*** Bias resistor config ***/
 	bias_use2();
 
