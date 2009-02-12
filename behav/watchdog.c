@@ -39,11 +39,11 @@ void watchdog_update( void )
 		motor_mode = MOTOR_BK;
 		motor_l = motor_r = 5;
 
-		time_wait(20);
+		time_wait(30);
  
-		/* 8x threshold time if parking */
+		/* 2x threshold time if parking */
 		if (now_parking)
-		  thresh_time = the_time + (WATCHDOG_THRESH << 3);
+		  thresh_time = the_time + (WATCHDOG_THRESH << 1);
 		else
 		  thresh_time = the_time + WATCHDOG_THRESH;
 	}
@@ -78,9 +78,9 @@ void watchdog_bearing_change()
 
 		if( s != watchdog_last_bearing )
 		  {
-		  /* 8x threshold time if parking */
+		  /* 2x threshold time if parking */
 		    if (now_parking)
-		      thresh_time = the_time + (WATCHDOG_THRESH << 3);
+		      thresh_time = the_time + (WATCHDOG_THRESH << 1);
 		    else
 		      thresh_time = the_time + WATCHDOG_THRESH;
 		  }

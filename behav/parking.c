@@ -114,19 +114,20 @@ void parking_update( void )
 		 	case NOTHIT:
 			  c = 0;
 			  rev_braitenberg_update();
+			  watchdog_update();
 			  /* want the stuck-on-object watchdog active */
 			  /* whilst seeking charger */
 			  if (hasfood())
 			    {
 			      motor_l = motor_r=6;
 			      motor_mode = MOTOR_BK;
-			      time_wait(3);
+			      time_wait(6);
 			      motor_mode = MOTOR_TURN_LEFT;
-			      time_wait(2);
+			      time_wait(3);
 			      motor_mode = MOTOR_FWD;
 			      time_wait(3);
 			      motor_mode = MOTOR_TURN_RIGHT;
-			      time_wait(2);
+			      time_wait(3);
 			      motor_mode = MOTOR_FWD;
 			    }
 			  watchdog_update();

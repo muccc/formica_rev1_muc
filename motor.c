@@ -135,8 +135,8 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	if( motor_mode == MOTOR_TURN_LEFT )
 	{
 		MAX_SPEED = 8;
-		motor_l = 0;
-		motor_r = 7;
+		motor_l = 1;
+		motor_r = 8;
 		
 		conf = M_FWD;
 
@@ -150,8 +150,8 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	if( motor_mode == MOTOR_TURN_RIGHT )
 	{
 		MAX_SPEED = 8;
-		motor_l = 7;
-		motor_r = 0;
+		motor_l = 8;
+		motor_r = 1;
 		
 		conf = M_FWD;
 
