@@ -97,8 +97,21 @@ freq.h: .freq.h.win
 	cp .freq.h.win freq.h
 endif
 
+lkr/$(ARCH)-norm.x:
+	mkdir -p lkr
+	msp430-ld -m $(ARCH) --verbose | csplit -f ./lkr/$(ARCH)-norm- - "%==================================================%1"
+	sed -i ./lkr/$(ARCH)-norm-00 -e 's/==================================================//'
+	mv ./lkr/$(ARCH)-norm-00 ./lkr/$(ARCH)-norm.x
+
+lkr/$(ARCH)-upper.x: lkr/$(ARCH)-norm.x
+	cat $< | sed -e 's/^[[:space:]]*text[[:space:]]*(rx).*$$/text : ORIGIN = 0xe000, LENGTH = 0x1e00/' > $@
+
+lkr/$(ARCH)-lower.x: lkr/$(ARCH)-norm.x
+	cat $< | sed -e 's/^[[:space:]]*text[[:space:]]*(rx).*$$/text : ORIGIN = 0xc000, LENGTH = 0x1e00/' > $@
+
 .PHONY: clean
 
 clean: 
 	-rm -f main main-top freq.{h,c} .fw_ver
+	-rm -f lkr/$(ARCH)-{upper,lower,norm}.x
 
