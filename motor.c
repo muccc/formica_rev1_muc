@@ -30,8 +30,6 @@
 #include "behav/parking.h"
 #include "ir-tx.h"
 
-
-
 motor_mode_t motor_mode = MOTOR_FWD;
 
 uint8_t motor_r = 0;
@@ -89,7 +87,6 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 		if(random_walk_en)
 		{
-
 			static uint8_t j = 0;
 
 			if( j == rand_walk_thresh )
