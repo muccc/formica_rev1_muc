@@ -24,7 +24,6 @@ void leds_flash(uint8_t colour);
 void leds_set(uint8_t colour);
 void leds_update_mood();
 
-
 #define leds_init() do { P4OUT &= ~6; P4DIR |= 6; } while (0)
 
 #define RED (2)
@@ -32,18 +31,17 @@ void leds_update_mood();
 #define ORANGE (6)
 #define NONE (0)
 
-
 typedef enum {
-  MOOD_NONE,
-  MOOD_DRIVING_TO_CHARGER_NOFOOD,
-  MOOD_DRIVING_TO_CHARGER_FLATBATT,
-  MOOD_CHARGING,
-  MOOD_GOT_FOOD,
-  MOOD_AT_LAMP,
-  MOOD_HEARD_ABOUT_FOOD,
-  MOOD_CHARGED,
-  MOOD_BORED_CHARGING,
-  MOOD_AM_STUCK
+	MOOD_NONE,
+	MOOD_DRIVING_TO_CHARGER_NOFOOD,
+	MOOD_DRIVING_TO_CHARGER_FLATBATT,
+	MOOD_CHARGING,
+	MOOD_GOT_FOOD,
+	MOOD_AT_LAMP,
+	MOOD_HEARD_ABOUT_FOOD,
+	MOOD_CHARGED,
+	MOOD_BORED_CHARGING,
+	MOOD_AM_STUCK
 } mood_t;
 
 extern mood_t mood;
