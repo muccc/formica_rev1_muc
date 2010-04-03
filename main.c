@@ -41,7 +41,6 @@
 /* when food_level rises above this amount, go to charger */
 #define FOOD_THRESHOLD (20 * 60)
 
-
 /* Initialises everything. */
 void init(void);
 
