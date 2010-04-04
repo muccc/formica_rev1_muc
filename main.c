@@ -1,5 +1,5 @@
 /*  Copyright 2008 Stephen English, Jeffrey Gough, Alexis Johnson, 
-        Robert Spanton and Joanna A. Sun.
+    Robert Spanton and Joanna A. Sun.
 
     This file is part of the Formica robot firmware.
 
@@ -59,9 +59,9 @@ int main( void )
 	
 	time_wait(8);
 	if (pg_inverted)
-	  leds_flash(RED);
+		leds_flash(RED);
 	else
-	  leds_flash(GREEN);
+		leds_flash(GREEN);
 	
 	time_wait(5);
 
@@ -69,49 +69,49 @@ int main( void )
 	chargeopportunity = the_time + 20;
 	leds_set(ORANGE);
 	while (the_time < chargeopportunity)
-	  {
-	    if ( battery_power_good() )
-	      now_parking = !charge_complete;
-	  }
+	{
+		if ( battery_power_good() )
+			now_parking = !charge_complete;
+	}
 	leds_set(NONE);
 	
 	while(1)
-	  {
-	    leds_update_mood();
+	{
+		leds_update_mood();
 	    
-	    if (battery_critical())
-	      low_power();
+		if (battery_critical())
+			low_power();
 	    
-	    /* We may have finished charging */
-	    if( charge_complete )
-	      {
-		food_level = 0;
-		charge_complete = FALSE;
-		now_parking = 0;
+		/* We may have finished charging */
+		if( charge_complete )
+		{
+			food_level = 0;
+			charge_complete = FALSE;
+			now_parking = 0;
 		
-		/* reverse out of the charger */
-		random_walk_disable();
-		motor_r = motor_l = 6;
-		motor_mode = MOTOR_BK;
+			/* reverse out of the charger */
+			random_walk_disable();
+			motor_r = motor_l = 6;
+			motor_mode = MOTOR_BK;
 		
-		time_wait(5);
-		continue;
-	      }
+			time_wait(5);
+			continue;
+		}
 		
-	    /* Go to the charger if... */
+		/* Go to the charger if... */
 		if( battery_low()
 		    /* Or we've reached a defficiency of food */
 		    || ( food_level > FOOD_THRESHOLD ) 
 		    || ( now_parking )  ) 
 		{
-		  if (battery_low() )
-		    mood = MOOD_DRIVING_TO_CHARGER_FLATBATT;
-		  else if ( food_level > FOOD_THRESHOLD ) 
-		    mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
+			if (battery_low() )
+				mood = MOOD_DRIVING_TO_CHARGER_FLATBATT;
+			else if ( food_level > FOOD_THRESHOLD ) 
+				mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
 		   
-		  now_parking = !charge_complete;
-		  parking_update();
-		  continue;
+			now_parking = !charge_complete;
+			parking_update();
+			continue;
 		}
 
 		/* Parking involves a static situation, which is incompatible 
@@ -120,14 +120,14 @@ int main( void )
 
 		if( hasfood() )
 		{
-		  mood = MOOD_GOT_FOOD;
+			mood = MOOD_GOT_FOOD;
 
 			/* Are we at the light source? */
 			if(light_intensity == 0)
 			{
 				/* Deposit food here */
-			  mood = MOOD_AT_LAMP;
-			  leds_update_mood();
+				mood = MOOD_AT_LAMP;
+				leds_update_mood();
 				random_walk_disable();
 				motor_r = motor_l = 6;
 				motor_mode = MOTOR_BK;
@@ -142,15 +142,15 @@ int main( void )
 				braitenberg_update();
 			}
 			else
-			  /* Random Walk */
-			  random_walk_enable();
+				/* Random Walk */
+				random_walk_enable();
 
 		}
 		else
 		{
 			/* Not got food, just do random walk */
-		  mood = MOOD_NONE;
-		  random_walk_enable();
+			mood = MOOD_NONE;
+			random_walk_enable();
 		}
 	}
 }
