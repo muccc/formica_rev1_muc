@@ -45,8 +45,6 @@ void braitenberg_update( void )
 	case 0:
 		motor_mode = MOTOR_FWD;
 
-		leds_set(ORANGE);
-
 		if(pd_left>pd_right)
 		{
 			motor_l = 7;
