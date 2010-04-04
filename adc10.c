@@ -29,14 +29,7 @@
 #include "time.h"
 
 /* Disable the ADC */
-//#define adc10_dis() do { ADC10CTL0 &= ~ENC; } while (0)
-
-void adc10_dis()
-{
-	bias_comms();			/* back to IR reception bias */
-	while ( ADC10CTL1 & ADC10BUSY );
-	ADC10CTL0 &= ~ENC;
-}
+#define adc10_dis() do { ADC10CTL0 &= ~ENC; } while (0)
 
 /* Select a channel (0 <= x <= 15) */
 #define adc10_set_channel(x) do { ADC10CTL1 &= ~INCH_15;	\
@@ -102,12 +95,16 @@ void adc10_init( void )
 
 void adc10_grab( void )
 {
+	/* Ignore request for ADC reading if there's one already happening */
+	if( ADC10CTL1 & ADC10BUSY )
+		return;
+
 	if(curreading == FOOD1)
 		fled_on();
 	//else if( ir_transmit_is_enabled() )
 	//{
+
 	bias_bearing();
-	
 	    /* Start the conversion: */
 	    ADC10CTL0 |= (ADC10SC | ENC);
 	    //}
@@ -134,6 +131,8 @@ uint16_t adc10_readtemp( void )
 
 	/*Disable the ADC*/
 	adc10_dis();
+	/* Hack the ADC back to reading PD1 */
+	adc10_set_channel( PD1_CHANNEL );
 	return boottemp;
 }
 
@@ -143,6 +142,7 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 	static uint16_t food1; /*output from food with LED on*/
 	static uint32_t batt_time = 0;
 
+	/* back to IR reception bias */
 	adc10_dis();
 
 	switch(curreading){

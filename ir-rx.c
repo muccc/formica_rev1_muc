@@ -287,6 +287,8 @@ static inline void decoder_newdata( uint16_t period )
 
 void ir_receive_en( void )
 {
+	bias_comms();
+
 	/* Enable the capture interrupt */
 	TACCTL1 |= CCIE;
 }
