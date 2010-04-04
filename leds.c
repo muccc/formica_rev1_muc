@@ -80,11 +80,6 @@ void leds_update_mood()
 		leds_flash(RED);
 		leds_flash(NONE);
 		break;
-	case MOOD_AM_STUCK:
-		leds_flash(RED);
-		leds_flash(NONE);
-		break;
-
 	default:
 		mood = MOOD_NONE;
 		leds_set(NONE);

@@ -41,7 +41,6 @@ typedef enum {
 	MOOD_HEARD_ABOUT_FOOD,
 	MOOD_CHARGED,
 	MOOD_BORED_CHARGING,
-	MOOD_AM_STUCK
 } mood_t;
 
 extern mood_t mood;
