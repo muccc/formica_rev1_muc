@@ -22,6 +22,7 @@
 #include "../motor.h"
 #include "../leds.h"
 #include "parking.h"
+#include "../food.h"
 
 /* The time the watchdog will get hit */
 static uint32_t thresh_time = 0;
@@ -83,6 +84,10 @@ void watchdog_bearing_change()
 			/* 2x threshold time if parking */
 			if (now_parking)
 				thresh_time = the_time + (WATCHDOG_THRESH << 1);
+			else if ( hasfood() && bearing == 0 )
+				/* When we have food, and we're headed towards the light,
+				   set the threshold to be much larger. */
+				thresh_time = the_time + (WATCHDOG_THRESH * 4);
 			else
 				thresh_time = the_time + WATCHDOG_THRESH;
 		}

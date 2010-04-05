@@ -21,7 +21,7 @@
 #define __WATCHDOG_H
 #include <stdint.h>
 
-#define WATCHDOG_THRESH (20*3)
+#define WATCHDOG_THRESH 30
 
 /* Check that the robot has moved. */
 void watchdog_update( void );
