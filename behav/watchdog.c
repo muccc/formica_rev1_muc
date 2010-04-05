@@ -1,5 +1,5 @@
 /*  Copyright 2008 Stephen English, Jeffrey Gough, Alexis Johnson, 
-        Robert Spanton and Joanna A. Sun.
+    Robert Spanton and Joanna A. Sun.
 
     This file is part of the Formica robot firmware.
 
@@ -34,7 +34,7 @@ void watchdog_update( void )
 {
 	if( the_time > thresh_time )
 	{
-	  leds_flash(RED);
+		leds_flash(RED);
 		motor_mode = MOTOR_BK;
 		motor_l = motor_r = 5;
 
@@ -42,9 +42,9 @@ void watchdog_update( void )
  
 		/* 2x threshold time if parking */
 		if (now_parking)
-		  thresh_time = the_time + (WATCHDOG_THRESH << 1);
+			thresh_time = the_time + (WATCHDOG_THRESH << 1);
 		else
-		  thresh_time = the_time + WATCHDOG_THRESH;
+			thresh_time = the_time + WATCHDOG_THRESH;
 	}
 }
 
@@ -76,13 +76,13 @@ void watchdog_bearing_change()
 			s = 0;
 
 		if( s != watchdog_last_bearing )
-		  {
-		  /* 2x threshold time if parking */
-		    if (now_parking)
-		      thresh_time = the_time + (WATCHDOG_THRESH << 1);
-		    else
-		      thresh_time = the_time + WATCHDOG_THRESH;
-		  }
+		{
+			/* 2x threshold time if parking */
+			if (now_parking)
+				thresh_time = the_time + (WATCHDOG_THRESH << 1);
+			else
+				thresh_time = the_time + WATCHDOG_THRESH;
+		}
 		watchdog_last_bearing = s;
 	}
 }
