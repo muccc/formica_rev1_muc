@@ -29,11 +29,16 @@
 #define get_stat1() (P3IN & STAT1)
 #define get_stat2() (P3IN & STAT2)
 
-uint16_t battval = 65000;
+#define INV_BATTVAL 0xffff
+
+uint16_t battval = INV_BATTVAL;
 bool pg_inverted = FALSE;
 
 bool battery_low( void )
 {
+	if( battval == INV_BATTVAL )
+		return FALSE;
+
 	/* Low = 3.5V. 1.75 out of divider, 1.75/2.5*1023 = 716 */
 	/* tweaked slightly by experiment */
 	return battval < 721 ? TRUE : FALSE;
@@ -41,6 +46,9 @@ bool battery_low( void )
 
 bool battery_critical( void )
 {
+	if( battval == INV_BATTVAL )
+		return FALSE;
+
 	/* Low = 3.3V. 1.65 out of divider, 1.65/2.5*1023 = 675 */
 	/* tweaked slightly by experiment */
 	return battval < 684 ? TRUE : FALSE;
@@ -101,4 +109,13 @@ bool battery_power_good( void )
 		retval = !retval;
 
 	return retval;
+}
+
+void battery_new_reading( uint16_t reading )
+{
+	/* Update battval */
+	if( battval == INV_BATTVAL )
+		battval = 1023 * 4;
+
+	battval = ((battval * 3) + reading) / 4;
 }

@@ -54,7 +54,7 @@ static enum {
 
 #define CHANNEL_CONFIG (1<<1) | (1<<2) | (1<<3) | (1<<4) | (1<<7)
 
-#define BATT_INTERVAL 10
+#define BATT_INTERVAL 5
 
 void adc10_init( void )
 {
@@ -189,7 +189,7 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 
 			break;
 		case BATT:
-			battval = ADC10MEM;
+			battery_new_reading( ADC10MEM );
 
 			adc10_set_channel(FOOD_CHANNEL);
 			ADC10AE0 = CHANNEL_CONFIG;
