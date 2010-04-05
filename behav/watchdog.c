@@ -38,7 +38,7 @@ void watchdog_update( void )
 {
 	if( the_time > thresh_time )
 	{
-		leds_flash(RED);
+		leds_flash(GREEN);
 		motor_mode = MOTOR_BK;
 		motor_l = motor_r = 5;
 
