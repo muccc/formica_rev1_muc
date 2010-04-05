@@ -23,9 +23,12 @@
 #include "../leds.h"
 #include "parking.h"
 
+/* The time the watchdog will get hit */
 static uint32_t thresh_time = 0;
+/* The last bearing that the watchdog measured. */
 static uint16_t watchdog_last_bearing = 0;
 
+/* Buffer to contain previous bearing values */
 #define B_HIST_LEN 8
 static uint16_t b_hist[B_HIST_LEN];
 static uint8_t bh_pos = 0;

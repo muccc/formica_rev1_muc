@@ -26,6 +26,7 @@
 /* Check that the robot has moved. */
 void watchdog_update( void );
 
+/* Get the watchdog to take note of a new bearing reading. */
 void watchdog_bearing_change();
 
 #endif	/* __WATCHDOG_H */
