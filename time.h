@@ -20,6 +20,8 @@
 #define __TIME_H
 #include <stdint.h>
 
+#define TICKS_PER_SEC 20
+
 extern volatile uint32_t the_time;
 
 /* Pause for t ticks */

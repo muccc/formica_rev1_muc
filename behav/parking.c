@@ -32,136 +32,108 @@
 #define RUNUP_WAIT 20
 #define OVERPUSH 2
 
+#define ANGER_MILD_PUSH_TIME (1 * TICKS_PER_SEC)
+#define ANGER_NUDGE_TIME (5 * TICKS_PER_SEC)
+
+#define NUDGE_TIME (TICKS_PER_SEC / 6)
+
 bool charge_complete = FALSE;
 bool now_parking = FALSE;
 
 void parking_update( void )
 {
 	static enum {
-		NOTHIT,     /* Moving around in a random walk */
-		JUSTHIT,    /* Just touched power */
-		WEDGED,	    /* Been touching power for a while, wedged in */
-		FALLEN,     /* Was touching power, not at the moment */
-		ANOTHERRUNUP 	/* Can't reastablish contact. Having a second run-up */
-	} pstate = NOTHIT;
+		PS_PARK,
+		PS_CHARGING,	/* We're charging */
+		PS_KNOCKED_OFF_ANGER1,
+		PS_KNOCKED_OFF_ANGER2,
+	} pstate = PS_PARK;
+	static uint32_t t = 0;
 
-	static uint32_t t = 0; /* Time stop running motors after hitting the wall */
-	static uint32_t r = 0; /* Time to go for a run-up */
-	static uint32_t c = 0; /* Time to finish charging */
-	static uint32_t e = 0; /* Time to give up pushing forward into the wall */
+	/* Immediately jump to the charging state... */
+	if( battery_power_good() )
+		pstate = PS_CHARGING;
 
-	/* Charging algorithm:
-	 * Random walk until power detected (state == NOTHIT)
-	 * When power detected, store a time + 200ms goto state == JUSTHIT
-	 * After 200ms if still got power goto state == WEDGED and turn off
-	 * 	motors
-	 */
-
-	if(battery_power_good())
+	switch( pstate )
 	{
-		random_walk_disable();
-		switch(pstate)
+	case PS_PARK:
+		/*** We're heading to the charger ***/
+
+		/* Avoid food */
+		if( hasfood() )
 		{
-		case NOTHIT:
-		case FALLEN:
-		case ANOTHERRUNUP:
-			motor_mode = MOTOR_FWD;
-			motor_l = motor_r = 6;
-				
-			t = the_time + OVERPUSH;
-			pstate = JUSTHIT;
-			break;
-		case JUSTHIT:
-			motor_mode = MOTOR_FWD;
-			motor_l = motor_r = 6;
-
-			if(c == 0)
-				c = the_time + CHARGE_TIME;
-				
-			if(t < the_time)
-			{
-				pstate = WEDGED;
-			}
-			break;
-		case WEDGED:
-			mood = MOOD_CHARGING;
-			if(c < the_time)
-			{
-				/* Bored of charging */
-				mood = MOOD_NONE;
-				tempmood = MOOD_BORED_CHARGING;
-				charge_complete = TRUE;
-				c = 0;
-				pstate = NOTHIT;
-			}
-			if (battery_charge_complete())
-			{
-				/* finished charging */
-				mood = MOOD_NONE;
-				tempmood = MOOD_CHARGED;
-				charge_complete = TRUE;
-				c = 0;
-				pstate = NOTHIT;
-			}
-
-			motor_l = motor_r = 0;
-
-			break;
-		}
-	}
-	else			/* not touching the charger */
-	{
-		switch(pstate)
-		{
-		case NOTHIT:
-			c = 0;
-			rev_braitenberg_update();
-			watchdog_update();
-			/* want the stuck-on-object watchdog active */
-			/* whilst seeking charger */
-			if (hasfood())
-			{
-				motor_l = motor_r=6;
-				motor_mode = MOTOR_BK;
-				time_wait(6);
-				motor_mode = MOTOR_TURN_LEFT;
-				time_wait(3);
-				motor_mode = MOTOR_FWD;
-				time_wait(3);
-				motor_mode = MOTOR_TURN_RIGHT;
-				time_wait(3);
-				motor_mode = MOTOR_FWD;
-			}
-			break;
-		case JUSTHIT:
-		case WEDGED:
-			mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
-			motor_mode = MOTOR_FWD;
-			motor_l = motor_r = 6;
-			r = the_time + RUNUP_WAIT;
-			pstate = FALLEN;
-			break;
-		case FALLEN:
-			motor_l = motor_r = 6;
-			motor_mode = MOTOR_FWD;
-				
-			e = the_time + FALLOUT_WAIT;
-
-			if(r < the_time)
-				pstate = ANOTHERRUNUP;
-			if(e < the_time)
-				pstate = NOTHIT;
-			
-			break;
-		case ANOTHERRUNUP:
-			motor_l = motor_r = 6;
+			motor_l = motor_r=6;
 			motor_mode = MOTOR_BK;
-			time_wait(2);
-			motor_mode = MOTOR_FWD;	
-			
-			if(e < the_time)
-				pstate = NOTHIT;
-			break;
+			time_wait(6);
+			motor_mode = MOTOR_TURN_LEFT;
+			time_wait(3);
+			motor_mode = MOTOR_FWD;
+			time_wait(3);
+			motor_mode = MOTOR_TURN_RIGHT;
+			time_wait(3);
+			motor_l = motor_r = 0;
 		}
+
+		rev_braitenberg_update();
+		/* Get unstuck if we can't move on our way to the charger */
+		watchdog_update();
+		break;
+
+	case PS_CHARGING:
+		/*** We've reached the charger ***/
+
+		random_walk_disable();
+		/* Turn the motors off */
+		motor_l = motor_r = 0;
+		mood = MOOD_CHARGING;
+
+		/* Finished charging? */
+		if( battery_charge_complete() )
+		{
+			mood = MOOD_NONE;
+			tempmood = MOOD_CHARGED;
+			charge_complete = TRUE;
+		}
+		/* Lost contact with charger? */
+		else if( !battery_power_good() ) {
+			pstate = PS_KNOCKED_OFF_ANGER1;
+			t = the_time + ANGER_MILD_PUSH_TIME;
+
+			motor_mode = MOTOR_FWD;
+			motor_l = motor_r = 2;
+		}
+		break;
+
+	case PS_KNOCKED_OFF_ANGER1:
+		/*** We were knocked off the charger ***/
+		mood = MOOD_CHARGING_ANGER1;
+
+		if( the_time > t ) {
+			pstate = PS_KNOCKED_OFF_ANGER2;
+			t = the_time + ANGER_NUDGE_TIME;
+		}
+		break;
+
+	case PS_KNOCKED_OFF_ANGER2:
+		/*** We were severely knocked off the charger ***/
+		mood = MOOD_CHARGING_ANGER2;
+
+		/* Reverse a little, then drive forwards again */
+		motor_l = motor_r = 6;
+
+		motor_mode = MOTOR_BK;
+		time_wait(NUDGE_TIME);
+
+		motor_mode = MOTOR_FWD;
+		/* Drive forwards for more time, to make sure we get to the rail */
+		time_wait(NUDGE_TIME * 2);
+
+		/* Leave the motors driving forwards mildly */
+		motor_l = motor_r = 3;
+
+		if( the_time > t )
+			/* Revert to reverse braitenberg again */
+			pstate = PS_PARK;
+		break;
 	}
 }

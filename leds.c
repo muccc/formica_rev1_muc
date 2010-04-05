@@ -63,6 +63,13 @@ void leds_update_mood()
 		leds_flash(ORANGE);
 		leds_flash(NONE);
 		break;
+	case MOOD_CHARGING_ANGER1:
+		leds_set(RED);
+		break;
+	case MOOD_CHARGING_ANGER2:
+		leds_flash(GREEN);
+		leds_flash(NONE);
+		break;
 	case MOOD_GOT_FOOD:
 		leds_set(GREEN);
 		break;
