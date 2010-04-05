@@ -43,7 +43,7 @@ void parking_update( void )
 		WEDGED,	    /* Been touching power for a while, wedged in */
 		FALLEN,     /* Was touching power, not at the moment */
 		ANOTHERRUNUP 	/* Can't reastablish contact. Having a second run-up */
-	} hit = NOTHIT;
+	} pstate = NOTHIT;
 
 	static uint32_t t = 0; /* Time stop running motors after hitting the wall */
 	static uint32_t r = 0; /* Time to go for a run-up */
@@ -60,7 +60,7 @@ void parking_update( void )
 	if(battery_power_good())
 	{
 	  random_walk_disable();
-		switch(hit)
+		switch(pstate)
 		{
 			case NOTHIT:
 			case FALLEN:
@@ -69,7 +69,7 @@ void parking_update( void )
 				motor_l = motor_r = 6;
 				
 				t = the_time + OVERPUSH;
-				hit = JUSTHIT;
+				pstate = JUSTHIT;
 				break;
 			case JUSTHIT:
 			        motor_mode = MOTOR_FWD;
@@ -80,7 +80,7 @@ void parking_update( void )
 				
 				if(t < the_time)
 				{
-					hit = WEDGED;
+					pstate = WEDGED;
 				}
 				break;
 			case WEDGED:
@@ -92,7 +92,7 @@ void parking_update( void )
 				  tempmood = MOOD_BORED_CHARGING;
 				  charge_complete = TRUE;
 				  c = 0;
-				  hit = NOTHIT;
+				  pstate = NOTHIT;
 				}
 				if (battery_charge_complete())
 				  {
@@ -101,7 +101,7 @@ void parking_update( void )
 				    tempmood = MOOD_CHARGED;
 				    charge_complete = TRUE;
 				    c = 0;
-				    hit = NOTHIT;
+				    pstate = NOTHIT;
 				  }
 
 				motor_l = motor_r = 0;
@@ -111,7 +111,7 @@ void parking_update( void )
 	}
 	else			/* not touching the charger */
 	{
-		switch(hit)
+		switch(pstate)
 		{
 		 	case NOTHIT:
 			  c = 0;
@@ -139,7 +139,7 @@ void parking_update( void )
 			        motor_mode = MOTOR_FWD;
 				motor_l = motor_r = 6;
 				r = the_time + RUNUP_WAIT;
-				hit = FALLEN;
+				pstate = FALLEN;
 				break;
 			case FALLEN:
 				motor_l = motor_r = 6;
@@ -148,9 +148,9 @@ void parking_update( void )
 				e = the_time + FALLOUT_WAIT;
 
 				if(r < the_time)
-				  hit = ANOTHERRUNUP;
+				  pstate = ANOTHERRUNUP;
 				if(e < the_time)
-				  hit = NOTHIT;
+				  pstate = NOTHIT;
 			
 				break;
 		       case ANOTHERRUNUP:
@@ -160,7 +160,7 @@ void parking_update( void )
 				motor_mode = MOTOR_FWD;	
 			
 				if(e < the_time)
-				  hit = NOTHIT;
+				  pstate = NOTHIT;
 				break;
 		}
 	}
