@@ -32,7 +32,6 @@ bool battery_critical( void );
 bool battery_low( void );
 
 extern uint16_t battval;
-extern bool pg_inverted;
 
 /* Called with new readings from ADC */
 void battery_new_reading( uint16_t reading );

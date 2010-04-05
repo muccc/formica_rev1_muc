@@ -32,7 +32,6 @@
 #define INV_BATTVAL 0xffff
 
 uint16_t battval = INV_BATTVAL;
-bool pg_inverted = FALSE;
 
 bool battery_low( void )
 {
@@ -59,14 +58,6 @@ void battery_init( void )
 	P3DIR &= ~(PG | STAT1 | STAT2);
 	P3REN |= (PG | STAT1 | STAT2);
 	P3OUT |= (PG | STAT1 | STAT2);
-
-	/* some robots have a hardware fault; !PG signal is inverted  */
-	/* due to damaged charge controller! So at boot up (not connected */
-	/* to charger) measure the !PG state. */
-
-	if ( !get_pg() )
-		pg_inverted = TRUE;
-  
 }
 
 bool battery_charge_complete( void )
@@ -105,9 +96,6 @@ bool battery_power_good( void )
 	else
 		retval = FALSE;
   
-	if (pg_inverted)
-		retval = !retval;
-
 	return retval;
 }
 
