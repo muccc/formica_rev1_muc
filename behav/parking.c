@@ -1,5 +1,5 @@
 /*  Copyright 2008 Stephen English, Jeffrey Gough, Alexis Johnson, 
-        Robert Spanton and Joanna A. Sun.
+    Robert Spanton and Joanna A. Sun.
 
     This file is part of the Formica robot firmware.
 
@@ -59,109 +59,109 @@ void parking_update( void )
 
 	if(battery_power_good())
 	{
-	  random_walk_disable();
+		random_walk_disable();
 		switch(pstate)
 		{
-			case NOTHIT:
-			case FALLEN:
-			case ANOTHERRUNUP:
-			        motor_mode = MOTOR_FWD;
-				motor_l = motor_r = 6;
+		case NOTHIT:
+		case FALLEN:
+		case ANOTHERRUNUP:
+			motor_mode = MOTOR_FWD;
+			motor_l = motor_r = 6;
 				
-				t = the_time + OVERPUSH;
-				pstate = JUSTHIT;
-				break;
-			case JUSTHIT:
-			        motor_mode = MOTOR_FWD;
-				motor_l = motor_r = 6;
+			t = the_time + OVERPUSH;
+			pstate = JUSTHIT;
+			break;
+		case JUSTHIT:
+			motor_mode = MOTOR_FWD;
+			motor_l = motor_r = 6;
 
-				if(c == 0)
-					c = the_time + CHARGE_TIME;
+			if(c == 0)
+				c = the_time + CHARGE_TIME;
 				
-				if(t < the_time)
-				{
-					pstate = WEDGED;
-				}
-				break;
-			case WEDGED:
-			        mood = MOOD_CHARGING;
-				if(c < the_time)
-				{
-				  /* Bored of charging */
-				  mood = MOOD_NONE;
-				  tempmood = MOOD_BORED_CHARGING;
-				  charge_complete = TRUE;
-				  c = 0;
-				  pstate = NOTHIT;
-				}
-				if (battery_charge_complete())
-				  {
-				    /* finished charging */
-				    mood = MOOD_NONE;
-				    tempmood = MOOD_CHARGED;
-				    charge_complete = TRUE;
-				    c = 0;
-				    pstate = NOTHIT;
-				  }
+			if(t < the_time)
+			{
+				pstate = WEDGED;
+			}
+			break;
+		case WEDGED:
+			mood = MOOD_CHARGING;
+			if(c < the_time)
+			{
+				/* Bored of charging */
+				mood = MOOD_NONE;
+				tempmood = MOOD_BORED_CHARGING;
+				charge_complete = TRUE;
+				c = 0;
+				pstate = NOTHIT;
+			}
+			if (battery_charge_complete())
+			{
+				/* finished charging */
+				mood = MOOD_NONE;
+				tempmood = MOOD_CHARGED;
+				charge_complete = TRUE;
+				c = 0;
+				pstate = NOTHIT;
+			}
 
-				motor_l = motor_r = 0;
+			motor_l = motor_r = 0;
 
-				break;
+			break;
 		}
 	}
 	else			/* not touching the charger */
 	{
 		switch(pstate)
 		{
-		 	case NOTHIT:
-			  c = 0;
-			  rev_braitenberg_update();
-			  watchdog_update();
-			  /* want the stuck-on-object watchdog active */
-			  /* whilst seeking charger */
-			  if (hasfood())
-			    {
-			      motor_l = motor_r=6;
-			      motor_mode = MOTOR_BK;
-			      time_wait(6);
-			      motor_mode = MOTOR_TURN_LEFT;
-			      time_wait(3);
-			      motor_mode = MOTOR_FWD;
-			      time_wait(3);
-			      motor_mode = MOTOR_TURN_RIGHT;
-			      time_wait(3);
-			      motor_mode = MOTOR_FWD;
-			    }
-			  break;
-			case JUSTHIT:
-			case WEDGED:
-			        mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
-			        motor_mode = MOTOR_FWD;
-				motor_l = motor_r = 6;
-				r = the_time + RUNUP_WAIT;
-				pstate = FALLEN;
-				break;
-			case FALLEN:
-				motor_l = motor_r = 6;
-  			        motor_mode = MOTOR_FWD;
+		case NOTHIT:
+			c = 0;
+			rev_braitenberg_update();
+			watchdog_update();
+			/* want the stuck-on-object watchdog active */
+			/* whilst seeking charger */
+			if (hasfood())
+			{
+				motor_l = motor_r=6;
+				motor_mode = MOTOR_BK;
+				time_wait(6);
+				motor_mode = MOTOR_TURN_LEFT;
+				time_wait(3);
+				motor_mode = MOTOR_FWD;
+				time_wait(3);
+				motor_mode = MOTOR_TURN_RIGHT;
+				time_wait(3);
+				motor_mode = MOTOR_FWD;
+			}
+			break;
+		case JUSTHIT:
+		case WEDGED:
+			mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
+			motor_mode = MOTOR_FWD;
+			motor_l = motor_r = 6;
+			r = the_time + RUNUP_WAIT;
+			pstate = FALLEN;
+			break;
+		case FALLEN:
+			motor_l = motor_r = 6;
+			motor_mode = MOTOR_FWD;
 				
-				e = the_time + FALLOUT_WAIT;
+			e = the_time + FALLOUT_WAIT;
 
-				if(r < the_time)
-				  pstate = ANOTHERRUNUP;
-				if(e < the_time)
-				  pstate = NOTHIT;
+			if(r < the_time)
+				pstate = ANOTHERRUNUP;
+			if(e < the_time)
+				pstate = NOTHIT;
 			
-				break;
-		       case ANOTHERRUNUP:
-			        motor_l = motor_r = 6;
-  			        motor_mode = MOTOR_BK;
-				time_wait(2);
-				motor_mode = MOTOR_FWD;	
+			break;
+		case ANOTHERRUNUP:
+			motor_l = motor_r = 6;
+			motor_mode = MOTOR_BK;
+			time_wait(2);
+			motor_mode = MOTOR_FWD;	
 			
-				if(e < the_time)
-				  pstate = NOTHIT;
-				break;
+			if(e < the_time)
+				pstate = NOTHIT;
+			break;
 		}
 	}
 }
