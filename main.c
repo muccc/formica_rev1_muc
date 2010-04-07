@@ -57,6 +57,7 @@ int main( void )
 
 	random_walk_disable();
 
+	time_wait(TICKS_PER_SEC * 1);
 	/* start charging if touching charger within 1 second */
 	chargeopportunity = the_time + 20;
 	leds_set(ORANGE);
