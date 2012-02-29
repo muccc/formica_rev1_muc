@@ -53,8 +53,8 @@ SYM_PER_BYTE := 3
 endif
 
 # Get a new firmware revision number!
-FW_VER = `cat .fw_ver`
-CFLAGS += -DFW_VER=`cat .fw_ver`
+FW_VER = 2
+CFLAGS += -DFW_VER=2
 
 .fw_ver: $(C_FILES) $(H_FILES) lkr/$(ARCH)-lower.x lkr/$(ARCH)-upper.x
 ifeq ($(strip $(FW)),)
@@ -63,11 +63,11 @@ else
 	echo $(FW) > .fw_ver
 endif
 
-main: $(C_FILES) $(H_FILES) lkr/$(ARCH)-lower.x .fw_ver
+main: $(C_FILES) $(H_FILES) lkr/$(ARCH)-lower.x 
 	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES) -Wl,-T,lkr/$(ARCH)-lower.x
 	@echo Firmware revision $(FW_VER)
 
-main-top: $(C_FILES) $(H_FILES) lkr/$(ARCH)-upper.x .fw_ver
+main-top: $(C_FILES) $(H_FILES) lkr/$(ARCH)-upper.x
 	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES) -Wl,-T,lkr/$(ARCH)-upper.x
 	@echo Firmware revision $(FW_VER)
 
