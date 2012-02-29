@@ -61,7 +61,7 @@ int main( void )
 	/* start charging if touching charger within 1 second */
 //	chargeopportunity = the_time + 20;
 	leds_set(ORANGE);
-    sleep(60);
+    time_wait(TICKS_PER_SEC * 2);
 //	while (the_time < chargeopportunity)
 //	{
 //		if ( battery_power_good() )
@@ -69,8 +69,8 @@ int main( void )
 //	}
 	leds_set(NONE);
 	
-//	while(1)
-//	{
+  	while(1)
+   	{
 //		leds_update_mood();
 	    
 //		if (battery_critical())
