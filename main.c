@@ -60,8 +60,30 @@ int main( void )
 	time_wait(TICKS_PER_SEC * 1);
 	/* start charging if touching charger within 1 second */
 //	chargeopportunity = the_time + 20;
-	leds_set(ORANGE);
+	leds_set(RED);          // red LED on for 2 seconds
     time_wait(TICKS_PER_SEC * 2);
+    leds_set(GREEN);        //green LED on for 1 second
+    time_wait(TICKS_PER_SEC * 1);
+    leds_set(NONE);
+    motor_l=1;              //left motor running at low speed for 1 second
+    time_wait(TICKS_PER_SEC *1);
+    motor_l=0;
+    motor_r=1;              //right motor running at low speed for 1 second
+    time_wait(TICKS_PER_SEC *1);
+    motor_r=0;
+
+//compiles, but no visible reaction from robot:
+/*    
+    motor_mode= MOTOR_BK;
+    time_wait(TICKS_PER_SEC *1);
+    motor_l=2;
+    motor_r=2;
+    time_wait(TICKS_PER_SEC *1);
+    motor_l=0;
+    motor_r=0;
+    motor_mode= MOTOR_FWD;
+    */
+
 //	while (the_time < chargeopportunity)
 //	{
 //		if ( battery_power_good() )
