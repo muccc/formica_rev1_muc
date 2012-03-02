@@ -110,10 +110,10 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 		conf = M_FWD;
 
 		if( count >= motor_r )
-			conf |= M2;
-
+			conf &= ~M2;                  //switch motor directions fwd/bw: replace &= ~M2 with |= M2;
+                                          //make according exchanges in motor.h
 		if( count >= motor_l )
-			conf |= M1;
+			conf &= ~M1;
 	}
 
 	if( motor_mode == MOTOR_BK )
@@ -123,10 +123,10 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 		conf = M_BK;
 
 		if( count >= motor_r )
-			conf &= ~M2;
+			conf |= M2;                   //switch motor directions fwd/bw: replace |= M2 with &= ~M2;
 
 		if( count >= motor_l )
-			conf &= ~M1;
+			conf |= M1;
 	}
 
 	if( motor_mode == MOTOR_TURN_LEFT )

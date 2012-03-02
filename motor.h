@@ -28,16 +28,16 @@
 #define M_ALL (M1 | MP | M2 | MN)
 
 /* Both motors forward */
-#define M_FWD ( MP | MN )
+#define M_FWD ( M1 | M2 )
 /* Both motors backward */
-#define M_BK ( M1 | M2 )
+#define M_BK ( MP | MN )
 
-/* Left hand motor forward */
+/* Left hand motor forward */             //never used!
 #define M_L_FWD ( MP | MN | M2 )
 /* Left hand motor backward */
 #define M_L_BK  ( M1 )
 
-/* Right hand motor forward */
+/* Right hand motor forward */            //never used!
 #define M_R_FWD ( M1 | MP | MN )
 /* Right hand motor backward */
 #define M_R_BK ( M2 )
