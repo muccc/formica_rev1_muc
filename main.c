@@ -18,8 +18,8 @@
     If not, see <http://www.gnu.org/licenses/>.  */
 #include "device.h"
 #include <signal.h>
-#include "ir-rx.h"
-#include "ir-tx.h"
+//#include "ir-rx.h"
+//#include "ir-tx.h"
 #include "ir-bias.h"
 #include "opamp-1.h"
 #include "adc10.h"
@@ -60,11 +60,14 @@ int main( void )
 	time_wait(TICKS_PER_SEC * 1);
 	/* start charging if touching charger within 1 second */
 //	chargeopportunity = the_time + 20;
-	leds_set(RED);          // red LED on for 2 seconds
+	leds_set(RED);                // red LED on for 2 seconds
+    P4DIR |= (0x09);                 //P40 and P43 are output IR
+    P4OUT |= (0x09);            //all IR leds on (3 top, one bottom)
     time_wait(TICKS_PER_SEC * 2);
-    leds_set(GREEN);        //green LED on for 1 second
+    leds_set(GREEN);          //green LED on for 1 second
     time_wait(TICKS_PER_SEC * 1);
     leds_set(NONE);
+    P4OUT &= ~(0x01);
     motor_l=1;              //left motor running at low speed for 1 second
     time_wait(TICKS_PER_SEC *1);
     motor_l=0;
@@ -72,8 +75,6 @@ int main( void )
     time_wait(TICKS_PER_SEC *1);
     motor_r=0;
 
-//compiles, but no visible reaction from robot:
-/*    
     motor_mode= MOTOR_BK;
     time_wait(TICKS_PER_SEC *1);
     motor_l=2;
@@ -82,7 +83,7 @@ int main( void )
     motor_l=0;
     motor_r=0;
     motor_mode= MOTOR_FWD;
-    */
+   
 
 //	while (the_time < chargeopportunity)
 //	{
@@ -206,8 +207,8 @@ void init(void)
 	
 	net_rx_init();
 	net_tx_init();
-	ir_receive_init();
-	ir_transmit_init();
+//	ir_receive_init();
+//	ir_transmit_init();
 	motor_init();
 	leds_init();
 	battery_init();
