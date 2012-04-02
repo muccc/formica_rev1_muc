@@ -20,35 +20,18 @@
 #include "device.h"
 #include <signal.h>
 #include "random.h"
-#include "battery.h"
 #include "ir.h"
 #include "leds.h"
 #include "bearing.h"
 #include "time.h"
-#include "behav/braitenberg.h"
-#include "food.h"
-#include "behav/parking.h"
-#include "ir-tx.h"
+//#include "ir-tx.h"
 
 motor_mode_t motor_mode = MOTOR_FWD;
 
 uint8_t motor_r = 0;
 uint8_t motor_l = 0;
-void motor_rand_walk_change( void );
-static uint8_t rand_walk_thresh = 0;
-static bool random_walk_en = 0;
 
 uint8_t MAX_SPEED = 8;
-
-void random_walk_enable( void )
-{
-	random_walk_en = TRUE;
-}
-
-void random_walk_disable( void )
-{
-	random_walk_en = FALSE;
-}
 
 void motor_init( void )
 {
@@ -82,25 +65,12 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	if( cc == 100 )
 	{
 		the_time++;
-		food_level++;
 		cc = 0;
 
-		if(random_walk_en)
-		{
-			static uint8_t j = 0;
-
-			if( j == rand_walk_thresh )
-			{
-				j = 0;
-				motor_rand_walk_change();
-			}
-
-			j++;
-		}
 	}
 	cc++;
 
-	//	motor_mode = MOTOR_FWD;
+	//motor_mode = MOTOR_FWD;
 	//motor_l = motor_r = 6;
 
 	if( motor_mode == MOTOR_FWD )
@@ -169,38 +139,5 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 	/* don't transmit data when parking */
 	ir_nudge();
-}
-
-void motor_rand_walk_change( void )
-{
-	static uint8_t mode = 0;
-
-	motor_r = motor_l = RAND_WALK_SPEED;
-	
-	mode = (random() >> 6) % 10;
-	
-	switch(mode)
-	  {
-	  case 0:
-	  case 1:
-	    motor_mode = MOTOR_TURN_LEFT;
-	    break;
-	  case 2:
-	  case 3:
-	  motor_mode = MOTOR_TURN_RIGHT;
-	  break;
-	  case 4:
-	    if( !hasfood() )
-	      motor_mode = MOTOR_BK;
-	    else
-	      motor_mode = MOTOR_FWD;
-	    break;
-	    
-	  default:
-	    motor_mode = MOTOR_FWD;
-	    break;
-	  }
-
-	rand_walk_thresh = (random() >> 5) + 1;
 }
 

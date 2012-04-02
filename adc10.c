@@ -21,10 +21,8 @@
 #include "device.h"
 #include <signal.h>
 #include <stdint.h>
-#include "food.h"
 #include "bearing.h"
-#include "ir-tx.h"
-#include "battery.h"
+//#include "ir-tx.h"
 #include "leds.h"
 #include "time.h"
 
@@ -41,20 +39,14 @@ static enum {
 	PD1,
 	PD2,
 	PD3,
-	BATT,
-	FOOD0,
-	FOOD1
 } curreading = PD1;
 
 #define PD1_CHANNEL 1
 #define PD2_CHANNEL 2
 #define PD3_CHANNEL 3
-#define FOOD_CHANNEL 4
-#define BATT_CHANNEL 15
 
 #define CHANNEL_CONFIG (1<<1) | (1<<2) | (1<<3) | (1<<4) | (1<<7)
 
-#define BATT_INTERVAL 5
 
 void adc10_init( void )
 {
@@ -99,49 +91,15 @@ void adc10_grab( void )
 	if( ADC10CTL1 & ADC10BUSY )
 		return;
 
-	if(curreading == FOOD1)
-		fled_on();
-	//else if( ir_transmit_is_enabled() )
-	//{
-
-	bias_bearing();
+	//bias_bearing();
 	/* Start the conversion: */
 	ADC10CTL0 |= (ADC10SC | ENC);
 	//}
 }
 
-uint16_t adc10_readtemp( void )
-{
-	uint16_t boottemp;
-
-	/* If the ADC is already enabled return 0 */
-	if(ADC10CTL0 & ENC)
-		return 0;
-
-	/* Read the temperature to initialise a random number generator */
-	ADC10CTL1 &= ~INCH_15;
-	ADC10CTL1 |= INCH_TEMP; /*Temperature sensor*/
-
- 	/* Start the conversion: */
- 	ADC10CTL0 |= (ENC | ADC10SC);
-
-	/* Wait for the conversion to finish */
-	while(!(ADC10CTL0 & ADC10IFG));
-	boottemp = ADC10MEM;
-
-	/*Disable the ADC*/
-	adc10_dis();
-	/* Hack the ADC back to reading PD1 */
-	adc10_set_channel( PD1_CHANNEL );
-	return boottemp;
-}
 
 interrupt (ADC10_VECTOR) adc10_isr( void )
 {
-	static uint16_t food0; /*output from food with LED off*/
-	static uint16_t food1; /*output from food with LED on*/
-	static uint32_t batt_time = 0;
-
 	/* back to IR reception bias */
 	adc10_dis();
 
@@ -160,65 +118,9 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 		break;
 	case PD3:
 		pd_value[2] = ADC10MEM;
-
-		/* sample the battery voltage once in a while */
-		if (the_time > batt_time)
-		{
-			batt_time = the_time + BATT_INTERVAL;
-
-			adc10_set_channel(BATT_CHANNEL);
-			curreading = BATT;
-
-			/* disable other channels to prevent coupling of photocurrents */
-			ADC10AE0 = 0;
-			ADC10CTL1 &= ~ADC10SSEL_SMCLK; /* Goto Aux Clock */
-			ADC10CTL1 |= ADC10SSEL_ACLK;   /* 12Khz */
-			ADC10CTL1 &= ~ADC10DIV_7;      /* Remove clock divide */
-			ADC10CTL1 |= ADC10DIV_0;
-			ADC10CTL0 |= SREF_1; /* Use 2.5V Reference */
-			ADC10CTL0 &= ~ADC10SHT_DIV64; /* Go from divide by 64 */
-			ADC10CTL0 |= ADC10SHT_DIV4; /* to divide by 4 */
-		}
-		else
-		{
-			adc10_set_channel(FOOD_CHANNEL);
-			curreading = FOOD0;
-		}
-
-		bearing_set( pd_value );
-
-		break;
-	case BATT:
-		battery_new_reading( ADC10MEM );
-
-		adc10_set_channel(FOOD_CHANNEL);
-		ADC10AE0 = CHANNEL_CONFIG;
-		ADC10CTL1 &= ~ADC10SSEL_SMCLK;
-		ADC10CTL1 |= ADC10SSEL_MCLK; /* Bacl to master clock*/
-		ADC10CTL1 |= ADC10DIV_7; /* Divide by 7 */
-		ADC10CTL0 &= ~SREF_7; /* Vcc - Vss rails */
-		ADC10CTL0 |= ADC10SHT_DIV4; /* Divide clock by 64 */
-
-		curreading = FOOD0;
-		break;
-	case FOOD0:
-		/* FLED Off */
-		food0 = ADC10MEM;
-
-		adc10_set_channel(FOOD_CHANNEL);
-
-		curreading = FOOD1;
-		break;
-	case FOOD1:
-		/* Fled ON */
-		food1 = ADC10MEM;
-
+                
 		adc10_set_channel(PD1_CHANNEL);
-
-		foodcallback(food0, food1);
-			
 		curreading = PD1;
 		break;
 	}
-	fled_off();
 }

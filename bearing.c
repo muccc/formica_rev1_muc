@@ -18,7 +18,6 @@
     If not, see <http://www.gnu.org/licenses/>.  */
 #include "device.h"
 #include "motor.h"
-#include "behav/watchdog.h"
 
 uint16_t bearing = 0;
 uint16_t bearing_strength = 0;
@@ -65,5 +64,5 @@ void bearing_set( uint16_t *pdr )
 				bearing_strength = pdr[0] - pdr[2];
 		}
 	
-	watchdog_bearing_change();
+//	watchdog_bearing_change();
 }

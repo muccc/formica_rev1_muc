@@ -25,8 +25,8 @@ uint16_t lfsr;
 
 void random_init( void )
 {
-	/* Seed with a temperature reading */
-	lfsr = adc10_readtemp() & (~0x03ff);
+	/* Seed with 2342 */
+	lfsr = 2342;
 
 	/*Spin a few times to spice it up a bit*/
 	random();
