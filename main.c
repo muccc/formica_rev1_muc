@@ -53,34 +53,6 @@ int main( void )
 
 
 
-
-/*
-//Motor test
-    P4OUT &= ~(0x01);
-
-//left motor running at low speed for 1 second
-    motor_l=1;              
-    time_wait(TICKS_PER_SEC *1);
-    motor_l=0;
-    motor_r=1;              
-
-//right motor running at low speed for 1 second
-    time_wait(TICKS_PER_SEC *1);
-    motor_r=0;
-
-//Stop motor
-    motor_mode= MOTOR_BK;
-    time_wait(TICKS_PER_SEC *1);
-
-//Both motors REV for 1 second
-    motor_l=2;
-    motor_r=2;
-    time_wait(TICKS_PER_SEC *1);
-    motor_l=0;
-    motor_r=0;
-    motor_mode= MOTOR_FWD;
-*/
-
    
 //LEDs off
     leds_set(NONE);
@@ -88,49 +60,44 @@ int main( void )
     while(1)
     {
 
-/*
-    leds_set(GREEN);
-    time_wait(TICKS_PER_SEC *1);
-    leds_set(ORANGE);
-    time_wait(TICKS_PER_SEC *1);
-    leds_set(RED);
-    time_wait(TICKS_PER_SEC *1);
-*/
-
 	//read three times adc to get all 3 light sensor values
 	adc10_grab();
 	leds_set(GREEN);
-        time_wait(TICKS_PER_SEC *2);
+        time_wait(TICKS_PER_SEC *1);
 	leds_set(NONE);
         time_wait(TICKS_PER_SEC *1);
 
 	adc10_grab();
 	leds_set(GREEN);
-        time_wait(TICKS_PER_SEC *2);
+        time_wait(TICKS_PER_SEC *1);
 	leds_set(NONE);
         time_wait(TICKS_PER_SEC *1);
 
 	adc10_grab();
 	leds_set(GREEN);
-        time_wait(TICKS_PER_SEC *2);
+        time_wait(TICKS_PER_SEC *1);
 	leds_set(NONE);
         time_wait(TICKS_PER_SEC *1);
 
         for (i=0; i<3; i++)
 	{
-		if(pd_value[i] > PD_THRESHOLD)
-		{
-			leds_set(RED);
-		}
-		else
+		for (loop=0; loop<=i; loop++)
 		{
 			leds_set(ORANGE);
+			time_wait(TICKS_PER_SEC/2);
+			leds_set(NONE);
+			time_wait(TICKS_PER_SEC/2);
 		}
-
-		time_wait(TICKS_PER_SEC *1);
-		leds_set(NONE);
-		time_wait(TICKS_PER_SEC *2);
-	}	
+		for (loop=0; loop<pd_value[i]; loop++)
+		{
+			leds_set(RED);
+			time_wait(TICKS_PER_SEC/2);
+			leds_set(NONE);
+			time_wait(TICKS_PER_SEC/2);
+		}
+		time_wait(TICKS_PER_SEC*1);
+	}
+	time_wait(TICKS_PER_SEC*3);	
     }
 }
 
@@ -161,8 +128,7 @@ void init(void)
 	
 	flash_init();
 	opamp1_init();
-//	bias_init();
-	bias_bearing();
+	bias_init();
 	motor_init();
 	leds_init();
 

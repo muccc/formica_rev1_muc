@@ -91,7 +91,7 @@ void adc10_grab( void )
 	if( ADC10CTL1 & ADC10BUSY )
 		return;
 
-	//bias_bearing();
+	bias_bearing();
 	/* Start the conversion: */
 	ADC10CTL0 |= (ADC10SC | ENC);
 	//}
