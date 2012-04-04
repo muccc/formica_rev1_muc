@@ -36,11 +36,13 @@
 uint16_t pd_value[3];
 int pd_loop = 0;
 
+/*
 static enum {
 	PD1,
 	PD2,
 	PD3,
 } curreading = PD1;
+*/
 
 #define PD1_CHANNEL 1
 #define PD2_CHANNEL 2
@@ -71,29 +73,13 @@ void adc10_grab( void )
 
  	/* Start the conversion: */
         ADC10CTL0 |= ENC + ADC10SC;
-	ADC10SA = pd_value;                        // Data buffer start
+	ADC10SA = (int)pd_value;                        // Data buffer start
 	__bis_SR_register(CPUOFF + GIE);        // LPM0, ADC10_ISR will force exit 
 }
 
 
 interrupt (ADC10_VECTOR) adc10_isr( void )
 {
-/*
-	switch(curreading)
-	{
-	case PD1:
-		pd_value[0] = ADC10MEM;
-		curreading = PD2;
-		break;
-	case PD2:
-		pd_value[1] = ADC10MEM;
-		curreading = PD3;
-		break;
-	case PD3:
-		pd_value[2] = ADC10MEM;
-		break;
-	}
-*/
 __bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
 }
 
