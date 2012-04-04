@@ -51,15 +51,11 @@ int main( void )
     leds_set(GREEN);          //green LED on for 1 second
     time_wait(TICKS_PER_SEC * 1);
 
-
-
-   
 //LEDs off
     leds_set(NONE);
 	
     while(1)
     {
-
 	//read three times adc to get all 3 light sensor values
 	adc10_grab();
 	leds_set(GREEN);
@@ -84,16 +80,16 @@ int main( void )
 		for (loop=0; loop<=i; loop++)
 		{
 			leds_set(ORANGE);
-			time_wait(TICKS_PER_SEC/2);
+			time_wait(TICKS_PER_SEC/10);
 			leds_set(NONE);
-			time_wait(TICKS_PER_SEC/2);
+			time_wait(TICKS_PER_SEC/10);
 		}
 		for (loop=0; loop<pd_value[i]; loop++)
 		{
 			leds_set(RED);
-			time_wait(TICKS_PER_SEC/2);
+			time_wait(TICKS_PER_SEC/10);
 			leds_set(NONE);
-			time_wait(TICKS_PER_SEC/2);
+			time_wait(TICKS_PER_SEC/10);
 		}
 		time_wait(TICKS_PER_SEC*1);
 	}
@@ -125,13 +121,12 @@ void init(void)
 		/* DCOR = 0 : DCO internal resistor */;
 
 	BCSCTL3 = LFXT1S1; /*VLOCLK */
-	
 	flash_init();
 	opamp1_init();
 	bias_init();
 	motor_init();
 	leds_init();
-
+        adc10_init();	
 	eint();
 	
 }
