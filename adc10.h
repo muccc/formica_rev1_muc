@@ -27,7 +27,7 @@ void adc10_init( void );
 void adc10_grab( void );
 
 /* The readings from the photodiodes */
-extern uint16_t pd_value[3];
+extern int pd_value[3];
 
 /* Which photodiode is which */
 #define PD_FRONT 0

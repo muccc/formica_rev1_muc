@@ -22,7 +22,6 @@
 #include "opamp-1.h"
 #include "adc10.h"
 #include "random.h"
-#include "motor.h"
 #include "leds.h"
 #include "flash.h"
 #include "time.h"
@@ -63,18 +62,6 @@ int main( void )
 	leds_set(NONE);
         time_wait(TICKS_PER_SEC *1);
 
-	adc10_grab();
-	leds_set(GREEN);
-        time_wait(TICKS_PER_SEC *1);
-	leds_set(NONE);
-        time_wait(TICKS_PER_SEC *1);
-
-	adc10_grab();
-	leds_set(GREEN);
-        time_wait(TICKS_PER_SEC *1);
-	leds_set(NONE);
-        time_wait(TICKS_PER_SEC *1);
-
         for (i=0; i<3; i++)
 	{
 		for (loop=0; loop<=i; loop++)
@@ -86,10 +73,14 @@ int main( void )
 		}
 		for (loop=0; loop<pd_value[i]; loop++)
 		{
-			leds_set(RED);
-			time_wait(TICKS_PER_SEC/10);
-			leds_set(NONE);
-			time_wait(TICKS_PER_SEC/10);
+			//blink RED every 10th time
+			if (loop%10 == 0)
+			{
+				leds_set(RED);
+				time_wait(TICKS_PER_SEC/10);
+				leds_set(NONE);
+				time_wait(TICKS_PER_SEC/10);
+			}
 		}
 		time_wait(TICKS_PER_SEC*1);
 	}
@@ -124,6 +115,7 @@ void init(void)
 	flash_init();
 	opamp1_init();
 	bias_init();
+	bias_bearing();
 	motor_init();
 	leds_init();
         adc10_init();	
