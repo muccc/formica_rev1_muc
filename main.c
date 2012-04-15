@@ -40,49 +40,58 @@ int main( void )
    init();
 
 //Switch on LED for 2sec in RED
-    time_wait(TICKS_PER_SEC * 1);
-    leds_set(RED);                // red LED on for 2 seconds
-    P4DIR |= (0x09);                 //P40 and P43 are output IR
-    P4OUT |= (0x09);            //all IR leds on (3 top, one bottom)
-    time_wait(TICKS_PER_SEC * 2);
+    //time_wait(TICKS_PER_SEC * 1);
+    //leds_set(RED);                // red LED on for 2 seconds
+    //P4DIR |= (0x09);                 //P40 and P43 are output IR
+    //P4OUT |= (0x09);            //all IR leds on (3 top, one bottom)
+    //time_wait(TICKS_PER_SEC * 2);
 
 //Switch on LED for 2sec in GREEN
     leds_set(GREEN);          //green LED on for 1 second
     time_wait(TICKS_PER_SEC * 1);
-
+    leds_set(ORANGE);          //green LED on for 1 second
+    time_wait(TICKS_PER_SEC * 1);
+    leds_set(RED);          //green LED on for 1 second
+    time_wait(TICKS_PER_SEC * 1);
 //LEDs off
     leds_set(NONE);
-	
+
+    /*MAIN LOOP*/	
     while(1)
     {
 	//read three times adc to get all 3 light sensor values
 	adc10_grab();
-	leds_set(GREEN);
-        time_wait(TICKS_PER_SEC *1);
-	leds_set(NONE);
-        time_wait(TICKS_PER_SEC *1);
 
         for (i=0; i<3; i++)
-	{
+        {
 		for (loop=0; loop<=i; loop++)
 		{
-			leds_set(ORANGE);
-			time_wait(TICKS_PER_SEC/10);
-			leds_set(NONE);
-			time_wait(TICKS_PER_SEC/10);
+		    leds_set(ORANGE);
+		    time_wait(TICKS_PER_SEC/4);
+		    leds_set(NONE);
+		    time_wait(TICKS_PER_SEC/4);
 		}
-		for (loop=0; loop<pd_value[i]; loop++)
+
+		if (pd_value[i] > 100)
 		{
-			//blink RED every 10th time
-			if (loop%10 == 0)
-			{
-				leds_set(RED);
-				time_wait(TICKS_PER_SEC/10);
-				leds_set(NONE);
-				time_wait(TICKS_PER_SEC/10);
-			}
+		    leds_set(RED);
+		    time_wait(TICKS_PER_SEC);
 		}
-		time_wait(TICKS_PER_SEC*1);
+		else 
+		{
+		    if (pd_value[i] > 50)
+		    {
+    		        leds_set(ORANGE);
+			time_wait(TICKS_PER_SEC);
+		    }
+		    else
+		    {
+    			leds_set(GREEN);
+			time_wait(TICKS_PER_SEC);
+		    }
+                 }
+            leds_set(NONE);
+	    time_wait(TICKS_PER_SEC*1);
 	}
 	time_wait(TICKS_PER_SEC*3);	
     }
@@ -114,11 +123,9 @@ void init(void)
 	BCSCTL3 = LFXT1S1; /*VLOCLK */
 	flash_init();
 	opamp1_init();
-	bias_init();
 	bias_bearing();
 	motor_init();
 	leds_init();
-        adc10_init();	
+    	adc10_init();	
 	eint();
-	
 }

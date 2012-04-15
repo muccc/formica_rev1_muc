@@ -33,8 +33,8 @@
 #define adc10_set_channel(x) do { ADC10CTL1 &= ~INCH_15;	\
 		ADC10CTL1 |= x << 12; } while (0)
 
-int pd_value[3];
-int pd_loop = 0;
+uint16_t pd_value[3];
+uint8_t pd_loop = 0;
 
 /*
 static enum {
@@ -55,32 +55,23 @@ void adc10_init( void )
 {
 	ADC10CTL1 = INCH_2 + CONSEQ_1;            // A2/A1/A0, once multi channel
 	ADC10CTL1 &= ~ADC10DF; //Straight binary format
-	ADC10CTL0 = REF2_5V + REFON + ADC10SHT_2 + MSC + ADC10ON + ADC10IE;
+	ADC10CTL0 = REF2_5V + REFON + ADC10SHT_2 + MSC + ADC10ON;
   	ADC10DTC1 = 0x03;                         // 3 conversion	
 
 	/* PD1, PD2, PD3 and FOOD are on P2.1, P2.2, P2.3 and P2.4 respectively */
 	/* P2.1, P2.2, P2.3, P2.4 (page 60 of the MSP430F2234 datasheet) */
 	/* RX is on P3.7 (A7) */
-	ADC10AE0 = 0x0E;
+	//ADC10AE0 = 0x0E;
+	ADC10AE0 = BIT1 + BIT2 + BIT3;
 }
 
 
 void adc10_grab( void )
 {
-	/* Ignore request for ADC reading if there's one already happening */
-	if( ADC10CTL1 & ADC10BUSY )
-		return;
-	ADC10CTL0 &= ~ENC;	
-	while (ADC10CTL1 & BUSY);// Wait if ADC10 core is active
-	ADC10SA = (int)pd_value; // Data buffer start
+
+	ADC10SA = (uint16_t)pd_value; // Data buffer start
         ADC10CTL0 |= ENC + ADC10SC; // Start the conversion
-	__bis_SR_register(CPUOFF + GIE); // LPM0, ADC10_ISR will force exit 
+	//Wait until conversion is ready
+	while( ADC10CTL1 & ADC10BUSY ){}
 }
-
-
-interrupt (ADC10_VECTOR) adc10_isr( void )
-{
-__bic_SR_register_on_exit(CPUOFF);        // Clear CPUOFF bit from 0(SR)
-}
-
 
