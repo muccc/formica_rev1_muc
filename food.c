@@ -16,6 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+#include <stdint.h>
 #include "types.h"
 #include "food.h"
 #include "time.h"

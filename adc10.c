@@ -16,11 +16,11 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+#include <isr_compat.h>
+#include <stdint.h>
 #include "adc10.h"
 #include "ir-bias.h"
 #include "device.h"
-#include <signal.h>
-#include <stdint.h>
 #include "food.h"
 #include "bearing.h"
 #include "ir-tx.h"
@@ -59,7 +59,7 @@ static enum {
 void adc10_init( void )
 {
 	ADC10CTL0 = SREF_0 	/* Use VCC and VSS as the references */
-		| ADC10SHT_DIV64 /* 64 x ADC10CLKs
+		| ADC10SHT_3    /* 64 x ADC10CLKs
 				    32 us */
 		/* ADC10SR = 0 -- Support 200 ksps sampling (TODO: maybe this can be set) */
 		/* REFOUT = 0 -- Reference output off */
@@ -67,8 +67,8 @@ void adc10_init( void )
 		//	| MSC		/* Move onto the next conversion after the previous*/
 		| REF2_5V
 		| REFON         /* Use 2.5V reference */
-		| ADC10ON	/* Peripheral on */
-	        | ADC10IE;       /* Interrupt enabled */
+		| ADC10ON	    /* Peripheral on */
+	    | ADC10IE;      /* Interrupt enabled */
 	//  | ENC; 		/* ADC Enabled */
 
 	ADC10CTL1 = /* Select the channel later... */
@@ -76,7 +76,7 @@ void adc10_init( void )
 		/* ADC10DF = 0 -- Straight binary format */
 		/* ISSH = 0 -- No inversion on the s&h signal */
 		| ADC10DIV_7	/* Divide clock by 8 */
-		| ADC10SSEL_MCLK
+		| ADC10SSEL1
 		| CONSEQ_0; 	/* Single channel single conversion */
 		
 
@@ -101,13 +101,12 @@ void adc10_grab( void )
 
 	if(curreading == FOOD1)
 		fled_on();
-	//else if( ir_transmit_is_enabled() )
-	//{
-
-	bias_bearing();
-	/* Start the conversion: */
-	ADC10CTL0 |= (ADC10SC | ENC);
-	//}
+	else if( ir_transmit_is_enabled() )
+	{
+	  bias_bearing();
+	  /* Start the conversion: */
+	  ADC10CTL0 |= (ADC10SC | ENC);
+	}
 }
 
 uint16_t adc10_readtemp( void )
@@ -120,7 +119,7 @@ uint16_t adc10_readtemp( void )
 
 	/* Read the temperature to initialise a random number generator */
 	ADC10CTL1 &= ~INCH_15;
-	ADC10CTL1 |= INCH_TEMP; /*Temperature sensor*/
+	ADC10CTL1 |= INCH_10; /*Temperature sensor*/
 
  	/* Start the conversion: */
  	ADC10CTL0 |= (ENC | ADC10SC);
@@ -136,7 +135,7 @@ uint16_t adc10_readtemp( void )
 	return boottemp;
 }
 
-interrupt (ADC10_VECTOR) adc10_isr( void )
+ISR(ADC10, ADC_ISR)
 {
 	static uint16_t food0; /*output from food with LED off*/
 	static uint16_t food1; /*output from food with LED on*/
@@ -171,13 +170,13 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 
 			/* disable other channels to prevent coupling of photocurrents */
 			ADC10AE0 = 0;
-			ADC10CTL1 &= ~ADC10SSEL_SMCLK; /* Goto Aux Clock */
-			ADC10CTL1 |= ADC10SSEL_ACLK;   /* 12Khz */
+			ADC10CTL1 &= ~ADC10SSEL_3; /* Goto Aux Clock */
+			ADC10CTL1 |= ADC10SSEL_1;   /* 12Khz */
 			ADC10CTL1 &= ~ADC10DIV_7;      /* Remove clock divide */
 			ADC10CTL1 |= ADC10DIV_0;
 			ADC10CTL0 |= SREF_1; /* Use 2.5V Reference */
-			ADC10CTL0 &= ~ADC10SHT_DIV64; /* Go from divide by 64 */
-			ADC10CTL0 |= ADC10SHT_DIV4; /* to divide by 4 */
+			ADC10CTL0 &= ~ADC10SHT_3; /* Go from divide by 64 */
+			ADC10CTL0 |= ADC10SHT_0; /* to divide by 4 */
 		}
 		else
 		{
@@ -193,11 +192,11 @@ interrupt (ADC10_VECTOR) adc10_isr( void )
 
 		adc10_set_channel(FOOD_CHANNEL);
 		ADC10AE0 = CHANNEL_CONFIG;
-		ADC10CTL1 &= ~ADC10SSEL_SMCLK;
-		ADC10CTL1 |= ADC10SSEL_MCLK; /* Bacl to master clock*/
-		ADC10CTL1 |= ADC10DIV_7; /* Divide by 7 */
-		ADC10CTL0 &= ~SREF_7; /* Vcc - Vss rails */
-		ADC10CTL0 |= ADC10SHT_DIV4; /* Divide clock by 64 */
+		ADC10CTL1 &= ~ADC10SSEL_3;
+		ADC10CTL1 |= ADC10SSEL_2; /* Bacl to master clock*/
+		ADC10CTL1 |= ADC10DIV_7;  /* Divide by 7 */
+		ADC10CTL0 &= ~SREF_7;     /* Vcc - Vss rails */
+		ADC10CTL0 |= ADC10SHT_3;  /* Divide clock by 64 */
 
 		curreading = FOOD0;
 		break;

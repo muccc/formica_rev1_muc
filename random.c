@@ -19,7 +19,8 @@
 #include "random.h"
 #include "adc10.h"
 #include "device.h"
-#include <signal.h>
+#include <isr_compat.h>
+#include <stdint.h>
 
 uint16_t lfsr;
 

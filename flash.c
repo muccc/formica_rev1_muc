@@ -16,10 +16,14 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+#include <isr_compat.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include "flash.h"
 #include "device.h"
 #include "leds.h"
-#include <signal.h>
+
+#define FW_VER 2
 
 /* Values of the registers */
 #define FCTL1_VAL 0
@@ -29,7 +33,7 @@
 		/* EEI = 0: No interrupts during erase */
 		/* MERAS:ERASE = 0: No erase. */;
 
-#define FCTL2_VAL (FSSEL_SMCLK | 43)
+#define FCTL2_VAL (FSSEL_3 | 43)
 		/* Flash controller clocked by SMCLK */
 		/* Divide the 16 MHz DCO to 363 KHz: */
 
@@ -128,8 +132,8 @@ void flash_rx_chunk( uint16_t cnum, const uint16_t *fw)
 		{
 			/* Got the IVT */
 			/* Disable interrupts */
-			dint();
-
+			_DINT();
+            
 			/* Erase the last segment */
 			flash_erase_segment( mem_segment(IVT) );
 

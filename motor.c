@@ -16,9 +16,13 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+    
+#define HIGH_SPEED 5
+#define LOW_SPEED 1   
+#define RAND_WALK_SPEED 2
 #include "motor.h"
 #include "device.h"
-#include <signal.h>
+#include <isr_compat.h>
 #include "random.h"
 #include "battery.h"
 #include "ir.h"
@@ -71,7 +75,7 @@ void motor_init( void )
 	IE1 |= WDTIE;
 }
 
-interrupt (WDT_VECTOR) motor_wdt_isr(void)
+ISR(WDT,WatchdogISR)
 {
 	static uint8_t count = 0;
 
@@ -100,12 +104,12 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	}
 	cc++;
 
-	//	motor_mode = MOTOR_FWD;
+	//motor_mode = MOTOR_FWD;
 	//motor_l = motor_r = 6;
 
 	if( motor_mode == MOTOR_FWD )
 	{
-		MAX_SPEED = 8;
+		MAX_SPEED = 5;
 
 		conf = M_FWD;
 
@@ -118,7 +122,7 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 	if( motor_mode == MOTOR_BK )
 	{
-		MAX_SPEED = 8;
+		MAX_SPEED = 5;
 
 		conf = M_BK;
 
@@ -132,8 +136,8 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	if( motor_mode == MOTOR_TURN_LEFT )
 	{
 		MAX_SPEED = 8;
-		motor_l = 1;
-		motor_r = 8;
+		motor_l = LOW_SPEED;
+		motor_r = HIGH_SPEED;
 		
 		conf = M_FWD;
 
@@ -146,9 +150,9 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 	if( motor_mode == MOTOR_TURN_RIGHT )
 	{
-		MAX_SPEED = 8;
-		motor_l = 8;
-		motor_r = 1;
+		MAX_SPEED = 5;
+		motor_l = HIGH_SPEED;
+		motor_r = LOW_SPEED;
 		
 		conf = M_FWD;
 

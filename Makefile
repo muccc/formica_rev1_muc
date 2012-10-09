@@ -1,117 +1,83 @@
-# Copyright 2008 Stephen English, Jeffrey Gough, Alexis Johnson, 
-#     Robert Spanton and Joanna A. Sun.
-
-# This file is part of the Formica robot firmware.
-
-# The Formica robot firmware is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
-# The Formica robot firmware is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-
-# You should have received a copy of the GNU General Public License
-# along with the Formica robot firmware.  
-# If not, see <http://www.gnu.org/licenses/>.
-
-ARCH=msp430x2254
-CFLAGS := -mmcu=$(ARCH) -g -Wall -Os
-CFLAGS += -mendup-at=main
-LDFLAGS :=
-
-CC := msp430-gcc
-
-C_FILES := main.c ir-rx.c freq.c net-rx.c opamp-1.c ir-tx.c \
+#
+# Makefile for msp430
+#
+# 'make' builds everything
+# 'make clean' deletes everything except source files and Makefile
+# You need to set TARGET, MCU and SOURCES for your project.
+# TARGET is the name of the executable file to be produced
+# $(TARGET).elf $(TARGET).hex and $(TARGET).txt nad $(TARGET).map are all generated.
+# The TXT file is used for BSL loading, the ELF can be used for JTAG use
+#
+TARGET=formica
+MCU=msp430f2254
+# List all the source files here
+# eg if you have a source file foo.c then list it here
+SOURCES = main.c ir-rx.c freq.c net-rx.c opamp-1.c ir-tx.c \
 	ir-tx-data.c net-tx.c adc10.c random.c motor.c virus.c \
 	smbus_pec.c battery.c ir.c food.c bearing.c flash.c \
 	behav/braitenberg.c time.c behav/parking.c behav/watchdog.c leds.c
-H_FILES := device.h ir-rx.h freq.h net-rx.h opamp-1.h ir-bias.h \
-	ir-tx.h ir-tx-data.h net-tx.h adc10.h random.h motor.h net.h \
-	leds.h virus.h smbus_pec.h battery.h ir.h food.h bearing.h flash.h \
-	behav/braitenberg.h time.h behav/parking.h behav/watchdog.h
-
-include .config
-
-world: main main-top
-
-ifeq ($(strip $(CONF_TX_SEQ)),y)
-CFLAGS += -DCONF_TX_SEQ=1
+# Include are located in the Include directory
+INCLUDES = -IInclude
+# Add or subtract whatever MSPGCC flags you want. There are plenty more
+#######################################################################################
+CFLAGS = -mmcu=$(MCU) -g -Os -Wall -Wunused $(INCLUDES)
+ASFLAGS = -mmcu=$(MCU) -x assembler-with-cpp -Wa,-gstabs
+LDFLAGS = -mmcu=$(MCU) -Wl,-Map=$(TARGET).map
+########################################################################################
+CC = msp430-gcc
+LD = msp430-ld
+AR = msp430-ar
+AS = msp430-gcc
+GASP = msp430-gasp
+NM = msp430-nm
+OBJCOPY = msp430-objcopy
+RANLIB = msp430-ranlib
+STRIP = msp430-strip
+SIZE = msp430-size
+READELF = msp430-readelf
+MAKETXT = srec_cat
+CP = cp -p
+RM = rm -f
+MV = mv
+########################################################################################
+# the file which will include dependencies
+DEPEND = $(SOURCES:.c=.d)
+# all the object files
+OBJECTS = $(SOURCES:.c=.o)
+all: $(TARGET).elf $(TARGET).hex $(TARGET).txt
+$(TARGET).elf: $(OBJECTS)
+	echo "Linking $@"
+	$(CC) $(OBJECTS) $(LDFLAGS) $(LIBS) -o $@
+	echo
+	echo ">>>> Size of Firmware <<<<"
+	$(SIZE) $(TARGET).elf
+	echo
+%.hex: %.elf
+	$(OBJCOPY) -O ihex $< $@
+%.txt: %.hex
+	$(MAKETXT) -O $@ -TITXT $< -I
+%.o: %.c
+	echo "Compiling $<"
+	$(CC) -c $(CFLAGS) -o $@ $<
+# rule for making assembler source listing, to see the code
+%.lst: %.c
+	$(CC) -c $(CFLAGS) -Wa,-anlhd $< > $@
+# include the dependencies unless we're going to clean, then forget about them.
+ifneq ($(MAKECMDGOALS), clean)
+-include $(DEPEND)
 endif
-
-CFLAGS += -DRAND_WALK_SPEED=$(RAND_WALK_SPEED)
-
-ifneq ($(strip $(WIN)),y)
-# Number of symbols we have to transmit per byte
-SYM_PER_BYTE := `./.sym_per_bit.py $(NBITS)`
-
-world: main .freq.h.win .freq.c.win
-else
-SYM_PER_BYTE := 3
-endif
-
-# Get a new firmware revision number!
-FW_VER = 2
-CFLAGS += -DFW_VER=2
-
-.fw_ver: $(C_FILES) $(H_FILES) lkr/$(ARCH)-lower.x lkr/$(ARCH)-upper.x
-ifeq ($(strip $(FW)),)
-	curl -s http://users.ecs.soton.ac.uk/rds204/formica/rev.php > .fw_ver
-else
-	echo $(FW) > .fw_ver
-endif
-
-main: $(C_FILES) $(H_FILES) lkr/$(ARCH)-lower.x 
-	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES) -Wl,-T,lkr/$(ARCH)-lower.x
-	@echo Firmware revision $(FW_VER)
-
-main-top: $(C_FILES) $(H_FILES) lkr/$(ARCH)-upper.x
-	$(CC) -o $@ $(CFLAGS) $(LDFLAGS) $(C_FILES) -Wl,-T,lkr/$(ARCH)-upper.x
-	@echo Firmware revision $(FW_VER)
-
-ifneq ($(strip $(WIN)),y)
-freq.c: freq.py .config
-	./freq.py $(MIN_PERIOD) $(MAX_PERIOD) $(NBITS) > freq.c
-
-freq.h: .freq.h .config
-	cp .freq.h freq.h
-	sed -i -e "s/_NFREQ/$(NFREQ)/" freq.h
-	sed -i -e "s/_NBITS/$(NBITS)/" freq.h
-	sed -i -e "s/_MIN_PERIOD/$(MIN_PERIOD)/" freq.h
-	sed -i -e "s/_MAX_PERIOD/$(MAX_PERIOD)/" freq.h
-	sed -i -e "s/_SYMBOLS_PER_BYTE/$(SYM_PER_BYTE)/" freq.h
-
-.freq.c.win: freq.c
-	cp -f freq.c .freq.c.win
-
-.freq.h.win: freq.h
-	cp -f freq.h .freq.h.win
-else
-# Alexis's windows mode
-freq.c: .freq.c.win
-	cp .freq.c.win freq.c
-
-freq.h: .freq.h.win
-	cp .freq.h.win freq.h
-endif
-
-lkr/$(ARCH)-norm.x:
-	mkdir -p lkr
-	msp430-ld -m $(ARCH) --verbose | csplit -f ./lkr/$(ARCH)-norm- - "%==================================================%1"
-	sed -i ./lkr/$(ARCH)-norm-00 -e 's/==================================================//'
-	mv ./lkr/$(ARCH)-norm-00 ./lkr/$(ARCH)-norm.x
-
-lkr/$(ARCH)-upper.x: lkr/$(ARCH)-norm.x
-	cat $< | sed -e 's/^[[:space:]]*text[[:space:]]*(rx).*$$/text : ORIGIN = 0xe000, LENGTH = 0x1e00/' > $@
-
-lkr/$(ARCH)-lower.x: lkr/$(ARCH)-norm.x
-	cat $< | sed -e 's/^[[:space:]]*text[[:space:]]*(rx).*$$/text : ORIGIN = 0xc000, LENGTH = 0x1e00/' > $@
-
+# dependencies file
+# includes also considered, since some of these are our own
+# (otherwise use -MM instead of -M)
+%.d: %.c
+	echo "Generating dependencies $@ from $<"
+	$(CC) -M ${CFLAGS} $< >$@
+.SILENT:
 .PHONY: clean
-
-clean: 
-	-rm -f main main-top freq.{h,c} .fw_ver
-	-rm -f lkr/$(ARCH)-{upper,lower,norm}.x
-
+clean:
+	-$(RM) $(OBJECTS)
+	-$(RM) $(TARGET).map
+	-$(RM) $(TARGET).elf $(TARGET).hex $(TARGET).txt
+	-$(RM) $(TARGET).lst
+	-$(RM) $(SOURCES:.c=.lst)
+	-$(RM) $(DEPEND)

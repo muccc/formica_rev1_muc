@@ -16,6 +16,9 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+#include <isr_compat.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include "ir-rx.h"
 #include "ir.h"
 #include "ir-bias.h"
@@ -23,7 +26,6 @@
 #include "freq.h"
 #include "net-rx.h"
 #include "types.h"
-#include <signal.h>
 #include "smbus_pec.h"
 
 /* Number of samples to average out */
@@ -32,7 +34,7 @@
 /* The stability threshold for when to accept a new frequency */
 #define STABLE_THRESH (110 * AVERAGE)
 
-#define timera_en() do { TACTL |= MC_CONT; } while(0)
+#define timera_en() do { TACTL |= MC_2; } while(0)
 
 static uint8_t cb_pos = 0;
 static uint8_t curbyte = 0;
@@ -63,9 +65,9 @@ static inline void decoder_newdata( uint16_t period );
 void ir_receive_init( void )
 {
 	/*** Configure Timer A ***/
-	TACTL = TASSEL_SMCLK	/* SMCLK clock source */
+	TACTL = TASSEL_2	/* SMCLK clock source */
 		/* No clock divider */
-		| MC_STOP	/* Timer stopped for now */
+		| MC_0	/* Timer stopped for now */
 		/* Don't reset the timer */
 		| TAIE		/* Interrupt enabled */;
 
@@ -73,8 +75,8 @@ void ir_receive_init( void )
 	TAR = 0;
 
 	/* Set up CCR1 to trigger off the comparator */
-	TACCTL1 = CM_POS	/* Trigger on positive edges */
-		| CCIS_0	/* CCI0A trigger source (COMP) */
+	TACCTL1 = CM1	/* Trigger on positive edges */
+		| CCIS0	/* CCI0A trigger source (COMP) */
 		| SCS		/* Synchronize with timer clock */
 		| CAP		/* Capture mode */
 		| CCIE;		/* Interrupt enabled */
@@ -99,7 +101,7 @@ void ir_receive_init( void )
 	timera_en();
 }
 
-interrupt (TIMERA1_VECTOR) timer_a_isr(void)
+ISR(TIMERA1, TIMERA1_ISR)
 {
 	uint16_t taiv_l = TAIV;
 	/* Number of times the timer has wrapped since the last edge */
@@ -182,10 +184,12 @@ interrupt (TIMERA1_VECTOR) timer_a_isr(void)
 
 }
 
-interrupt (TIMERA0_VECTOR) timer_a1_isr(void)
+
+ISR(TIMERA0, TIMERA_ISR)
 {
 
 }
+
 
 static void decoder_reset( void )
 {
