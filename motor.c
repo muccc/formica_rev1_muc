@@ -17,8 +17,8 @@
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
     
-#define HIGH_SPEED 5
-#define LOW_SPEED 1   
+#define HIGH_SPEED 4
+#define LOW_SPEED 2   
 #define RAND_WALK_SPEED 2
 #include "motor.h"
 #include "device.h"
@@ -41,7 +41,6 @@ uint8_t motor_l = 0;
 void motor_rand_walk_change( void );
 static uint8_t rand_walk_thresh = 0;
 static bool random_walk_en = 0;
-
 uint8_t MAX_SPEED = 8;
 
 void random_walk_enable( void )
@@ -110,11 +109,10 @@ ISR(WDT,WatchdogISR)
 	if( motor_mode == MOTOR_FWD )
 	{
 		MAX_SPEED = 5;
-
 		conf = M_FWD;
 
 		if( count >= motor_r )
-			conf &= ~M2;                  //switch motor directions fwd/bw: replace &= ~M2 with |= M2;
+			conf &= ~M2;      //switch motor directions fwd/bw: replace &= ~M2 with |= M2;
                                           //make according exchanges in motor.h
 		if( count >= motor_l )
 			conf &= ~M1;
@@ -123,7 +121,6 @@ ISR(WDT,WatchdogISR)
 	if( motor_mode == MOTOR_BK )
 	{
 		MAX_SPEED = 5;
-
 		conf = M_BK;
 
 		if( count >= motor_r )
@@ -161,7 +158,6 @@ ISR(WDT,WatchdogISR)
 
 		if( count >= motor_l )
 			conf |= M1;
-
 	}
 
 	motor_off();
@@ -180,29 +176,27 @@ void motor_rand_walk_change( void )
 	static uint8_t mode = 0;
 
 	motor_r = motor_l = RAND_WALK_SPEED;
-	
 	mode = (random() >> 6) % 10;
 	
 	switch(mode)
-	  {
-	  case 0:
-	  case 1:
-	    motor_mode = MOTOR_TURN_LEFT;
-	    break;
-	  case 2:
-	  case 3:
-	  motor_mode = MOTOR_TURN_RIGHT;
-	  break;
-	  case 4:
-	    if( !hasfood() )
-	      motor_mode = MOTOR_BK;
-	    else
-	      motor_mode = MOTOR_FWD;
-	    break;
-	    
-	  default:
-	    motor_mode = MOTOR_FWD;
-	    break;
+	{
+		case 0:
+	  	case 1:
+	    		motor_mode = MOTOR_TURN_LEFT;
+	    		break;
+	  	case 2:
+	  	case 3:
+	  		motor_mode = MOTOR_TURN_RIGHT;
+	  		break;
+	  	case 4:
+	    		if( !hasfood() )
+	      			motor_mode = MOTOR_BK;
+	    		else
+	      			motor_mode = MOTOR_FWD;
+	    		break;
+	  	default:
+	    		motor_mode = MOTOR_FWD;
+	    		break;
 	  }
 
 	rand_walk_thresh = (random() >> 5) + 1;

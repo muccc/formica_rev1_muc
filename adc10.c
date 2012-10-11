@@ -36,7 +36,7 @@
 		ADC10CTL1 |= x << 12; } while (0)
 
 uint16_t pd_value[3];
-
+static uint32_t batt_time = 0;
 static enum {
 	PD1,
 	PD2,
@@ -60,16 +60,16 @@ void adc10_init( void )
 {
 	ADC10CTL0 = SREF_0 	/* Use VCC and VSS as the references */
 		| ADC10SHT_3    /* 64 x ADC10CLKs
-				    32 us */
+	            	           32 us */
 		/* ADC10SR = 0 -- Support 200 ksps sampling (TODO: maybe this can be set) */
 		/* REFOUT = 0 -- Reference output off */
 		/* REFBURST = 0 -- Reference buffer on continuously (TODO) */
-		//	| MSC		/* Move onto the next conversion after the previous*/
+		//| MSC		/* Move onto the next conversion after the previous*/
 		| REF2_5V
-		| REFON         /* Use 2.5V reference */
-		| ADC10ON	    /* Peripheral on */
-	    | ADC10IE;      /* Interrupt enabled */
-	//  | ENC; 		/* ADC Enabled */
+		| REFON		/* Use 2.5V reference */
+		| ADC10ON   	/* Peripheral on */
+	    	| ADC10IE;      /* Interrupt enabled */
+		//| ENC; 	/* ADC Enabled */
 
 	ADC10CTL1 = /* Select the channel later... */
 		SHS_0		/* ADC10SC is the sample-and-hold selector */
@@ -139,7 +139,6 @@ ISR(ADC10, ADC_ISR)
 {
 	static uint16_t food0; /*output from food with LED off*/
 	static uint16_t food1; /*output from food with LED on*/
-	static uint32_t batt_time = 0;
 
 	/* back to IR reception bias */
 	adc10_dis();
@@ -147,25 +146,27 @@ ISR(ADC10, ADC_ISR)
 	switch(curreading){
 	case PD1:
 		pd_value[0] = ADC10MEM;
-
 		adc10_set_channel(PD2_CHANNEL);
+
+		//Switch to next adc channel for next run
 		curreading = PD2;
 		break;
 	case PD2:
 		pd_value[1] = ADC10MEM;
-
 		adc10_set_channel(PD3_CHANNEL);
+
+		//Switch to next adc channel for next run
 		curreading = PD3;
 		break;
 	case PD3:
 		pd_value[2] = ADC10MEM;
-
 		/* sample the battery voltage once in a while */
 		if (the_time > batt_time)
 		{
 			batt_time = the_time + BATT_INTERVAL;
-
 			adc10_set_channel(BATT_CHANNEL);
+		
+			//Switch to next adc channel for next run
 			curreading = BATT;
 
 			/* disable other channels to prevent coupling of photocurrents */
@@ -181,41 +182,41 @@ ISR(ADC10, ADC_ISR)
 		else
 		{
 			adc10_set_channel(FOOD_CHANNEL);
+
+			//Switch to next adc channel for next run
 			curreading = FOOD0;
 		}
 
 		bearing_set( pd_value );
-
 		break;
 	case BATT:
 		battery_new_reading( ADC10MEM );
-
 		adc10_set_channel(FOOD_CHANNEL);
 		ADC10AE0 = CHANNEL_CONFIG;
 		ADC10CTL1 &= ~ADC10SSEL_3;
-		ADC10CTL1 |= ADC10SSEL_2; /* Bacl to master clock*/
+		ADC10CTL1 |= ADC10SSEL_2; /* Back to master clock*/
 		ADC10CTL1 |= ADC10DIV_7;  /* Divide by 7 */
 		ADC10CTL0 &= ~SREF_7;     /* Vcc - Vss rails */
 		ADC10CTL0 |= ADC10SHT_3;  /* Divide clock by 64 */
 
+		//Switch to next adc channel for next run
 		curreading = FOOD0;
 		break;
 	case FOOD0:
 		/* FLED Off */
 		food0 = ADC10MEM;
-
 		adc10_set_channel(FOOD_CHANNEL);
-
+		
+		//Switch to next adc channel for next run
 		curreading = FOOD1;
 		break;
 	case FOOD1:
 		/* Fled ON */
 		food1 = ADC10MEM;
-
 		adc10_set_channel(PD1_CHANNEL);
-
 		foodcallback(food0, food1);
-			
+		
+		//Switch to next adc channel for next run
 		curreading = PD1;
 		break;
 	}

@@ -27,7 +27,6 @@
 
 static uint16_t average[AVERAGE_SIZE];
 static bool gotfood = FALSE;
-
 uint32_t food_level = 0;
 
 void foodcallback(uint16_t dataoff, uint16_t dataon)
@@ -43,14 +42,17 @@ void foodcallback(uint16_t dataoff, uint16_t dataon)
 
 	/* Save the data in the array */
 	average[averageindex++] = data;
-	if(averageindex == AVERAGE_SIZE ){
+	if(averageindex == AVERAGE_SIZE )
+	{
 		averageindex = 0;
 	}
 
 	/*Calculating moving average*/
 	uint16_t mavg = 0;
 	for(i=0; i<AVERAGE_SIZE; i++)
+	{
 		mavg += average[i];
+	}
 
 	mavg = mavg/AVERAGE_SIZE;
 	
@@ -60,7 +62,9 @@ void foodcallback(uint16_t dataoff, uint16_t dataon)
 		food_level = 0;
 	}
 	else
+	{
 		gotfood = FALSE;
+	}
 }
 
 bool hasfood(void)

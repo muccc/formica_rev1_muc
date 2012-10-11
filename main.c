@@ -57,14 +57,14 @@ int i = 0;
 int main( void )
 {
     uint32_t chargeopportunity = 0;
-	init();
+    init();
 
-	random_walk_disable();
+    random_walk_disable();
 
-	time_wait(TICKS_PER_SEC * 1);
-	/* start charging if touching charger within 1 second */
-	chargeopportunity = the_time + 20;
-	leds_set(RED);                // red LED on for 2 seconds
+    time_wait(TICKS_PER_SEC * 1);
+    /* start charging if touching charger within 1 second */
+    chargeopportunity = the_time + 20;
+    leds_set(RED);                // red LED on for 2 seconds
     P4DIR |= (0x09);                 //P40 and P43 are output IR
     P4OUT |= (0x09);            //all IR leds on (3 top, one bottom)
     time_wait(TICKS_PER_SEC * 2);
@@ -88,91 +88,99 @@ int main( void )
     motor_r=0;
     motor_mode= MOTOR_FWD;
    
-
-	while (the_time < chargeopportunity)
+    while (the_time < chargeopportunity)
+    {
+	if ( battery_power_good() )
 	{
-		if ( battery_power_good() )
-			now_parking = !charge_complete;
+	    now_parking = !charge_complete;
 	}
-	leds_set(NONE);
-	
-  	while(1)
-   	{
-		leds_update_mood();
+    }
+    leds_set(NONE);
+
+    while(1)
+    {
+	leds_update_mood();
 	    
-		if (battery_critical())
-			low_power();
+	if (battery_critical())
+	{
+	    low_power();
+	}
 	    
-		/* We may have finished charging */
-		if( charge_complete )
-		{
-			food_level = 0;
-			charge_complete = FALSE;
-			now_parking = 0;
+	/* We may have finished charging */
+	if( charge_complete )
+	{
+    	    food_level = 0;
+	    charge_complete = FALSE;
+	    now_parking = 0;
 		
-			/* reverse out of the charger */
+	    /* reverse out of the charger */
+	    random_walk_disable();
+	    motor_r = motor_l = 6;
+	    motor_mode = MOTOR_BK;
+		
+	    time_wait(5);
+	    continue;
+	}
+		
+	/* Go to the charger if... */
+	if( battery_low()
+        /* Or we've reached a defficiency of food */
+	    || ( food_level > FOOD_THRESHOLD ) 
+	    || ( now_parking )  ) 
+	{
+	     if (battery_low() )
+	     {
+	             mood = MOOD_DRIVING_TO_CHARGER_FLATBATT;
+	     }
+	     else if ( food_level > FOOD_THRESHOLD ) 
+	     {
+		     mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
+	     }
+		   
+	     now_parking = !charge_complete;
+	     parking_update();
+	     continue;
+	}
+
+	/* Parking involves a static situation, which is incompatible 
+	   with the watchdog - hence leave it here. */
+	watchdog_update();
+
+	if( hasfood() )
+	{
+		mood = MOOD_GOT_FOOD;
+
+		/* Are we at the light source? */
+		if(light_intensity == 0)
+		{
+			/* Deposit food here */
+			mood = MOOD_AT_LAMP;
+			leds_update_mood();
 			random_walk_disable();
 			motor_r = motor_l = 6;
 			motor_mode = MOTOR_BK;
-		
-			time_wait(5);
-			continue;
-		}
-		
-		/* Go to the charger if... */
-		if( battery_low()
-            /* Or we've reached a defficiency of food */
-		    || ( food_level > FOOD_THRESHOLD ) 
-		    || ( now_parking )  ) 
-		{
-			if (battery_low() )
-				mood = MOOD_DRIVING_TO_CHARGER_FLATBATT;
-			else if ( food_level > FOOD_THRESHOLD ) 
-				mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
-		   
-			now_parking = !charge_complete;
-			parking_update();
-			continue;
+			time_wait(10);
 		}
 
-		/* Parking involves a static situation, which is incompatible 
-		   with the watchdog - hence leave it here. */
-		watchdog_update();
-
-		if( hasfood() )
+		/* Do we have a reasonable bearing? */
+		else if(bearing_strength > 10)
 		{
-			mood = MOOD_GOT_FOOD;
-
-			/* Are we at the light source? */
-			if(light_intensity == 0)
-			{
-				/* Deposit food here */
-				mood = MOOD_AT_LAMP;
-				leds_update_mood();
-				random_walk_disable();
-				motor_r = motor_l = 6;
-				motor_mode = MOTOR_BK;
-
-				time_wait(10);
-			}
-
-			/* Do we have a reasonable bearing? */
-			else if(bearing_strength > 10)
-			{
-				random_walk_disable();
-				braitenberg_update();
-			}
-			else
-				/* Random Walk */
-				random_walk_enable();
+			random_walk_disable();
+			braitenberg_update();
 		}
 		else
 		{
-			/* Not got food, just do random walk */
-			mood = MOOD_NONE;
+			/* Random Walk */
 			random_walk_enable();
 		}
-  	}
+	}
+	else
+	{
+		/* Not got food, just do random walk */
+		mood = MOOD_NONE;
+		random_walk_enable();
+	}
+  }
 }
 
 void init(void)
@@ -201,15 +209,13 @@ void init(void)
 		;
 
 	BCSCTL3 = LFXT1S1; /*VLOCLK */
-	
+
+	//Init everything else
 	flash_init();
 	opamp1_init();
 	bias_init();
-
 	adc10_init(); /* The order here matters. This configures the ADC */
 	random_init(); /* Grab some random data */
-
-	
 	net_rx_init();
 	net_tx_init();
 	ir_receive_init();
