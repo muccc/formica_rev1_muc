@@ -36,7 +36,6 @@
 		ADC10CTL1 |= x << 12; } while (0)
 
 uint16_t pd_value[3];
-static uint32_t batt_time = 0;
 static enum {
 	PD1,
 	PD2,
@@ -139,6 +138,7 @@ ISR(ADC10, ADC_ISR)
 {
 	static uint16_t food0; /*output from food with LED off*/
 	static uint16_t food1; /*output from food with LED on*/
+	static uint32_t batt_time = 0;
 
 	/* back to IR reception bias */
 	adc10_dis();
@@ -164,9 +164,9 @@ ISR(ADC10, ADC_ISR)
 		if (the_time > batt_time)
 		{
 			batt_time = the_time + BATT_INTERVAL;
-			adc10_set_channel(BATT_CHANNEL);
-		
+			
 			//Switch to next adc channel for next run
+			adc10_set_channel(BATT_CHANNEL);
 			curreading = BATT;
 
 			/* disable other channels to prevent coupling of photocurrents */

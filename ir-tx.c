@@ -85,15 +85,21 @@ ISR(TIMERB0, TIMERB_ISR)
 
 	/* Only change output period during the low section */
 	if( P4IN & 1 )
+	{
 		return;
+	}
 	else
+	{
 		/* LEDs currently off */
 		adc10_grab();
+	}
 
 	period++;
 	/* Transmit 3 periods of each frequency */
 	if( period != 4 )
+	{
 		return;
+	}
 	period = 0;
 
 	sym = ir_tx_next_symbol();
@@ -104,17 +110,18 @@ ISR(TIMERB0, TIMERB_ISR)
 		/* Disable the compare unit's control of the IR */
 		P4OUT &= ~1;
 		P4SEL &= ~1;
-
 		ir_receive_en();
 	}
 	else
+	{
 		TBCCR0 = period_lut[ sym ];
+	}
 
 	/* Flag is automatically cleared */
 }
 
 
-ISR(TIMERB1, Timerb_ISR)
+ISR(TIMERB1, TIMERB1_ISR)
 {
 	// This interrupt should never happen
 }

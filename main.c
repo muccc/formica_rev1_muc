@@ -70,6 +70,10 @@ int main( void )
     time_wait(TICKS_PER_SEC * 2);
     leds_set(GREEN);          //green LED on for 1 second
     time_wait(TICKS_PER_SEC * 1);
+    leds_set(ORANGE);          //green LED on for 1 second
+    time_wait(TICKS_PER_SEC * 1);
+    leds_set(RED);          //green LED on for 1 second
+    time_wait(TICKS_PER_SEC * 1);
     leds_set(NONE);
     P4OUT &= ~(0x01);
     motor_l=1;              //left motor running at low speed for 1 second
@@ -87,7 +91,8 @@ int main( void )
     motor_l=0;
     motor_r=0;
     motor_mode= MOTOR_FWD;
-   
+    
+/*   
     while (the_time < chargeopportunity)
     {
 	if ( battery_power_good() )
@@ -95,6 +100,8 @@ int main( void )
 	    now_parking = !charge_complete;
 	}
     }
+*/
+
     leds_set(NONE);
 
     while(1)
@@ -105,15 +112,16 @@ int main( void )
 	{
 	    low_power();
 	}
-	    
-	/* We may have finished charging */
+
+/*	    
+	// We may have finished charging
 	if( charge_complete )
 	{
-    	    food_level = 0;
+    	food_level = 0;
 	    charge_complete = FALSE;
 	    now_parking = 0;
 		
-	    /* reverse out of the charger */
+	    // reverse out of the charger
 	    random_walk_disable();
 	    motor_r = motor_l = 6;
 	    motor_mode = MOTOR_BK;
@@ -121,10 +129,13 @@ int main( void )
 	    time_wait(5);
 	    continue;
 	}
-		
-	/* Go to the charger if... */
+*/
+
+
+/*		
+	// Go to the charger if...
 	if( battery_low()
-        /* Or we've reached a defficiency of food */
+        // Or we've reached a defficiency of food
 	    || ( food_level > FOOD_THRESHOLD ) 
 	    || ( now_parking )  ) 
 	{
@@ -141,14 +152,16 @@ int main( void )
 	     parking_update();
 	     continue;
 	}
-
+*/
 	/* Parking involves a static situation, which is incompatible 
 	   with the watchdog - hence leave it here. */
 	watchdog_update();
 
+/*
 	if( hasfood() )
 	{
 		mood = MOOD_GOT_FOOD;
+*/
 
 		/* Are we at the light source? */
 		if(light_intensity == 0)
@@ -158,7 +171,7 @@ int main( void )
 			leds_update_mood();
 			random_walk_disable();
 			motor_r = motor_l = 6;
-			motor_mode = MOTOR_BK;
+			motor_mode = MOTOR_FWD;
 			time_wait(10);
 		}
 
@@ -173,13 +186,17 @@ int main( void )
 			/* Random Walk */
 			random_walk_enable();
 		}
+	
+/*
 	}
 	else
 	{
-		/* Not got food, just do random walk */
+		// Not got food, just do random walk
 		mood = MOOD_NONE;
 		random_walk_enable();
 	}
+*/
+
   }
 }
 
