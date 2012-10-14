@@ -19,6 +19,7 @@
 #ifndef __LEDS_H
 #define __LEDS_H
 #include "device.h"
+#include <stdint.h>
 
 void leds_flash(uint8_t colour);
 void leds_set(uint8_t colour);

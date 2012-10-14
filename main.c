@@ -16,10 +16,13 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+
+/* Standard includes. */
+#include <msp430f2254.h>
+#include <isr_compat.h>
+#include <stdint.h>
 #include "device.h"
-#include <signal.h>
-//#include "ir-rx.h"
-//#include "ir-tx.h"
+#include "interrupt.h"
 #include "ir-bias.h"
 #include "opamp-1.h"
 #include "adc10.h"
@@ -27,8 +30,6 @@
 #include "motor.h"
 #include "leds.h"
 #include "virus.h"
-#include "net-rx.h"
-#include "net-tx.h"
 #include "battery.h"
 #include "food.h"
 #include "bearing.h"
@@ -52,19 +53,23 @@ int i = 0;
 
 int main( void )
 {
-//        uint32_t chargeopportunity = 0;
-	init();
+    uint32_t chargeopportunity = 0;
+    init();
 
-	random_walk_disable();
+    random_walk_disable();
 
-	time_wait(TICKS_PER_SEC * 1);
-	/* start charging if touching charger within 1 second */
-//	chargeopportunity = the_time + 20;
-	leds_set(RED);                // red LED on for 2 seconds
+    time_wait(TICKS_PER_SEC * 1);
+    /* start charging if touching charger within 1 second */
+    chargeopportunity = the_time + 20;
+    leds_set(RED);                // red LED on for 2 seconds
     P4DIR |= (0x09);                 //P40 and P43 are output IR
     P4OUT |= (0x09);            //all IR leds on (3 top, one bottom)
     time_wait(TICKS_PER_SEC * 2);
     leds_set(GREEN);          //green LED on for 1 second
+    time_wait(TICKS_PER_SEC * 1);
+    leds_set(ORANGE);          //green LED on for 1 second
+    time_wait(TICKS_PER_SEC * 1);
+    leds_set(RED);          //green LED on for 1 second
     time_wait(TICKS_PER_SEC * 1);
     leds_set(NONE);
     P4OUT &= ~(0x01);
@@ -76,100 +81,120 @@ int main( void )
     motor_r=0;
 
     motor_mode= MOTOR_BK;
-    time_wait(TICKS_PER_SEC *1);
+    time_wait(TICKS_PER_SEC *2);
     motor_l=2;
     motor_r=2;
     time_wait(TICKS_PER_SEC *1);
     motor_l=0;
     motor_r=0;
     motor_mode= MOTOR_FWD;
-   
+    
+/*   
+    while (the_time < chargeopportunity)
+    {
+	if ( battery_power_good() )
+	{
+	    now_parking = !charge_complete;
+	}
+    }
+*/
 
-//	while (the_time < chargeopportunity)
-//	{
-//		if ( battery_power_good() )
-//			now_parking = !charge_complete;
-//	}
-	leds_set(NONE);
-	
-  	while(1)
-   	{
-//		leds_update_mood();
+    leds_set(NONE);
+
+    while(1)
+    {
+	leds_update_mood();
 	    
-//		if (battery_critical())
-//			low_power();
-	    
-		/* We may have finished charging */
-//		if( charge_complete )
-//		{
-//			food_level = 0;
-//			charge_complete = FALSE;
-//			now_parking = 0;
+	if (battery_critical())
+	{
+	    low_power();
+	}
+
+/*	    
+	// We may have finished charging
+	if( charge_complete )
+	{
+    	food_level = 0;
+	    charge_complete = FALSE;
+	    now_parking = 0;
 		
-			/* reverse out of the charger */
-//			random_walk_disable();
-//			motor_r = motor_l = 6;
-//			motor_mode = MOTOR_BK;
+	    // reverse out of the charger
+	    random_walk_disable();
+	    motor_r = motor_l = 6;
+	    motor_mode = MOTOR_BK;
 		
-//			time_wait(5);
-//			continue;
-//		}
-		
-		/* Go to the charger if... */
-//		if( battery_low()
-		    /* Or we've reached a defficiency of food */
-//		    || ( food_level > FOOD_THRESHOLD ) 
-//		    || ( now_parking )  ) 
-//		{
-//			if (battery_low() )
-//				mood = MOOD_DRIVING_TO_CHARGER_FLATBATT;
-//			else if ( food_level > FOOD_THRESHOLD ) 
-//				mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
+	    time_wait(5);
+	    continue;
+	}
+*/
+
+
+/*		
+	// Go to the charger if...
+	if( battery_low()
+        // Or we've reached a defficiency of food
+	    || ( food_level > FOOD_THRESHOLD ) 
+	    || ( now_parking )  ) 
+	{
+	     if (battery_low() )
+	     {
+	             mood = MOOD_DRIVING_TO_CHARGER_FLATBATT;
+	     }
+	     else if ( food_level > FOOD_THRESHOLD ) 
+	     {
+		     mood = MOOD_DRIVING_TO_CHARGER_NOFOOD;
+	     }
 		   
-//			now_parking = !charge_complete;
-//			parking_update();
-//			continue;
-//		}
+	     now_parking = !charge_complete;
+	     parking_update();
+	     continue;
+	}
+*/
+	/* Parking involves a static situation, which is incompatible 
+	   with the watchdog - hence leave it here. */
+	watchdog_update();
 
-		/* Parking involves a static situation, which is incompatible 
-		   with the watchdog - hence leave it here. */
-//		watchdog_update();
+/*
+	if( hasfood() )
+	{
+		mood = MOOD_GOT_FOOD;
+*/
 
-//		if( hasfood() )
-//		{
-//			mood = MOOD_GOT_FOOD;
+		/* Are we at the light source? */
+		if(light_intensity == 0)
+		{
+			/* Deposit food here */
+			mood = MOOD_AT_LAMP;
+			leds_update_mood();
+			random_walk_disable();
+			motor_r = motor_l = 6;
+			motor_mode = MOTOR_FWD;
+			time_wait(10);
+		}
 
-			/* Are we at the light source? */
-//			if(light_intensity == 0)
-//			{
-				/* Deposit food here */
-//				mood = MOOD_AT_LAMP;
-//				leds_update_mood();
-//				random_walk_disable();
-//				motor_r = motor_l = 6;
-//				motor_mode = MOTOR_BK;
-//
-//				time_wait(10);
-//			}
+		/* Do we have a reasonable bearing? */
+		else if(bearing_strength > 10)
+		{
+			random_walk_disable();
+			braitenberg_update();
+		}
+		else
+		{
+			/* Random Walk */
+			random_walk_enable();
+		}
+	
+/*
+	}
+	else
+	{
+		// Not got food, just do random walk
+		mood = MOOD_NONE;
+		random_walk_enable();
+	}
+*/
 
-			/* Do we have a reasonable bearing? */
-//			else if(bearing_strength > 10)
-//			{
-//				random_walk_disable();
-//				braitenberg_update();
-//			}
-//			else
-				/* Random Walk */
-//				random_walk_enable();
-
-//		}
-//		else
-//		{
-			/* Not got food, just do random walk */
-//			mood = MOOD_NONE;
-//			random_walk_enable();
-//		}
-  	}
+  }
 }
 
 void init(void)
@@ -189,32 +214,32 @@ void init(void)
 		DIVA_0 /* ACLK Divider 0: /1 */
 		|CALBC1_16MHZ; /* BCSCTL1 Calibration Data for 16MHz */
 
-	BCSCTL2 = SELM_DCOCLK	/* MCLK from DCO */
+	//BCSCTL2 = SELM_DCOCLK	/* MCLK from DCO */
+	BCSCTL2 = SELM_0	/* MCLK from DCO */
 		/* DIVMx = 0 : No MCLK divider */
 		/* SELS = 0: SMCLK from DCO */
 		/* DIVSx = 0 : No SMCLK divider */
-		/* DCOR = 0 : DCO internal resistor */;
+		/* DCOR = 0 : DCO internal resistor */
+		;
 
 	BCSCTL3 = LFXT1S1; /*VLOCLK */
-	
+
+	//Init everything else
 	flash_init();
 	opamp1_init();
 	bias_init();
-
 	adc10_init(); /* The order here matters. This configures the ADC */
 	random_init(); /* Grab some random data */
-
-	
-	net_rx_init();
-	net_tx_init();
-//	ir_receive_init();
-//	ir_transmit_init();
+	//net_rx_init();
+	//net_tx_init();
+	init_timera();
+	init_timerb();
 	motor_init();
 	leds_init();
 	battery_init();
-	food_init();
+	//food_init();
 
-	eint();
+	_EINT();
 	
 /* 	virus_init(); */
 }
@@ -232,7 +257,7 @@ void low_power(void)
 	P4DIR |= 1;
 	P4SEL &= ~1;
 	
-	dint();
+	_DINT();
 
 	_BIS_SR(LPM3_bits);
 	while(1);

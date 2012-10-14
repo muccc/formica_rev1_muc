@@ -16,6 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+#include <stdint.h>
 #include "types.h"
 #include "food.h"
 #include "time.h"
@@ -26,7 +27,6 @@
 
 static uint16_t average[AVERAGE_SIZE];
 static bool gotfood = FALSE;
-
 uint32_t food_level = 0;
 
 void foodcallback(uint16_t dataoff, uint16_t dataon)
@@ -42,14 +42,17 @@ void foodcallback(uint16_t dataoff, uint16_t dataon)
 
 	/* Save the data in the array */
 	average[averageindex++] = data;
-	if(averageindex == AVERAGE_SIZE ){
+	if(averageindex == AVERAGE_SIZE )
+	{
 		averageindex = 0;
 	}
 
 	/*Calculating moving average*/
 	uint16_t mavg = 0;
 	for(i=0; i<AVERAGE_SIZE; i++)
+	{
 		mavg += average[i];
+	}
 
 	mavg = mavg/AVERAGE_SIZE;
 	
@@ -59,7 +62,9 @@ void foodcallback(uint16_t dataoff, uint16_t dataon)
 		food_level = 0;
 	}
 	else
+	{
 		gotfood = FALSE;
+	}
 }
 
 bool hasfood(void)

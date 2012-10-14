@@ -27,6 +27,7 @@ uint16_t light_intensity = 0;
 void bearing_set( uint16_t *pdr )
 {
 	if(pdr[0] < pdr[1])
+	{
 		if(pdr[0] < pdr[2])
 		{
 			bearing = 0;
@@ -45,7 +46,9 @@ void bearing_set( uint16_t *pdr )
 			else
 				bearing_strength = pdr[0] - pdr[2];
 		}
+	}
 	else
+	{
 		if(pdr[1] < pdr[2])
 		{
 			bearing = 120;
@@ -64,6 +67,6 @@ void bearing_set( uint16_t *pdr )
 			else
 				bearing_strength = pdr[0] - pdr[2];
 		}
-	
+	}
 	watchdog_bearing_change();
 }

@@ -16,19 +16,21 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+    
+#define HIGH_SPEED 4
+#define LOW_SPEED 2   
+#define RAND_WALK_SPEED 2
 #include "motor.h"
 #include "device.h"
-#include <signal.h>
+#include <isr_compat.h>
 #include "random.h"
 #include "battery.h"
-#include "ir.h"
 #include "leds.h"
 #include "bearing.h"
 #include "time.h"
-#include "behav/braitenberg.h"
 #include "food.h"
+#include "behav/braitenberg.h"
 #include "behav/parking.h"
-#include "ir-tx.h"
 
 motor_mode_t motor_mode = MOTOR_FWD;
 
@@ -37,7 +39,6 @@ uint8_t motor_l = 0;
 void motor_rand_walk_change( void );
 static uint8_t rand_walk_thresh = 0;
 static bool random_walk_en = 0;
-
 uint8_t MAX_SPEED = 8;
 
 void random_walk_enable( void )
@@ -71,7 +72,7 @@ void motor_init( void )
 	IE1 |= WDTIE;
 }
 
-interrupt (WDT_VECTOR) motor_wdt_isr(void)
+ISR(WDT,WatchdogISR)
 {
 	static uint8_t count = 0;
 
@@ -100,17 +101,16 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	}
 	cc++;
 
-	//	motor_mode = MOTOR_FWD;
+	//motor_mode = MOTOR_FWD;
 	//motor_l = motor_r = 6;
 
 	if( motor_mode == MOTOR_FWD )
 	{
-		MAX_SPEED = 8;
-
+		MAX_SPEED = 5;
 		conf = M_FWD;
 
 		if( count >= motor_r )
-			conf &= ~M2;                  //switch motor directions fwd/bw: replace &= ~M2 with |= M2;
+			conf &= ~M2;      //switch motor directions fwd/bw: replace &= ~M2 with |= M2;
                                           //make according exchanges in motor.h
 		if( count >= motor_l )
 			conf &= ~M1;
@@ -118,8 +118,7 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 	if( motor_mode == MOTOR_BK )
 	{
-		MAX_SPEED = 8;
-
+		MAX_SPEED = 5;
 		conf = M_BK;
 
 		if( count >= motor_r )
@@ -132,8 +131,8 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 	if( motor_mode == MOTOR_TURN_LEFT )
 	{
 		MAX_SPEED = 8;
-		motor_l = 1;
-		motor_r = 8;
+		motor_l = LOW_SPEED;
+		motor_r = HIGH_SPEED;
 		
 		conf = M_FWD;
 
@@ -146,9 +145,9 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 	if( motor_mode == MOTOR_TURN_RIGHT )
 	{
-		MAX_SPEED = 8;
-		motor_l = 8;
-		motor_r = 1;
+		MAX_SPEED = 5;
+		motor_l = HIGH_SPEED;
+		motor_r = LOW_SPEED;
 		
 		conf = M_FWD;
 
@@ -157,7 +156,6 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 
 		if( count >= motor_l )
 			conf |= M1;
-
 	}
 
 	motor_off();
@@ -168,7 +166,7 @@ interrupt (WDT_VECTOR) motor_wdt_isr(void)
 		count = 0;
 
 	/* don't transmit data when parking */
-	ir_nudge();
+	//ir_nudge();
 }
 
 void motor_rand_walk_change( void )
@@ -176,29 +174,27 @@ void motor_rand_walk_change( void )
 	static uint8_t mode = 0;
 
 	motor_r = motor_l = RAND_WALK_SPEED;
-	
 	mode = (random() >> 6) % 10;
 	
 	switch(mode)
-	  {
-	  case 0:
-	  case 1:
-	    motor_mode = MOTOR_TURN_LEFT;
-	    break;
-	  case 2:
-	  case 3:
-	  motor_mode = MOTOR_TURN_RIGHT;
-	  break;
-	  case 4:
-	    if( !hasfood() )
-	      motor_mode = MOTOR_BK;
-	    else
-	      motor_mode = MOTOR_FWD;
-	    break;
-	    
-	  default:
-	    motor_mode = MOTOR_FWD;
-	    break;
+	{
+		case 0:
+	  	case 1:
+	    		motor_mode = MOTOR_TURN_LEFT;
+	    		break;
+	  	case 2:
+	  	case 3:
+	  		motor_mode = MOTOR_TURN_RIGHT;
+	  		break;
+	  	case 4:
+	    		if( !hasfood() )
+	      			motor_mode = MOTOR_BK;
+	    		else
+	      			motor_mode = MOTOR_FWD;
+	    		break;
+	  	default:
+	    		motor_mode = MOTOR_FWD;
+	    		break;
 	  }
 
 	rand_walk_thresh = (random() >> 5) + 1;
