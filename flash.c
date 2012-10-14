@@ -16,11 +16,11 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+#include "flash.h"
+#include <msp430f2254.h>
 #include <isr_compat.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include "flash.h"
-#include "device.h"
 #include "leds.h"
 
 #define FW_VER 2

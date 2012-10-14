@@ -19,7 +19,6 @@
 #include "parking.h"
 #include "braitenberg.h"
 #include "watchdog.h"
-#include "../food.h"
 #include "../motor.h"
 #include "../battery.h"
 #include "../bearing.h"
@@ -59,7 +58,8 @@ void parking_update( void )
 	case PS_PARK:
 		/*** We're heading to the charger ***/
 
-		/* Avoid food */
+/*
+		// Avoid food 
 		if( hasfood() )
 		{
 			motor_l = motor_r=6;
@@ -73,7 +73,7 @@ void parking_update( void )
 			time_wait(3);
 			motor_l = motor_r = 0;
 		}
-
+*/
 		rev_braitenberg_update();
 		/* Get unstuck if we can't move on our way to the charger */
 		watchdog_update();

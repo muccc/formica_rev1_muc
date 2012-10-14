@@ -16,8 +16,8 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+#include <msp430f2254.h>
 #include "time.h"
-#include "device.h"
 
 volatile uint32_t the_time = 0;
 

@@ -16,7 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
-#include "device.h"
+#include <msp430f2254.h>
 #include "motor.h"
 #include "behav/watchdog.h"
 

@@ -18,7 +18,7 @@
     If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef __LEDS_H
 #define __LEDS_H
-#include "device.h"
+#include <msp430f2254.h>
 #include <stdint.h>
 
 void leds_flash(uint8_t colour);

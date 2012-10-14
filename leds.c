@@ -1,6 +1,6 @@
+#include <msp430f2254.h>
 #include "leds.h"
 #include "time.h"
-#include "device.h"
 #include <stdint.h>
 
 /* produce a single flash of a colour, as defined in leds.h */

@@ -17,7 +17,7 @@
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
 #include "opamp-1.h"
-#include "device.h"
+#include <msp430f2254.h>
 
 
 void opamp1_init( void )

@@ -21,14 +21,13 @@
 #define LOW_SPEED 2   
 #define RAND_WALK_SPEED 2
 #include "motor.h"
-#include "device.h"
+#include <msp430f2254.h>
 #include <isr_compat.h>
 #include "random.h"
 #include "battery.h"
 #include "leds.h"
 #include "bearing.h"
 #include "time.h"
-#include "food.h"
 #include "behav/braitenberg.h"
 #include "behav/parking.h"
 
@@ -83,7 +82,6 @@ ISR(WDT,WatchdogISR)
 	if( cc == 100 )
 	{
 		the_time++;
-		food_level++;
 		cc = 0;
 
 		if(random_walk_en)
@@ -186,11 +184,8 @@ void motor_rand_walk_change( void )
 	  	case 3:
 	  		motor_mode = MOTOR_TURN_RIGHT;
 	  		break;
-	  	case 4:
-	    		if( !hasfood() )
-	      			motor_mode = MOTOR_BK;
-	    		else
-	      			motor_mode = MOTOR_FWD;
+		case 4:
+			motor_mode = MOTOR_FWD;
 	    		break;
 	  	default:
 	    		motor_mode = MOTOR_FWD;

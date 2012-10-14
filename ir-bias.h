@@ -19,7 +19,7 @@
 /* Macros for configuring the IR receiver biasing */
 #ifndef __IR_BIAS_H
 #define __IR_BIAS_H
-#include "device.h"
+#include <msp430f2254.h> 
 
 #define BIAS1 (1<<6)
 #define BIAS2 (1<<7)

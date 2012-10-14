@@ -13,8 +13,8 @@ MCU=msp430f2254
 # List all the source files here
 # eg if you have a source file foo.c then list it here
 SOURCES = main.c freq.c opamp-1.c interrupt.c \
-	adc10.c random.c motor.c virus.c \
-	battery.c food.c bearing.c flash.c \
+	adc10.c random.c motor.c \
+	battery.c bearing.c flash.c \
 	behav/braitenberg.c time.c behav/parking.c behav/watchdog.c leds.c
 # Include are located in the Include directory
 INCLUDES = -IInclude

@@ -16,12 +16,11 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+#include <msp430f2254.h>
 #include <isr_compat.h>
 #include <stdint.h>
 #include "adc10.h"
 #include "ir-bias.h"
-#include "device.h"
-#include "food.h"
 #include "bearing.h"
 #include "battery.h"
 #include "leds.h"
@@ -96,9 +95,6 @@ void adc10_grab( void )
 	/* Ignore request for ADC reading if there's one already happening */
 	if( ADC10CTL1 & ADC10BUSY )
 		return;
-
-	if(curreading == FOOD1)
-		fled_on();
 }
 
 uint16_t adc10_readtemp( void )
@@ -207,11 +203,11 @@ ISR(ADC10, ADC_ISR)
 		/* Fled ON */
 		food1 = ADC10MEM;
 		adc10_set_channel(PD1_CHANNEL);
-		foodcallback(food0, food1);
+		//foodcallback(food0, food1);
 		
 		//Switch to next adc channel for next run
 		curreading = PD1;
 		break;
 	}
-	fled_off();
+	//fled_off();
 }

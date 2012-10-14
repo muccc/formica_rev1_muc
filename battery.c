@@ -17,7 +17,7 @@
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
 #include "battery.h"
-#include "device.h"
+#include <msp430f2254.h>
 #include "stdint.h"
 #include "types.h"
 

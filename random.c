@@ -16,9 +16,9 @@
     You should have received a copy of the GNU General Public License
     along with the Formica robot firmware.  
     If not, see <http://www.gnu.org/licenses/>.  */
+#include <msp430f2254.h>
 #include "random.h"
 #include "adc10.h"
-#include "device.h"
 #include <isr_compat.h>
 #include <stdint.h>
 
