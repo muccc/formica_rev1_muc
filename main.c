@@ -30,7 +30,6 @@
 #include "leds.h"
 #include "battery.h"
 #include "bearing.h"
-#include "flash.h"
 #include "time.h"
 #include "behav/braitenberg.h"
 #include "behav/parking.h"
@@ -153,6 +152,7 @@ void init(void)
 	flash_init();
 	opamp1_init();
 	bias_init();
+	bias_bearing();
 	adc10_init(); /* The order here matters. This configures the ADC */
 	random_init(); /* Grab some random data */
 	init_timera();
