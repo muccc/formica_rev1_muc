@@ -96,8 +96,8 @@ void adc10_grab( void )
 	if( ADC10CTL1 & ADC10BUSY )
 		return;
 
-	//FIXME   this might be incorrect
-	ADC10CTL0 |= ENC;
+	//Start ADC10 conversion
+	ADC10CTL0 |= (ADC10SC | ENC);
 
 }
 
