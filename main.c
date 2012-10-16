@@ -149,7 +149,6 @@ void init(void)
 	BCSCTL3 = LFXT1S1; /*VLOCLK */
 
 	//Init everything else
-	flash_init();
 	opamp1_init();
 	bias_init();
 	bias_bearing();

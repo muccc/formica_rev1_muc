@@ -57,7 +57,7 @@ void adc10_init( void )
 {
 	ADC10CTL0 = SREF_0 	/* Use VCC and VSS as the references */
 		| ADC10SHT_3    /* 64 x ADC10CLKs
-	            	           32 us */
+	            	           32 us ?TBC */
 		/* ADC10SR = 0 -- Support 200 ksps sampling (TODO: maybe this can be set) */
 		/* REFOUT = 0 -- Reference output off */
 		/* REFBURST = 0 -- Reference buffer on continuously (TODO) */
@@ -95,6 +95,10 @@ void adc10_grab( void )
 	/* Ignore request for ADC reading if there's one already happening */
 	if( ADC10CTL1 & ADC10BUSY )
 		return;
+
+	//FIXME   this might be incorrect
+	ADC10CTL0 |= ENC;
+
 }
 
 uint16_t adc10_readtemp( void )
