@@ -26,12 +26,7 @@
 #include "leds.h"
 #include "time.h"
 
-/* Disable the ADC */
-#define adc10_dis() do { ADC10CTL0 &= ~ENC; } while (0)
 
-/* Select a channel (0 <= x <= 15) */
-#define adc10_set_channel(x) do { ADC10CTL1 &= ~INCH_15;	\
-		ADC10CTL1 |= x << 12; } while (0)
 
 uint16_t pd_value[3];
 static enum {
@@ -214,4 +209,19 @@ ISR(ADC10, ADC_ISR)
 		break;
 	}
 	//fled_off();
+}
+
+
+/* Select a channel (0 <= x <= 15) */
+void adc10_set_channel(uint8_t x)
+{ 
+	ADC10CTL1 &= ~INCH_15;
+	ADC10CTL1 |= x << 12; 
+}
+
+
+/* Disable the ADC */
+void adc10_dis() 
+{ 
+	ADC10CTL0 &= ~ENC; 
 }

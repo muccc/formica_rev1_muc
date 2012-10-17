@@ -35,9 +35,14 @@
 #include "behav/parking.h"
 #include "behav/watchdog.h"
 
+//************************************************
+//DEFINES
 /* when food_level rises above this amount, go to charger */
 #define FOOD_THRESHOLD (20 * 60)
 
+#define PG_DEBUG
+
+//************************************************
 /* Initialises everything. */
 void init(void);
 
@@ -57,17 +62,19 @@ int main( void )
     time_wait(TICKS_PER_SEC * 1);
     /* start charging if touching charger within 1 second */
     leds_set(RED);                // red LED on for 2 seconds
-    P4DIR |= (0x09);                 //P40 and P43 are output IR
-    P4OUT |= (0x09);            //all IR leds on (3 top, one bottom)
+    //P4DIR |= (0x09);                 //P40 and P43 are output IR
+    //P4OUT |= (0x09);            //all IR leds on (3 top, one bottom)
+    //P4OUT &= ~(0x01);
+    //time_wait(TICKS_PER_SEC * 2);
+    leds_set(NONE);
     time_wait(TICKS_PER_SEC * 2);
-    leds_set(GREEN);          //green LED on for 1 second
+    leds_flash(GREEN);          //green LED on for 1 second
     time_wait(TICKS_PER_SEC * 1);
-    leds_set(ORANGE);          //green LED on for 1 second
+    leds_flash(ORANGE);          //green LED on for 1 second
     time_wait(TICKS_PER_SEC * 1);
-    leds_set(RED);          //green LED on for 1 second
+    leds_flash(RED);          //green LED on for 1 second
     time_wait(TICKS_PER_SEC * 1);
     leds_set(NONE);
-    P4OUT &= ~(0x01);
     motor_l=1;              //left motor running at low speed for 1 second
     time_wait(TICKS_PER_SEC *1);
     motor_l=0;
@@ -87,6 +94,10 @@ int main( void )
 
     while(1)
     {
+#ifdef PG_DEBUG
+	//dont do nothing because we onliy want to watch the 
+	//variables and don t want to actually drive.
+#else
 	if (battery_critical())
 	{
 	    low_power();
@@ -103,6 +114,7 @@ int main( void )
 		motor_r = motor_l = 6;
 		motor_mode = MOTOR_FWD;
 		time_wait(10);
+		leds_set(NONE);
 	}
 
 	/* Do we have a reasonable bearing? */
@@ -118,6 +130,7 @@ int main( void )
 		leds_set(GREEN);
 		random_walk_enable();
 	}
+#endif
   }
 }
 
@@ -154,7 +167,6 @@ void init(void)
 	bias_bearing();
 	adc10_init(); /* The order here matters. This configures the ADC */
 	random_init(); /* Grab some random data */
-	init_timera();
 	init_timerb();
 	motor_init();
 	leds_init();

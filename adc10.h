@@ -32,6 +32,11 @@ void adc10_grab( void );
 /* The readings from the photodiodes */
 extern uint16_t pd_value[3];
 
+void adc10_set_channel(uint8_t x);
+	
+/* Disable the ADC */
+void adc10_dis();
+
 /* Which photodiode is which */
 #define PD_FRONT 0
 #define PD_RIGHT 1
