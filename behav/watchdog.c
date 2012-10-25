@@ -53,45 +53,45 @@ void watchdog_update( void )
 
 void watchdog_bearing_change()
 {
-	if( bearing_strength < 10 )
-		return;
-
-	b_hist[bh_pos] = bearing;
-	bh_pos++;
-	if( bh_pos == B_HIST_LEN )
+	if( bearing_strength >= 10 )
 	{
-		uint8_t i;
-		uint16_t s = 0;
-
-		bh_pos = 0;
-
-		for(i=0; i<B_HIST_LEN; i++)
-			s += b_hist[i];
-
-		s /= B_HIST_LEN;
-		if( s < 60 )
-			s = 0;
-		else if( s < 180 )
-			s = 120;
-		else if( s < 300 )
-			s = 240;
-		else 
-			s = 0;
-
-		if( s != watchdog_last_bearing )
+		b_hist[bh_pos] = bearing;
+		bh_pos++;
+		if( bh_pos == B_HIST_LEN )
 		{
-			/* 2x threshold time if parking */
-			if (now_parking)
-				thresh_time = the_time + (WATCHDOG_THRESH << 1);
-			/*
-			else if ( hasfood() && bearing == 0 )
+			uint8_t i;
+			uint16_t s = 0;
+
+			bh_pos = 0;
+
+			for(i=0; i<B_HIST_LEN; i++)
+				s += b_hist[i];
+
+			s /= B_HIST_LEN;
+			if( s < 60 )
+				s = 0;
+			else if( s < 180 )
+				s = 120;
+			else if( s < 300 )
+				s = 240;
+			else 
+				s = 0;
+
+			if( s != watchdog_last_bearing )
+			{
+				/* 2x threshold time if parking */
+				if (now_parking)
+					thresh_time = the_time + (WATCHDOG_THRESH << 1);
+				/*
+				else if ( hasfood() && bearing == 0 )
 				// When we have food, and we're headed towards the light,
 				//   set the threshold to be much larger.
 				thresh_time = the_time + (WATCHDOG_THRESH * 4);
-			*/
-			else
-				thresh_time = the_time + WATCHDOG_THRESH;
+				*/
+				else
+					thresh_time = the_time + WATCHDOG_THRESH;
+			}
+			watchdog_last_bearing = s;
 		}
-		watchdog_last_bearing = s;
 	}
 }
