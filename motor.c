@@ -36,7 +36,7 @@ motor_mode_t motor_mode = MOTOR_FWD;
 uint8_t motor_r = 0;
 uint8_t motor_l = 0;
 void motor_rand_walk_change( void );
-static uint8_t rand_walk_thresh = 0;
+static uint8_t rand_walk_thresh = 30;
 static bool random_walk_en = 0;
 uint8_t MAX_SPEED = 8;
 
@@ -104,7 +104,9 @@ ISR(WDT,WatchdogISR)
 
 	if( motor_mode == MOTOR_FWD )
 	{
-		MAX_SPEED = 5;
+		MAX_SPEED = 8;
+		motor_l = HIGH_SPEED;
+		motor_r = HIGH_SPEED;
 		conf = M_FWD;
 
 		if( count >= motor_r )
@@ -116,7 +118,9 @@ ISR(WDT,WatchdogISR)
 
 	if( motor_mode == MOTOR_BK )
 	{
-		MAX_SPEED = 5;
+		MAX_SPEED = 8;
+		motor_l = HIGH_SPEED;
+		motor_r = HIGH_SPEED;
 		conf = M_BK;
 
 		if( count >= motor_r )
@@ -143,7 +147,7 @@ ISR(WDT,WatchdogISR)
 
 	if( motor_mode == MOTOR_TURN_RIGHT )
 	{
-		MAX_SPEED = 5;
+		MAX_SPEED = 8;
 		motor_l = HIGH_SPEED;
 		motor_r = LOW_SPEED;
 		

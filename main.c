@@ -40,7 +40,7 @@
 /* when food_level rises above this amount, go to charger */
 #define FOOD_THRESHOLD (20 * 60)
 
-#define PG_DEBUG
+//#define PG_DEBUG
 
 //************************************************
 /* Initialises everything. */
@@ -57,40 +57,6 @@ int main( void )
     //Initialize everything
     init();
 
-    random_walk_disable();
-
-    time_wait(TICKS_PER_SEC * 1);
-    /* start charging if touching charger within 1 second */
-    leds_set(RED);                // red LED on for 2 seconds
-    //P4DIR |= (0x09);                 //P40 and P43 are output IR
-    //P4OUT |= (0x09);            //all IR leds on (3 top, one bottom)
-    //P4OUT &= ~(0x01);
-    //time_wait(TICKS_PER_SEC * 2);
-    leds_set(NONE);
-    time_wait(TICKS_PER_SEC * 2);
-    leds_flash(GREEN);          //green LED on for 1 second
-    time_wait(TICKS_PER_SEC * 1);
-    leds_flash(ORANGE);          //green LED on for 1 second
-    time_wait(TICKS_PER_SEC * 1);
-    leds_flash(RED);          //green LED on for 1 second
-    time_wait(TICKS_PER_SEC * 1);
-    leds_set(NONE);
-    motor_l=1;              //left motor running at low speed for 1 second
-    time_wait(TICKS_PER_SEC *1);
-    motor_l=0;
-    motor_r=1;              //right motor running at low speed for 1 second
-    time_wait(TICKS_PER_SEC *1);
-    motor_r=0;
-
-    motor_mode= MOTOR_BK;
-    time_wait(TICKS_PER_SEC *2);
-    motor_l=2;
-    motor_r=2;
-    time_wait(TICKS_PER_SEC *1);
-    motor_l=0;
-    motor_r=0;
-    motor_mode= MOTOR_FWD;
-    leds_set(NONE);
 
     while(1)
     {
@@ -109,6 +75,8 @@ int main( void )
 	if(light_intensity == 0)
 	{
 		// Deposit food here (in original FW)
+		// In this case formica just walks
+		// away quickly
 		leds_set(ORANGE);
 		random_walk_disable();
 		motor_r = motor_l = 6;
@@ -117,7 +85,13 @@ int main( void )
 		leds_set(NONE);
 	}
 
-	/* Do we have a reasonable bearing? */
+	/* Braitenberg 
+
+	   Do we have a reasonable bearing? 
+	   If we have good enough light bearing
+	   formica disables stops walking randomly
+	   and switches to braitenberg mode. 
+	*/
 	else if(bearing_strength > 10)
 	{
 		leds_set(RED);
@@ -126,7 +100,13 @@ int main( void )
 	}
 	else
 	{
-		/* Random Walk */
+		/* Random Walk 
+		   
+		   If formica has no information
+		   for a better decision it starts
+		   to walk randomly until the light
+		   sensors pick up better readings.
+		*/
 		leds_set(GREEN);
 		random_walk_enable();
 	}
@@ -173,6 +153,43 @@ void init(void)
 	battery_init();
 
 	_EINT();
+
+	//Hardwaretest
+
+        random_walk_disable();
+
+        time_wait(TICKS_PER_SEC * 1);
+        /* start charging if touching charger within 1 second */
+        leds_set(RED);                // red LED on for 2 seconds
+        //P4DIR |= (0x09);                 //P40 and P43 are output IR
+        //P4OUT |= (0x09);            //all IR leds on (3 top, one bottom)
+        //P4OUT &= ~(0x01);
+        //time_wait(TICKS_PER_SEC * 2);
+        leds_set(NONE);
+        time_wait(TICKS_PER_SEC * 2);
+        leds_flash(GREEN);          //green LED on for 1 second
+    	time_wait(TICKS_PER_SEC * 1);
+	leds_flash(ORANGE);          //green LED on for 1 second
+       	time_wait(TICKS_PER_SEC * 1);
+    	leds_flash(RED);          //green LED on for 1 second
+    	time_wait(TICKS_PER_SEC * 1);
+    	leds_set(NONE);
+    	motor_l=1;              //left motor running at low speed for 1 second
+    	time_wait(TICKS_PER_SEC *1);
+    	motor_l=0;
+    	motor_r=1;              //right motor running at low speed for 1 second
+    	time_wait(TICKS_PER_SEC *1);
+    	motor_r=0;
+
+    	motor_mode= MOTOR_BK;
+    	time_wait(TICKS_PER_SEC *2);
+    	motor_l=2;
+    	motor_r=2;
+    	time_wait(TICKS_PER_SEC *1);
+    	motor_l=0;
+    	motor_r=0;
+    	motor_mode= MOTOR_FWD;
+    	leds_set(NONE);
 }
 
 void low_power(void)
